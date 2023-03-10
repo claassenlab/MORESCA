@@ -335,7 +335,7 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=Path,
-        default=Path("data/3kPBMC.h5ad"),
+        default=Path("data/data_raw.h5ad"),
         help="Path to the H5AD file.",
     )
     parser.add_argument(

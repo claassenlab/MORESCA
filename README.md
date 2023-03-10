@@ -21,7 +21,7 @@ The overall folder structure looks like this:
 ```
 project
 ├── data
-│   └── 3kPBMC.h5ad
+│   └── data_raw.h5ad
 ├── figures
 │   ├── postQC
 │   └── preQC
