@@ -234,12 +234,14 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
                 adata, flavor="pearson_residuals", n_top_genes=feature_number
             )
         case "anti_correlation":
-            # Todo: Implement feature selection based on anti-correlation following
-            # https://doi.org/10.1101/2022.12.05.519161
-            # https://bitbucket.org/scottyler892/anticor_features/src/main/
-            sys.exit(
-                f"Selected feature selection method {feature_method} not available."
-            )
+            # This is experimental and has to be tested and discussed!
+            # Todo: Implement mapping for species according to provided YAML.
+            from anticor_features.anticor_features import get_anti_cor_genes
+
+            anti_cor_table = get_anti_cor_genes(
+                adata.X.T, adata.var.index.tolist(), species="hsapiens")
+            anti_cor_table.fillna(value=False, axis=None, inplace=True)
+            adata.var["highly_variable"] = anti_cor_table.selected.copy()
         case _:
             sys.exit(
                 f"Selected feature selection method {feature_method} not available."
