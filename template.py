@@ -71,9 +71,9 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
     adata.obs["log_counts"] = np.log(adata.obs["n_counts"])
     adata.obs["n_genes"] = (adata.X > 0).sum(1)
 
-    adata.var["mt"] = adata.var_names.str.startswith("MT-")
-    adata.var["ribo"] = adata.var_names.str.contains(("^RP[SL]"))
-    adata.var["hb"] = adata.var_names.str.contains(("^HB[^(P)]"))
+    adata.var["mt"] = adata.var_names.str.startswith("(?i)MT-")
+    adata.var["ribo"] = adata.var_names.str.contains(("(?i)^RP[SL]"))
+    adata.var["hb"] = adata.var_names.str.contains(("(?i)^HB[^(P)]"))
 
     sc.pp.calculate_qc_metrics(
         adata,
@@ -174,10 +174,9 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
     sc.pp.filter_genes(adata, min_cells=qc_dict["min_cells"])
     print(f"Number of genes after cell filter: {adata.n_vars}")
 
-    malat1 = adata.var_names.str.startswith("MALAT1")
-    mito_genes = adata.var_names.str.startswith("MT-")
-    ribo_genes = adata.var_names.str.contains(("^RP[SL]"))
-    hb_genes = adata.var_names.str.contains("^HB[^(P)]")
+    mito_genes = adata.var_names.str.startswith("(?i)MT-")
+    ribo_genes = adata.var_names.str.contains(("(?i)^RP[SL]"))
+    hb_genes = adata.var_names.str.contains("(?i)^HB[^(P)]")
 
     gene_stack_lst = []
 
@@ -198,7 +197,7 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
     keep = np.invert(remove)
     adata = adata[:, keep]
 
-    adata.layers["Counts"] = adata.X
+    adata.layers["counts"] = adata.X.copy()
 
     sc.settings.figdir = Path(FIGURE_PATH_POST)
 
@@ -228,7 +227,7 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
         case "seurat_v3":
             # Todo: This method expects the raw counts. Adjust the layer.
             sc.pp.highly_variable_genes(
-                adata, flavor=feature_method, n_top_genes=feature_number, layer="Counts"
+                adata, flavor=feature_method, n_top_genes=feature_number, layer="counts"
             )
         case "analytical_pearson":
             sc.experimental.pp.highly_variable_genes(
