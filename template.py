@@ -71,9 +71,9 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
     adata.obs["log_counts"] = np.log(adata.obs["n_counts"])
     adata.obs["n_genes"] = (adata.X > 0).sum(1)
 
-    adata.var["mt"] = adata.var_names.str.startswith("(?i)MT-")
-    adata.var["ribo"] = adata.var_names.str.contains(("(?i)^RP[SL]"))
-    adata.var["hb"] = adata.var_names.str.contains(("(?i)^HB[^(P)]"))
+    adata.var["mt"] = adata.var_names.str.startswith("MT-")
+    adata.var["ribo"] = adata.var_names.str.contains(("^RP[SL]"))
+    adata.var["hb"] = adata.var_names.str.contains(("^HB[^(P)]"))
 
     sc.pp.calculate_qc_metrics(
         adata,
@@ -117,6 +117,7 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             ],
             show=False,
             save="preQC",
+            multi_panel=True
         )
 
         sc.pl.scatter(
@@ -225,7 +226,6 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
         case "seurat":
             sc.pp.highly_variable_genes(adata, flavor=feature_method)
         case "seurat_v3":
-            # Todo: This method expects the raw counts. Adjust the layer.
             sc.pp.highly_variable_genes(
                 adata, flavor=feature_method, n_top_genes=feature_number, layer="counts"
             )
@@ -233,9 +233,10 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             sc.experimental.pp.highly_variable_genes(
                 adata, flavor="pearson_residuals", n_top_genes=feature_number
             )
-        case "anti-correlation":
+        case "anti_correlation":
             # Todo: Implement feature selection based on anti-correlation following
             # https://doi.org/10.1101/2022.12.05.519161
+            # https://bitbucket.org/scottyler892/anticor_features/src/main/
             sys.exit(
                 f"Selected feature selection method {feature_method} not available."
             )
@@ -347,15 +348,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "-v",
         "--verbose",
-        type=bool,
-        default=False,
+        action="store_true",
         help="Set verbosity level.",
     )
     parser.add_argument(
         "-f",
         "--figures",
-        type=bool,
-        default=False,
+        action="store_true",
         help="Set whether figures will be generated.",
     )
     args = parser.parse_args()
