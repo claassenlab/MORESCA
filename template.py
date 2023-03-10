@@ -294,7 +294,7 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             resolution = cluster_dict["resolution"]
             sc.tl.leiden(
                 adata=adata,
-                resolution=cluster_dict["resolution"],
+                resolution=resolution,
                 key_added=f"leiden_r{resolution}",
                 random_state=0,
             )
