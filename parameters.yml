@@ -8,7 +8,7 @@ QC:
   feature_selection: seurat_v3
   number_features: 2000
   scale: True
-  n_genes_by_counts: 10000
+  n_genes_by_counts: null
   mt_threshold: 20
   rb_threshold: null
   hb_threshold: 1
