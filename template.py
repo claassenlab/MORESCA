@@ -142,11 +142,9 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             adata = adata[adata.obs["pct_counts_mt"] < qc_dict["mt_threshold"], :]
         case "auto":
             # Todo: Implement automatic selection of threshold.
-            pass
-        case None:
+            sys.exit("Auto selection for mt_threshold not implemented.")
+        case None | False:
             print("No mitochondrial filter applied.")
-        case False:
-            pass
 
     match qc_dict["rb_threshold"]:
         case rb_value if isinstance(rb_value, (int, float)) and not isinstance(
@@ -154,12 +152,9 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
         ):
             adata = adata[adata.obs["pct_counts_ribo"] > qc_dict["rb_threshold"], :]
         case "auto":
-            # Todo: Implement automatic selection of threshold.
-            pass
-        case None:
+            sys.exit("Auto selection for rb_threshold not implemented.")
+        case None | False:
             print("No ribosomal filter applied.")
-        case False:
-            pass
 
     match qc_dict["hb_threshold"]:
         case hb_value if isinstance(hb_value, (int, float)) and not isinstance(
@@ -167,12 +162,9 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
         ):
             adata = adata[adata.obs["pct_counts_hb"] < qc_dict["hb_threshold"], :]
         case "auto":
-            # Todo: Implement automatic selection of threshold.
-            pass
-        case None:
+            sys.exit("Auto selection for hb_threshold not implemented.")
+        case None | False:
             print("No hemoglobin filter applied.")
-        case False:
-            pass
 
     print(f"Total number of cells: {adata.n_obs}")
 
@@ -242,7 +234,7 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             sc.pp.normalize_total(adata, target_sum=None)
         case "analytical_pearson":
             sc.experimental.pp.normalize_pearson_residuals(adata)
-        case None:
+        case None | False:
             print("No normalization applied.")
         case _:
             sys.exit(f"Normalization method {norm_method} not available.")
@@ -276,7 +268,8 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             )
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
-        case None:
+        case None | False:
+            # Todo: Should this be a warning?
             print("No feature selection applied.")
         case _:
             sys.exit(
