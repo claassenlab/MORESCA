@@ -9,9 +9,9 @@ QC:
   number_features: 3000
   scale: True
   n_genes_by_counts: null
-  mt_threshold: 20
+  mt_threshold: null
   rb_threshold: null
-  hb_threshold: 1
+  hb_threshold: null
   remove_mt: False
   remove_rb: False
   remove_hb: False
