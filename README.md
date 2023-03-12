@@ -1,3 +1,4 @@
+
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -37,7 +38,17 @@ By default, ```template.py``` expects the data in ```H5AD``` format to be in ```
 
 Currently, the script will perform the most common operations from doublet removal to DEG analysis of found clusters. If you want to apply ambient RNA correction beforehand, you need to run this separately.
 
-You can pass your own paths to both required files via the command line. Example assuming the shown folder structure: ```python template.py -d data/3kPBMC.h5ad -p parameters.yml```.
+
+| Flag | Type | Description | Default |
+| - | -  | - | - |
+| -d, --data | Path | Path to the h5ad file | *data/adata_raw.h5ad*
+| -p, --parameters | Path | Path to the YAML file | *parameters.yml* |
+| -v, --verbose | Boolean | If set, prints to output | *False* |
+| -f, --figures | Boolean | If set, figures will be generated | *False* |
+
+The following example executes the template with the h5ad file example_data.h5ad, the parameter file example_param.yml and both prints and figures.
+
+```python template.py -d example_data.h5ad -p example_param.yml -v -f```
 
 
 ## Todo
