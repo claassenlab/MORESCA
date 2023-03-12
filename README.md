@@ -46,7 +46,7 @@ Currently, the script will perform the most common operations from doublet remov
 | -v, --verbose | Boolean | If set, prints to output | *False* |
 | -f, --figures | Boolean | If set, figures will be generated | *False* |
 
-The following example executes the template with the h5ad file example_data.h5ad, the parameter file example_param.yml and both prints and figures.
+The following example executes the template with the h5ad file example_data.h5ad, the parameter file example_param.yml and enables both print-statements and figures.
 
 ```python template.py -d example_data.h5ad -p example_param.yml -v -f```
 
