@@ -1,4 +1,3 @@
-
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -98,8 +97,8 @@ The following values of the parameters are currently possible
 | doublet_removal | *bool* |
 | min_genes | *int*, *null* | 
 | min_cells| *int*, *null* |
-| normalization| *log1pCP10k*, *log1PF*, *PFlog1pPF*, *analytical_pearson*, *null*|
-| number_features| *seurat*, *seurat_v3*, *analytical_pearson*, *anti_correlation*, *null* |
+| normalization| *log1pCP10k*, *log1PF*, *PFlog1pPF*, *pearson_residuals*, *null*|
+| number_features| *seurat*, *seurat_v3*, *pearson_residuals*, *anti_correlation*, *null* |
 | feature_selection| *int*, *null* |
 | scale| *bool* |
 | mt_threshold| *float*, *null* |
