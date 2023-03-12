@@ -143,3 +143,5 @@ figures/
 *.ipynb
 
 .idea/
+
+generated_code.py
