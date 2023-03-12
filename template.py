@@ -21,7 +21,7 @@ def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool)
     return outlier
 
 
-def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -> None:
+def run_analysis(h5ad_path: Path, yaml_path: Path, figures: bool, verbose: bool) -> None:
     FIGURE_PATH = Path("figures")
     FIGURE_PATH_PRE = Path(FIGURE_PATH, "preQC")
     FIGURE_PATH_POST = Path(FIGURE_PATH, "postQC")
@@ -35,13 +35,13 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
     sc.settings.figdir = Path(FIGURE_PATH_PRE)
 
     try:
-        with open(yamlPath, "r") as f:
+        with open(yaml_path, "r") as f:
             param_dict = list(yaml.load_all(f, Loader=SafeLoader))[0]
     except FileNotFoundError:
-        sys.exit(f"Parameter YAML file {yamlPath} not found.")
+        sys.exit(f"Parameter YAML file {yaml_path} not found.")
 
     # Load data.
-    adata = sc.read(h5adPath)
+    adata = sc.read(h5ad_path)
 
     # Quality control
     qc_dict = param_dict["QC"]
@@ -394,8 +394,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run_analysis(
-        h5adPath=args.data,
-        yamlPath=args.parameters,
+        h5ad_path=args.data,
+        yaml_path=args.parameters,
         figures=args.figures,
         verbose=args.verbose,
     )
