@@ -122,9 +122,7 @@ The following values of the parameters are currently possible
 
 ### Code generator
 
-After deciding for a suitable pipeline and specific parameters, you can create a Python file which reflects the exact step in a minimal fashion. The generation is started as follows:
-
-```a
+After deciding for a suitable pipeline and specific parameters, you can create a Python file which reflects the exact step in a minimal fashion. 
 
 ## Todo
 
