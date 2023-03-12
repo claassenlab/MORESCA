@@ -219,6 +219,8 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             category=RuntimeWarning,
         )
 
+    # Add zero array in case all three selection are not selected.
+    gene_stack_lst.append(np.zeros_like(a=adata.var_names))
     remove = np.stack(gene_stack_lst).sum(axis=0).astype(bool)
     keep = np.invert(remove)
     adata = adata[:, keep]
