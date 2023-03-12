@@ -1,18 +1,12 @@
- # Automatically generated code at 12/03/2023 23:00:31
-import argparse
+ # Automatically generated code at 12/03/2023 23:22:40
 import doubletdetection
 import numpy as np
 import pandas as pd
 import scanpy as sc
 import scanpy.external as sce
 import scipy.stats as ss
-import sys
-import warnings
-import yaml
 
 from anndata import AnnData
-from pathlib import Path
-from yaml.loader import SafeLoader
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
     M = adata.obs[metric]
@@ -20,7 +14,7 @@ def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool)
     outlier = (M < np.median(M) - nmads * MAD) | (np.median(M) + nmads * MAD < M)
     return outlier
 
-adata = sc.read(h5adPath)
+adata = sc.read("data/data_raw.h5ad")
 
 # Quality control - calculate QC covariates
 adata.obs["n_counts"] = adata.X.sum(1)
@@ -39,17 +33,12 @@ sc.pp.calculate_qc_metrics(
     inplace=True,
 )
 
-
-
-
-
 sc.pp.filter_cells(adata, min_genes=200)
 sc.pp.filter_genes(adata, min_cells=10)
+
 gene_stack_lst = []
-
-
-
 gene_stack_lst.append(np.zeros_like(a=adata.var_names))
+
 remove = np.stack(gene_stack_lst).sum(axis=0).astype(bool)
 keep = np.invert(remove)
 adata = adata[:, keep]
@@ -59,8 +48,8 @@ sc.pp.normalize_total(adata, target_sum=None)
 sc.pp.log1p(adata)
 sc.pp.normalize_total(adata, target_sum=None)
 adata.raw = adata
-sc.pp.highly_variable_genes(adata, flavor='seurat_v3', 
-            n_top_genes=3000, layer='counts')
+sc.pp.highly_variable_genes(adata, flavor="seurat_v3", 
+            n_top_genes=3000, layer="counts")
 sc.pp.scale(adata)
 sc.pp.pca(adata, n_comps=50, use_highly_variable=True)
 

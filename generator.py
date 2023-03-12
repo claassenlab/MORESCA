@@ -1,5 +1,5 @@
 import argparse
-import subprocess
+import re
 import sys
 import warnings
 import yaml
@@ -9,7 +9,7 @@ from pathlib import Path
 from yaml.loader import SafeLoader
 
 
-def generator(yaml_path, file_name):
+def generator(h5ad_path, yaml_path, file_name):
     try:
         with open(yaml_path, "r") as f:
             param_dict = list(yaml.load_all(f, Loader=SafeLoader))[0]
@@ -156,12 +156,11 @@ sc.pp.normalize_total(adata, target_sum=None)"""
 
     match feature_method := qc_dict["feature_selection"]:
         case "seurat":
-            feature_method_str = (
-                f"sc.pp.highly_variable_genes(adata, flavor={feature_method})"
-            )
+            feature_method_str = f"""sc.pp.highly_variable_genes(adata, flavor="{feature_method}")"""
+            
         case "seurat_v3":
-            feature_method_str = f"""sc.pp.highly_variable_genes(adata, flavor='{feature_method}', 
-            n_top_genes={feature_number}, layer='counts')"""
+            feature_method_str = f"""sc.pp.highly_variable_genes(adata, flavor="{feature_method}", 
+            n_top_genes={feature_number}, layer="counts")"""
         case "pearson_residuals":
             feature_method_str = f"""sc.experimental.pp.highly_variable_genes(adata, flavor='{feature_method}', 
             n_top_genes={feature_number})"""
@@ -200,9 +199,9 @@ adata.var['highly_variable'] = anti_cor_table.selected.copy()"""
         case "harmony":
             batch_correct_str = """sce.pp.harmony_integrate(
                 adata=adata,
-                key=batch_dict['batch_key'],
-                basis='X_pca',
-                adjusted_basis='X_pca',
+                key=batch_dict["batch_key"],
+                basis="X_pca",
+                adjusted_basis="X_pca",
                 max_iter_harmony=50,
             )"""
         case False | None:
@@ -269,20 +268,14 @@ adata.var['highly_variable'] = anti_cor_table.selected.copy()"""
     dt_string = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     generated_code = f""" # Automatically generated code at {dt_string}
-import argparse
 import doubletdetection
 import numpy as np
 import pandas as pd
 import scanpy as sc
 import scanpy.external as sce
 import scipy.stats as ss
-import sys
-import warnings
-import yaml
 
 from anndata import AnnData
-from pathlib import Path
-from yaml.loader import SafeLoader
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
     M = adata.obs[metric]
@@ -290,7 +283,7 @@ def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool)
     outlier = (M < np.median(M) - nmads * MAD) | (np.median(M) + nmads * MAD < M)
     return outlier
 
-adata = sc.read(h5adPath)
+adata = sc.read("{h5ad_path}")
 {doublet_str}
 # Quality control - calculate QC covariates
 adata.obs["n_counts"] = adata.X.sum(1)
@@ -315,11 +308,12 @@ sc.pp.calculate_qc_metrics(
 {gene_count_filter_str}
 {filter_cells_str}
 {filter_genes_str}
+
 gene_stack_lst = []
+gene_stack_lst.append(np.zeros_like(a=adata.var_names))
 {mito_gene_rm_str}
 {ribo_gene_rm_str}
 {hb_gene_rm_str}
-gene_stack_lst.append(np.zeros_like(a=adata.var_names))
 remove = np.stack(gene_stack_lst).sum(axis=0).astype(bool)
 keep = np.invert(remove)
 adata = adata[:, keep]
@@ -334,13 +328,21 @@ sc.pp.pca(adata, n_comps=50, use_highly_variable=True)
     if file_name.suffix != ".py":
         file_name = f"{file_name}.py"
 
-    # Todo: Get rid of empty lines.
+    generated_code = re.sub(r'\n\s*\n', '\n\n', generated_code)
+
     with open(file_name, mode="w") as file:
         file.write(generated_code)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-d",
+        "--data",
+        type=Path,
+        default=Path("data/data_raw.h5ad"),
+        help="Path to the H5AD file.",
+    )
     parser.add_argument(
         "-p",
         "--parameters",
@@ -356,4 +358,4 @@ if __name__ == "__main__":
         help="Name of the generated Python file.",
     )
     args = parser.parse_args()
-    generator(yaml_path=args.parameters, file_name=args.name)
+    generator(h5ad_path=args.data, yaml_path=args.parameters, file_name=args.name)

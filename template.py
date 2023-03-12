@@ -21,7 +21,9 @@ def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool)
     return outlier
 
 
-def run_analysis(h5ad_path: Path, yaml_path: Path, figures: bool, verbose: bool) -> None:
+def run_analysis(
+    h5ad_path: Path, yaml_path: Path, figures: bool, verbose: bool
+) -> None:
     FIGURE_PATH = Path("figures")
     FIGURE_PATH_PRE = Path(FIGURE_PATH, "preQC")
     FIGURE_PATH_POST = Path(FIGURE_PATH, "postQC")
