@@ -19,10 +19,9 @@ QC:
 BatchEffectCorrection:
   method: null
   batch_key: null
-Preprocessing:
-  NeighborhoodGraph:
-    n_neighbors: 15
-    n_pcs: null
+NeighborhoodGraph:
+  n_neighbors: 15
+  n_pcs: null
 Clustering:
   method: leiden
   resolution: 1.0
