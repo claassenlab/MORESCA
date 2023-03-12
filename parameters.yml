@@ -6,15 +6,15 @@ QC:
   min_cells: 10
   normalization: PFlog1pPF
   feature_selection: seurat_v3
-  number_features: 2000
+  number_features: 3000
   scale: True
   n_genes_by_counts: null
   mt_threshold: 20
   rb_threshold: null
   hb_threshold: 1
-  remove_mt: True
-  remove_rb: True
-  remove_hb: True
+  remove_mt: False
+  remove_rb: False
+  remove_hb: False
   remove_custom_genes : null
 BatchEffectCorrection:
   method: null
