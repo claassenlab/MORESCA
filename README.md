@@ -8,6 +8,8 @@ This repository provides a template  on standardized scRNA-seq analysis using Py
 
 ## Usage
 
+### Setting up the environment
+
 Create a virtual environment using Conda with Python version 3.10:
 
 `conda create -n <envName> python=3.10`
@@ -38,6 +40,7 @@ By default, ```template.py``` expects the data in ```H5AD``` format to be in ```
 
 Currently, the script will perform the most common operations from doublet removal to DEG analysis of found clusters. If you want to apply ambient RNA correction beforehand, you need to run this separately.
 
+### Calling the template
 
 | Flag | Type | Description | Default |
 | - | -  | - | - |
@@ -50,6 +53,59 @@ The following example executes the template with the h5ad file example_data.h5ad
 
 ```python template.py -d example_data.h5ad -p example_param.yml -v -f```
 
+
+### Using the YAML
+
+By default, the used parameter file looks like this:
+
+``` yaml
+# parameters.yml
+Info:
+  sample_key: null
+QC:
+  doublet_removal: False
+  min_genes: 200
+  min_cells: 10
+  normalization: PFlog1pPF
+  feature_selection: seurat_v3
+  number_features: 2000
+  scale: True
+  n_genes_by_counts: null
+  mt_threshold: 20
+  rb_threshold: null
+  hb_threshold: 1
+  remove_mt: True
+  remove_rb: True
+  remove_hb: True
+  remove_custom_genes : null
+BatchEffectCorrection:
+  method: null
+  batch_key: Patient
+Preprocessing:
+  NeighborhoodGraph:
+    n_neighbors: 15
+    n_pcs: null
+  DimRed: null
+Clustering:
+  method: leiden
+  resolution: 1.0
+DiffGeneExp:
+  method: wilcoxon
+```
+The following values of the parameters are currently possible
+
+
+| Parameter | Values 
+| - | -  
+| sample_key | *Str* | 
+| doublet_removal | *bool* |
+| min_genes | *int*, *null* | 
+| min_cells| *int*, *null* |
+| normalization| *log1pCP10k*, *log1PF*, *PFlog1pPF*, *analytical_pearson*, *null*|
+| feature_selection| *int*, *null* |
+| number_features| *seurat*, *seurat_v3*, *analytical_pearson*, *anti_correlation*, *null* |
+| scale| *bool* |
+| n_genes_by_counts| *float*, *null* |
 
 ## Todo
 
