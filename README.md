@@ -102,8 +102,8 @@ The following values of the parameters are currently possible
 | min_genes | *int*, *null* | 
 | min_cells| *int*, *null* |
 | normalization| *log1pCP10k*, *log1PF*, *PFlog1pPF*, *analytical_pearson*, *null*|
-| feature_selection| *int*, *null* |
 | number_features| *seurat*, *seurat_v3*, *analytical_pearson*, *anti_correlation*, *null* |
+| feature_selection| *int*, *null* |
 | scale| *bool* |
 | mt_threshold| *float*, *null* |
 | rb_threshold| *float*, *null* |
