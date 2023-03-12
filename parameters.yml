@@ -18,12 +18,11 @@ QC:
   remove_custom_genes : null
 BatchEffectCorrection:
   method: null
-  batch_key: Patient
+  batch_key: null
 Preprocessing:
   NeighborhoodGraph:
     n_neighbors: 15
     n_pcs: null
-  DimRed: null
 Clustering:
   method: leiden
   resolution: 1.0

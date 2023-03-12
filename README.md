@@ -68,24 +68,22 @@ QC:
   min_cells: 10
   normalization: PFlog1pPF
   feature_selection: seurat_v3
-  number_features: 2000
+  number_features: 3000
   scale: True
   n_genes_by_counts: null
-  mt_threshold: 20
+  mt_threshold: null
   rb_threshold: null
-  hb_threshold: 1
-  remove_mt: True
-  remove_rb: True
-  remove_hb: True
+  hb_threshold: null
+  remove_mt: False
+  remove_rb: False
+  remove_hb: False
   remove_custom_genes : null
 BatchEffectCorrection:
   method: null
-  batch_key: Patient
-Preprocessing:
-  NeighborhoodGraph:
-    n_neighbors: 15
-    n_pcs: null
-  DimRed: null
+  batch_key: null
+NeighborhoodGraph:
+  n_neighbors: 15
+  n_pcs: null
 Clustering:
   method: leiden
   resolution: 1.0
@@ -96,8 +94,10 @@ The following values of the parameters are currently possible
 
 
 | Parameter | Values 
-| - | -  
-| sample_key | *Str* | 
+| - | -
+| **INFO** 
+| sample_key | *str* |
+| **QC** 
 | doublet_removal | *bool* |
 | min_genes | *int*, *null* | 
 | min_cells| *int*, *null* |
@@ -105,7 +105,24 @@ The following values of the parameters are currently possible
 | feature_selection| *int*, *null* |
 | number_features| *seurat*, *seurat_v3*, *analytical_pearson*, *anti_correlation*, *null* |
 | scale| *bool* |
-| n_genes_by_counts| *float*, *null* |
+| mt_threshold| *float*, *null* |
+| rb_threshold| *float*, *null* |
+| hb_threshold| *float*, *null* |
+| remove_mt| *float*, *null* |
+| remove_rb| *float*, *null* |
+| remove_hb| *float*, *null* |
+| remove_custom_genes| *list(str)*, *null* |
+| **BatchEffectCorrection**
+| method| *harmony*, *null* |
+| batch_ley| Not implemented / *null* |
+| **NeighborhoodGraph**
+| n_neighbors| *int* |
+| n_pcs| *int*, *null* |
+| **Clustering**
+| method| *str*, *null* |
+| resolution| *float*|
+| **DiffGeneExp**
+| method| *wilcoxon*, *logreg*, *t-test*, *t-test_overestim_var* |
 
 ## Todo
 

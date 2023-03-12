@@ -189,12 +189,29 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
 
     gene_stack_lst = []
 
-    if qc_dict["remove_mt"]:
-        gene_stack_lst.append(mito_genes)
-    if qc_dict["remove_rb"]:
-        gene_stack_lst.append(ribo_genes)
-    if qc_dict["remove_hb"]:
-        gene_stack_lst.append(hb_genes)
+    match qc_dict["remove_mt"]:
+        case True:
+            gene_stack_lst.append(mito_genes)
+        case False | None:
+            pass
+        case _:
+            sys.exit("Invalid choice for remove_mt.")
+
+    match qc_dict["remove_rb"]:
+        case True:
+            gene_stack_lst.append(ribo_genes)
+        case False | None:
+            pass
+        case _:
+            sys.exit("Invalid choice for remove_rb.")
+
+    match qc_dict["remove_hb"]:
+        case True:
+            gene_stack_lst.append(hb_genes)
+        case False | None:
+            pass
+        case _:
+            sys.exit("Invalid choice for remove_hb.")
 
     if qc_dict["remove_custom_genes"] is not None:
         warnings.warn(
@@ -287,13 +304,13 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
 
     # Preprocessing
 
-    pre_dict = param_dict["Preprocessing"]
+    neighbor_dict = param_dict["NeighborhoodGraph"]
 
     # Make this depending on integration choice.
     sc.pp.neighbors(
         adata,
-        n_neighbors=pre_dict["NeighborhoodGraph"]["n_neighbors"],
-        n_pcs=pre_dict["NeighborhoodGraph"]["n_pcs"],
+        n_neighbors=neighbor_dict["n_neighbors"],
+        n_pcs=neighbor_dict["n_pcs"],
         use_rep="X_pca",
         random_state=0,
     )
@@ -315,6 +332,9 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
                 key_added=f"leiden_r{resolution}",
                 random_state=0,
             )
+        case None:
+            print("No clustering done. Exiting.")
+            sys.exit(0)
         case _:
             sys.exit(f"Clustering method {cluster_method} not available.")
 
