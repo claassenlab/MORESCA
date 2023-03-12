@@ -40,7 +40,7 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
     except FileNotFoundError:
         sys.exit(f"Parameter YAML file {yamlPath} not found.")
 
-    # Load example data.
+    # Load data.
     adata = sc.read(h5adPath)
 
     # Quality control
@@ -215,6 +215,8 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             sc.pp.normalize_total(adata, target_sum=None)
         case "analytical_pearson":
             sc.experimental.pp.normalize_pearson_residuals(adata)
+        case None:
+            print("No normalization applied.")
         case _:
             sys.exit(f"Normalization method {norm_method} not available.")
 
@@ -242,6 +244,8 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
                 adata.X.T, adata.var.index.tolist(), species="hsapiens")
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
+        case None:
+            print("No feature selection applied.")
         case _:
             sys.exit(
                 f"Selected feature selection method {feature_method} not available."
