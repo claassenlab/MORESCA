@@ -19,6 +19,7 @@ def generator(h5ad_path, yaml_path, file_name):
     qc_dict = param_dict["QC"]
 
     doublet_str = ""
+
     if qc_dict["doublet_removal"]:
         doublet_str = """
 clf = doubletdetection.BoostClassifier(

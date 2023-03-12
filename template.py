@@ -127,13 +127,13 @@ def run_analysis(
         )
 
     match gene_count_flt := qc_dict["n_genes_by_counts"]:
+        case gene_count_flt if isinstance(gene_count_flt, float):
+            adata = adata[adata.obs.n_genes_by_counts < gene_count_flt, :]
         # Todo: Implement automatic selection of threshold.
         case "auto":
             pass
-        case None:
+        case False | None:
             print("No removal based on n_genes_by_counts.")
-        case gene_count_flt if isinstance(gene_count_flt, float):
-            adata = adata[adata.obs.n_genes_by_counts < gene_count_flt, :]
         case _:
             sys.exit("Invalid value for n_genes_by_counts.")
 
@@ -145,7 +145,7 @@ def run_analysis(
         case "auto":
             # Todo: Implement automatic selection of threshold.
             sys.exit("Auto selection for mt_threshold not implemented.")
-        case None | False:
+        case False | None:
             print("No mitochondrial filter applied.")
 
     match qc_dict["rb_threshold"]:
@@ -154,8 +154,9 @@ def run_analysis(
         ):
             adata = adata[adata.obs["pct_counts_ribo"] > qc_dict["rb_threshold"], :]
         case "auto":
+            # Todo: Implement automatic selection of threshold.
             sys.exit("Auto selection for rb_threshold not implemented.")
-        case None | False:
+        case False | None:
             print("No ribosomal filter applied.")
 
     match qc_dict["hb_threshold"]:
@@ -164,8 +165,9 @@ def run_analysis(
         ):
             adata = adata[adata.obs["pct_counts_hb"] < qc_dict["hb_threshold"], :]
         case "auto":
+            # Todo: Implement automatic selection of threshold.
             sys.exit("Auto selection for hb_threshold not implemented.")
-        case None | False:
+        case False | None:
             print("No hemoglobin filter applied.")
 
     print(f"Total number of cells: {adata.n_obs}")
@@ -270,7 +272,7 @@ def run_analysis(
             )
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
-        case None | False:
+        case False | None:
             # Todo: Should this be a warning?
             print("No feature selection applied.")
         case _:
@@ -329,7 +331,7 @@ def run_analysis(
                 key_added=f"leiden_r{resolution}",
                 random_state=0,
             )
-        case None:
+        case False | None:
             print("No clustering done. Exiting.")
             sys.exit(0)
         case _:
