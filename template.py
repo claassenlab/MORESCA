@@ -117,7 +117,7 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             ],
             show=False,
             save="preQC",
-            multi_panel=True
+            multi_panel=True,
         )
 
         sc.pl.scatter(
@@ -126,9 +126,11 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
 
     match gene_count_flt := qc_dict["n_genes_by_counts"]:
         # Todo: Implement automatic selection of threshold.
-        case "auto" | None:
+        case "auto":
             pass
-        case gene_count_flt if isinstance(gene_count_flt, int):
+        case None:
+            print("No removal based on n_genes_by_counts.")
+        case gene_count_flt if isinstance(gene_count_flt, float):
             adata = adata[adata.obs.n_genes_by_counts < gene_count_flt, :]
         case _:
             sys.exit("Invalid value for n_genes_by_counts.")
@@ -138,9 +140,11 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             mt_value, bool
         ):
             adata = adata[adata.obs["pct_counts_mt"] < qc_dict["mt_threshold"], :]
-        case "auto" | None:
+        case "auto":
             # Todo: Implement automatic selection of threshold.
             pass
+        case None:
+            print("No mitochondrial filter applied.")
         case False:
             pass
 
@@ -149,9 +153,11 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             rb_value, bool
         ):
             adata = adata[adata.obs["pct_counts_ribo"] > qc_dict["rb_threshold"], :]
-        case "auto" | None:
+        case "auto":
             # Todo: Implement automatic selection of threshold.
             pass
+        case None:
+            print("No ribosomal filter applied.")
         case False:
             pass
 
@@ -160,9 +166,11 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
             hb_value, bool
         ):
             adata = adata[adata.obs["pct_counts_hb"] < qc_dict["hb_threshold"], :]
-        case "auto" | None:
+        case "auto":
             # Todo: Implement automatic selection of threshold.
             pass
+        case None:
+            print("No hemoglobin filter applied.")
         case False:
             pass
 
@@ -236,12 +244,17 @@ def run_analysis(h5adPath: Path, yamlPath: Path, figures: bool, verbose: bool) -
                 adata, flavor="pearson_residuals", n_top_genes=feature_number
             )
         case "anti_correlation":
+            warnings.warn(
+                "This feature selection is currently only implemented for human data!",
+                category=RuntimeWarning,
+            )
             # This is experimental and has to be tested and discussed!
             # Todo: Implement mapping for species according to provided YAML.
             from anticor_features.anticor_features import get_anti_cor_genes
 
             anti_cor_table = get_anti_cor_genes(
-                adata.X.T, adata.var.index.tolist(), species="hsapiens")
+                adata.X.T, adata.var.index.tolist(), species="hsapiens"
+            )
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
         case None:
