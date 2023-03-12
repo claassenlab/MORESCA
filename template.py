@@ -314,12 +314,6 @@ def run_analysis(
         random_state=0,
     )
 
-    # Todo: Should "logreg" be the default?
-    if (dge_temp := param_dict["DiffGeneExp"]["method"]) is None:
-        dge_method = "wilcoxon"
-    else:
-        dge_method = dge_temp
-
     cluster_dict = param_dict["Clustering"]
 
     match cluster_method := cluster_dict["method"]:
@@ -337,32 +331,47 @@ def run_analysis(
         case _:
             sys.exit(f"Clustering method {cluster_method} not available.")
 
+    dge_dict = param_dict["DiffGeneExp"]
+
     with warnings.catch_warnings():
         warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
-        sc.tl.rank_genes_groups(
-            adata,
-            f"leiden_r{resolution}",
-            method=dge_method,
-            use_raw=True,
-            key_added=f"leiden_r{resolution}_{dge_method}",
-        )
 
-        dedf_leiden = sc.get.rank_genes_groups_df(
-            adata, group=None, key=f"leiden_r{resolution}_{dge_method}"
-        )
-        dedf_leiden.drop("pvals", axis=1, inplace=True)
-        # Todo: Should we keep all genes, e.g., for later visualization?
-        dedf_leiden = dedf_leiden[dedf_leiden["pvals_adj"] < 0.05]
+        # Todo: Should "logreg" be the default?
+        match dge_method := dge_dict["method"]:
+            case dge_method if dge_method in [
+                "wilcoxon",
+                "t-test",
+                "logreg",
+                "t-test_overestim_var",
+            ]:
+                sc.tl.rank_genes_groups(
+                    adata,
+                    f"leiden_r{resolution}",
+                    method=dge_method,
+                    use_raw=True,
+                    key_added=f"leiden_r{resolution}_{dge_method}",
+                )
 
-        with pd.ExcelWriter(
-            path=f"results/dge_leiden_r{resolution}_{dge_method}.xlsx"
-        ) as writer:
-            for cluster_id in dedf_leiden.group.unique():
-                df_sub_cl = dedf_leiden[dedf_leiden.group == cluster_id].copy()
-                df_sub_cl.to_excel(writer, sheet_name=f"c{cluster_id}")
+                dedf_leiden = sc.get.rank_genes_groups_df(
+                    adata, group=None, key=f"leiden_r{resolution}_{dge_method}"
+                )
 
-        del df_sub_cl
-        del dedf_leiden
+                dedf_leiden.drop("pvals", axis=1, inplace=True)
+                # Todo: Should we keep all genes, e.g., for later visualization?
+                dedf_leiden = dedf_leiden[dedf_leiden["pvals_adj"] < 0.05]
+
+                if dge_dict["tables"]:
+                    with pd.ExcelWriter(
+                        path=f"results/dge_leiden_r{resolution}_{dge_method}.xlsx"
+                    ) as writer:
+                        for cluster_id in dedf_leiden.group.unique():
+                            df_sub_cl = dedf_leiden[
+                                dedf_leiden.group == cluster_id
+                            ].copy()
+                            df_sub_cl.to_excel(writer, sheet_name=f"c{cluster_id}")
+
+            case False | None:
+                print("No DGE performed.")
 
     adata.write(Path(RESULT_PATH, "adata_processed.h5ad"))
 
