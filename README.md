@@ -12,12 +12,9 @@ This repository provides a template  on standardized scRNA-seq analysis using Py
 
 Create a virtual environment using Conda with Python version 3.10:
 
-`conda create -n <envName> python=3.10`
+`conda create -n <envName> -f environment.yml`
 
 Install the needed packages using the requirements.txt file:
-
-`pip install -r requirements.txt`
-
 
 The overall folder structure looks like this:
 
