@@ -269,7 +269,7 @@ adata.var['highly_variable'] = anti_cor_table.selected.copy()"""
     """
     dt_string = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-    generated_code = f""" # Automatically generated code at {dt_string}
+    generated_code = f"""# Automatically generated code at {dt_string}
 import doubletdetection
 import numpy as np
 import pandas as pd

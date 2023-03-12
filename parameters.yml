@@ -27,3 +27,4 @@ Clustering:
   resolution: 1.0
 DiffGeneExp:
   method: wilcoxon
+  tables: True

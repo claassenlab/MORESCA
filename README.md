@@ -120,6 +120,12 @@ The following values of the parameters are currently possible
 | **DiffGeneExp**
 | method| *wilcoxon*, *logreg*, *t-test*, *t-test_overestim_var* |
 
+### Code generator
+
+After deciding for a suitable pipeline and specific parameters, you can create a Python file which reflects the exact step in a minimal fashion. The generation is started as follows:
+
+```a
+
 ## Todo
 
 - Better figures (matplotlib.pyplot.subplot_mosaic looks interesting)
