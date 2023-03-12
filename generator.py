@@ -156,13 +156,14 @@ sc.pp.normalize_total(adata, target_sum=None)"""
 
     match feature_method := qc_dict["feature_selection"]:
         case "seurat":
-            feature_method_str = f"""sc.pp.highly_variable_genes(adata, flavor="{feature_method}")"""
-            
+            feature_method_str = (
+                f"""sc.pp.highly_variable_genes(adata, flavor="{feature_method}")"""
+            )
         case "seurat_v3":
-            feature_method_str = f"""sc.pp.highly_variable_genes(adata, flavor="{feature_method}", 
+            feature_method_str = f"""sc.pp.highly_variable_genes(adata, flavor="{feature_method}",
             n_top_genes={feature_number}, layer="counts")"""
         case "pearson_residuals":
-            feature_method_str = f"""sc.experimental.pp.highly_variable_genes(adata, flavor='{feature_method}', 
+            feature_method_str = f"""sc.experimental.pp.highly_variable_genes(adata, flavor='{feature_method}',
             n_top_genes={feature_number})"""
         case "anti_correlation":
             feature_method_str = """
@@ -328,7 +329,7 @@ sc.pp.pca(adata, n_comps=50, use_highly_variable=True)
     if file_name.suffix != ".py":
         file_name = f"{file_name}.py"
 
-    generated_code = re.sub(r'\n\s*\n', '\n\n', generated_code)
+    generated_code = re.sub(r"\n\s*\n", "\n\n", generated_code)
 
     with open(file_name, mode="w") as file:
         file.write(generated_code)
