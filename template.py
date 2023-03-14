@@ -9,6 +9,10 @@ import sys
 import warnings
 import yaml
 
+from typing import Optional
+from utils import remove_cells_by_pct_counts
+from utils import remove_genes
+
 from anndata import AnnData
 from pathlib import Path
 from yaml.loader import SafeLoader
@@ -20,66 +24,45 @@ def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool)
     outlier = (M < np.median(M) - nmads * MAD) | (np.median(M) + nmads * MAD < M)
     return outlier
 
-def load_type(data_path: Path) -> AnnData:
+
+def load_data(data_path):
     if data_path.is_dir():
+        # Todo: Implement this for paths.
         pass
-    if data_path.is_file():
-        match data_path.suffix:
-            case ".hdf5":
-                pass
-            case ".h5ad":
-                pass
-            case ".loom":
-                pass
-            case ".txt":
-                pass
+    file_extension = data_path.suffix
+    if file_extension == ".h5ad":
+        return sc.read(data_path)
+    elif file_extension == ".loom":
+        return sc.read_loom(data_path)
+    elif file_extension == ".hdf5":
+        return sc.read_10x_h5(data_path)
+    else:
+        raise ValueError(f"Unknown file format: {file_extension}")
 
 
-
-def run_analysis(
-    data_path: Path, yaml_path: Path, figures: bool, verbose: bool
-) -> None:
-    FIGURE_PATH = Path("figures")
-    FIGURE_PATH_PRE = Path(FIGURE_PATH, "preQC")
-    FIGURE_PATH_POST = Path(FIGURE_PATH, "postQC")
-    RESULT_PATH = Path("results")
-
-    FIGURE_PATH.mkdir(exist_ok=True)
-    RESULT_PATH.mkdir(exist_ok=True)
-    FIGURE_PATH_PRE.mkdir(exist_ok=True)
-    FIGURE_PATH_POST.mkdir(exist_ok=True)
-
-    sc.settings.figdir = Path(FIGURE_PATH_PRE)
-
-    try:
-        with open(yaml_path, "r") as f:
-            param_dict = list(yaml.load_all(f, Loader=SafeLoader))[0]
-    except FileNotFoundError:
-        sys.exit(f"Parameter YAML file {yaml_path} not found.")
-
-    # Todo: Loading the data should be possible for different formats.
-
-    #   Check whether list or single path
-    #   If list:
-    #       Check 
-    # 
-    #
-
-    match data_path.suffix:
-        case ".h5ad":
-            adata = sc.read(data_path)
-        case ".loom":
-            adata = sc.read_loom(data_path)
-        case ".mtx":
-            pass
-        case ".hdf5":
-            adata = sc.read_10x_h5(data_path)
-
-    # Quality control
-    qc_dict = param_dict["QC"]
+# Todo: Implement utility functions for matching etc.
+def quality_control(
+    adata: AnnData,
+    doublet_removal,
+    outlier_removal,
+    min_genes,
+    min_cells,
+    n_genes_by_counts,
+    mt_threshold,
+    rb_threshold,
+    hb_threshold,
+    remove_mt,
+    remove_rb,
+    remove_hb,
+    remove_custom_genes,
+    inplace=True,
+    save=False,
+) -> Optional[AnnData]:
+    if not inplace:
+        adata = adata.copy()
 
     # Todo: This should be aware of the batch key.
-    if qc_dict["doublet_removal"]:
+    if doublet_removal:
         clf = doubletdetection.BoostClassifier(
             n_iters=10,
             clustering_algorithm="phenograph",
@@ -95,8 +78,6 @@ def run_analysis(
         adata.obs["doublet_score"] = clf.doublet_score()
 
         adata = adata[(~adata.obs.doublet)]
-
-    print(f"Cells in raw data: {adata.n_obs}")
 
     # Quality control - calculate QC covariates
     adata.obs["n_counts"] = adata.X.sum(1)
@@ -115,50 +96,18 @@ def run_analysis(
         inplace=True,
     )
 
-    adata.obs["outlier"] = (
-        is_outlier(adata, "log1p_total_counts", 5)
-        | is_outlier(adata, "log1p_n_genes_by_counts", 5)
-        | is_outlier(adata, "pct_counts_in_top_20_genes", 5)
-    )
-
-    # Idea: Make one Figure before QC using matplotlib.pyplot.subplot_mosaic?
-    if figures:
-        sc.pl.violin(
-            adata,
-            keys=[
-                "log1p_total_counts",
-                "log1p_n_genes_by_counts",
-                "pct_counts_in_top_20_genes",
-            ],
-            multi_panel=True,
-            show=False,
-            save="qc_before_outlier_removal",
+    if outlier_removal:
+        adata.obs["outlier"] = (
+            is_outlier(adata, "log1p_total_counts", 5)
+            | is_outlier(adata, "log1p_n_genes_by_counts", 5)
+            | is_outlier(adata, "pct_counts_in_top_20_genes", 5)
         )
 
-    adata = adata[(~adata.obs.outlier)]
+        adata = adata[(~adata.obs.outlier)]
 
-    if figures:
-        sc.pl.violin(
-            adata,
-            [
-                "n_genes_by_counts",
-                "log_counts",
-                "pct_counts_mt",
-                "pct_counts_ribo",
-                "pct_counts_hb",
-            ],
-            show=False,
-            save="preQC",
-            multi_panel=True,
-        )
-
-        sc.pl.scatter(
-            adata, x="total_counts", y="n_genes_by_counts", show=False, save="scatter"
-        )
-
-    match gene_count_flt := qc_dict["n_genes_by_counts"]:
-        case gene_count_flt if isinstance(gene_count_flt, float):
-            adata = adata[adata.obs.n_genes_by_counts < gene_count_flt, :]
+    match n_genes_by_counts:
+        case n_genes_by_counts if isinstance(n_genes_by_counts, float):
+            adata = adata[adata.obs.n_genes_by_counts < n_genes_by_counts, :]
         # Todo: Implement automatic selection of threshold.
         case "auto":
             pass
@@ -167,79 +116,25 @@ def run_analysis(
         case _:
             sys.exit("Invalid value for n_genes_by_counts.")
 
-    match qc_dict["mt_threshold"]:
-        case mt_value if isinstance(mt_value, (int, float)) and not isinstance(
-            mt_value, bool
-        ):
-            adata = adata[adata.obs["pct_counts_mt"] < qc_dict["mt_threshold"], :]
-        case "auto":
-            # Todo: Implement automatic selection of threshold.
-            sys.exit("Auto selection for mt_threshold not implemented.")
-        case False | None:
-            print("No mitochondrial filter applied.")
+    # Todo: Test this!
+    remove_cells_by_pct_counts(adata=adata, genes="mt", threshold=mt_threshold)
+    remove_cells_by_pct_counts(adata=adata, genes="rb", threshold=rb_threshold)
+    remove_cells_by_pct_counts(adata=adata, genes="hb", threshold=hb_threshold)
 
-    match qc_dict["rb_threshold"]:
-        case rb_value if isinstance(rb_value, (int, float)) and not isinstance(
-            rb_value, bool
-        ):
-            adata = adata[adata.obs["pct_counts_ribo"] > qc_dict["rb_threshold"], :]
-        case "auto":
-            # Todo: Implement automatic selection of threshold.
-            sys.exit("Auto selection for rb_threshold not implemented.")
-        case False | None:
-            print("No ribosomal filter applied.")
+    sc.pp.filter_cells(adata, min_genes=min_genes)
+    sc.pp.filter_genes(adata, min_cells=min_cells)
 
-    match qc_dict["hb_threshold"]:
-        case hb_value if isinstance(hb_value, (int, float)) and not isinstance(
-            hb_value, bool
-        ):
-            adata = adata[adata.obs["pct_counts_hb"] < qc_dict["hb_threshold"], :]
-        case "auto":
-            # Todo: Implement automatic selection of threshold.
-            sys.exit("Auto selection for hb_threshold not implemented.")
-        case False | None:
-            print("No hemoglobin filter applied.")
-
-    print(f"Total number of cells: {adata.n_obs}")
-
-    sc.pl.highest_expr_genes(adata, n_top=20, show=False, save=True)
-
-    sc.pp.filter_cells(adata, min_genes=qc_dict["min_genes"])
-    print(f"Number of cells after gene filter: {adata.n_obs}")
-    sc.pp.filter_genes(adata, min_cells=qc_dict["min_cells"])
-    print(f"Number of genes after cell filter: {adata.n_vars}")
-
-    mito_genes = adata.var_names.str.startswith("(?i)MT-")
-    ribo_genes = adata.var_names.str.contains(("(?i)^RP[SL]"))
+    mt_genes = adata.var_names.str.startswith("(?i)MT-")
+    rb_genes = adata.var_names.str.contains(("(?i)^RP[SL]"))
     hb_genes = adata.var_names.str.contains("(?i)^HB[^(P)]")
 
     gene_stack_lst = []
 
-    match qc_dict["remove_mt"]:
-        case True:
-            gene_stack_lst.append(mito_genes)
-        case False | None:
-            pass
-        case _:
-            sys.exit("Invalid choice for remove_mt.")
+    remove_genes(gene_lst=mt_genes, rmv_lst=gene_stack_lst, gene_key=remove_mt)
+    remove_genes(gene_lst=rb_genes, rmv_lst=gene_stack_lst, gene_key=remove_rb)
+    remove_genes(gene_lst=hb_genes, rmv_lst=gene_stack_lst, gene_key=remove_hb)
 
-    match qc_dict["remove_rb"]:
-        case True:
-            gene_stack_lst.append(ribo_genes)
-        case False | None:
-            pass
-        case _:
-            sys.exit("Invalid choice for remove_rb.")
-
-    match qc_dict["remove_hb"]:
-        case True:
-            gene_stack_lst.append(hb_genes)
-        case False | None:
-            pass
-        case _:
-            sys.exit("Invalid choice for remove_hb.")
-
-    if qc_dict["remove_custom_genes"] is not None:
+    if remove_custom_genes is not None:
         warnings.warn(
             "Removing custom genes is not implemented yet. Continue without doing this.",
             category=RuntimeWarning,
@@ -251,11 +146,23 @@ def run_analysis(
     keep = np.invert(remove)
     adata = adata[:, keep]
 
-    adata.layers["counts"] = adata.X.copy()
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            adata.write("results/post_qc.h5ad")
 
-    sc.settings.figdir = Path(FIGURE_PATH_POST)
+    if not inplace:
+        return adata
 
-    match norm_method := qc_dict["normalization"]:
+
+def normalization(
+    adata: AnnData, method: str, inplace=True, save=False
+) -> Optional[AnnData]:
+    if not inplace:
+        adata = adata.copy()
+
+    match method:
         case "log1pCP10k":
             sc.pp.normalize_total(adata, target_sum=10e4)
             sc.pp.log1p(adata)
@@ -270,23 +177,36 @@ def run_analysis(
             sc.experimental.pp.normalize_pearson_residuals(adata)
         case None | False:
             print("No normalization applied.")
+            return None
         case _:
-            sys.exit(f"Normalization method {norm_method} not available.")
+            sys.exit(f"Normalization method {method} not available.")
 
-    adata.raw = adata
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            adata.write("results/normalized.h5ad")
 
-    feature_number = qc_dict["number_features"]
+    if not inplace:
+        return adata
 
-    match feature_method := qc_dict["feature_selection"]:
+
+def feature_selection(
+    adata: AnnData, method: str, number_features=None, inplace=True, save=False
+):
+    if not inplace:
+        adata = adata.copy()
+
+    match method:
         case "seurat":
-            sc.pp.highly_variable_genes(adata, flavor=feature_method)
+            sc.pp.highly_variable_genes(adata, flavor=method)
         case "seurat_v3":
             sc.pp.highly_variable_genes(
-                adata, flavor=feature_method, n_top_genes=feature_number, layer="counts"
+                adata, flavor=method, n_top_genes=number_features, layer="counts"
             )
         case "analytical_pearson":
             sc.experimental.pp.highly_variable_genes(
-                adata, flavor="pearson_residuals", n_top_genes=feature_number
+                adata, flavor="pearson_residuals", n_top_genes=number_features
             )
         case "anti_correlation":
             warnings.warn(
@@ -305,50 +225,87 @@ def run_analysis(
         case False | None:
             # Todo: Should this be a warning?
             print("No feature selection applied.")
+            return None
         case _:
-            sys.exit(
-                f"Selected feature selection method {feature_method} not available."
-            )
+            sys.exit(f"Selected feature selection method {method} not available.")
 
-    if qc_dict["scale"]:
-        sc.pp.scale(adata)
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            # Todo: Do we have to save here?
+            adata.write("results/feature_selection.h5ad")
 
-    sc.pp.pca(adata, n_comps=50, use_highly_variable=True)
+    if not inplace:
+        return adata
 
-    batch_dict = param_dict["BatchEffectCorrection"]
 
-    match batch_dict["method"]:
+def batch_effect_correction(
+    adata: AnnData, method: str, batch_key: str, inplace=True, save=False
+) -> None:
+    if not inplace:
+        adata = adata.copy()
+
+    match method:
         case "harmony":
             sce.pp.harmony_integrate(
                 adata=adata,
-                key=batch_dict["batch_key"],
+                key=batch_key,
                 basis="X_pca",
+                # Todo: Should this be a different layer?
                 adjusted_basis="X_pca",
                 max_iter_harmony=50,
             )
         case False | None:
             print("No batch effect correction applied.")
+            return None
         case _:
             sys.exit("Invalid choice for batch effect correction method.")
 
-    # Preprocessing
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            adata.write("results/batch_corrected.h5ad")
 
-    neighbor_dict = param_dict["NeighborhoodGraph"]
+    if not inplace:
+        return adata
+
+
+def neighborhood_graph(
+    adata: AnnData, n_neighbors: int, n_pcs: int, inplace=True, save=False
+) -> Optional[AnnData]:
+    if not inplace:
+        adata = adata.copy()
 
     # Make this depending on integration choice.
     sc.pp.neighbors(
         adata,
-        n_neighbors=neighbor_dict["n_neighbors"],
-        n_pcs=neighbor_dict["n_pcs"],
+        n_neighbors=n_neighbors,
+        n_pcs=n_pcs,
         use_rep="X_pca",
         random_state=0,
     )
 
-    cluster_dict = param_dict["Clustering"]
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            adata.write("results/neighborhood_graph.h5ad")
 
-    match cluster_method := cluster_dict["method"]:
+    if not inplace:
+        return adata
+
+
+def clustering(
+    adata: AnnData, method: str, resolution=None, inplace=True, save=False
+) -> Optional[AnnData]:
+    if not inplace:
+        adata = adata.copy()
+
+    match method:
         case "leiden":
-            resolution = cluster_dict["resolution"]
+            resolution = resolution
             sc.tl.leiden(
                 adata=adata,
                 resolution=resolution,
@@ -357,42 +314,63 @@ def run_analysis(
             )
         case False | None:
             print("No clustering done. Exiting.")
-            sys.exit(0)
+            return None
         case _:
-            sys.exit(f"Clustering method {cluster_method} not available.")
+            sys.exit(f"Clustering method {method} not available.")
 
-    dge_dict = param_dict["DiffGeneExp"]
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            adata.write("results/clustered.h5ad")
+
+    if not inplace:
+        return adata
+
+
+def diff_gene_exp(
+    adata: AnnData,
+    method: str,
+    groupby: str,
+    use_raw=True,
+    tables=True,
+    inplace=True,
+    save=False,
+) -> Optional[AnnData]:
+    if not inplace:
+        adata = adata.copy()
 
     with warnings.catch_warnings():
         warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
         # Todo: Should "logreg" be the default?
-        match dge_method := dge_dict["method"]:
-            case dge_method if dge_method in [
+        match method:
+            case method if method in [
                 "wilcoxon",
                 "t-test",
                 "logreg",
                 "t-test_overestim_var",
             ]:
+                key_added = f"{groupby}_{method}"
                 sc.tl.rank_genes_groups(
-                    adata,
-                    f"leiden_r{resolution}",
-                    method=dge_method,
+                    adata=adata,
+                    groupby=groupby,
+                    method=method,
                     use_raw=True,
-                    key_added=f"leiden_r{resolution}_{dge_method}",
+                    key_added=key_added,
                 )
 
                 dedf_leiden = sc.get.rank_genes_groups_df(
-                    adata, group=None, key=f"leiden_r{resolution}_{dge_method}"
+                    adata=adata, group=None, key=key_added
                 )
 
                 dedf_leiden.drop("pvals", axis=1, inplace=True)
                 # Todo: Should we keep all genes, e.g., for later visualization?
                 dedf_leiden = dedf_leiden[dedf_leiden["pvals_adj"] < 0.05]
 
-                if dge_dict["tables"]:
+                if tables:
                     with pd.ExcelWriter(
-                        path=f"results/dge_leiden_r{resolution}_{dge_method}.xlsx"
+                        path=f"results/dge_leiden_r{key_added}.xlsx"
                     ) as writer:
                         for cluster_id in dedf_leiden.group.unique():
                             df_sub_cl = dedf_leiden[
@@ -403,7 +381,63 @@ def run_analysis(
             case False | None:
                 print("No DGE performed.")
 
-    adata.write(Path(RESULT_PATH, "adata_processed.h5ad"))
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            adata.write("results/DGE.h5ad")
+
+    if not inplace:
+        return adata
+
+
+def run_analysis(
+    data_path: Path, yaml_path: Path, figures: bool, verbose: bool
+) -> None:
+    FIGURE_PATH = Path("figures")
+    FIGURE_PATH_PRE = Path(FIGURE_PATH, "preQC")
+    FIGURE_PATH_POST = Path(FIGURE_PATH, "postQC")
+    RESULT_PATH = Path("results")
+
+    FIGURE_PATH.mkdir(exist_ok=True)
+    RESULT_PATH.mkdir(exist_ok=True)
+    FIGURE_PATH_PRE.mkdir(exist_ok=True)
+    FIGURE_PATH_POST.mkdir(exist_ok=True)
+
+    try:
+        with open(yaml_path, "r") as f:
+            param_dict = list(yaml.load_all(f, Loader=SafeLoader))[0]
+    except FileNotFoundError:
+        sys.exit(f"Parameter YAML file {yaml_path} not found.")
+
+    qc_dict = param_dict["QC"]
+    norm_dict = param_dict["Normalization"]
+    feature_dict = param_dict["FeatureSelection"]
+    batch_correct_dict = param_dict["BatchEffectCorrection"]
+    neighbor_dict = param_dict["NeighborhoodGraph"]
+    cluster_dict = param_dict["Clustering"]
+    dge_dict = param_dict["DiffGeneExp"]
+
+    adata = load_data(data_path)
+    adata.layers["counts"] = adata.X.copy()
+    quality_control(adata=adata, **qc_dict)
+    normalization(adata=adata, **norm_dict)
+    feature_selection(adata=adata, **feature_dict)
+
+    if param_dict["Scale"]:
+        # Todo: Better naming.
+        adata.layers["unscaled"] = adata.X.copy()
+        sc.pp.scale(adata)
+    adata.raw = adata
+    if param_dict["PCA"]:
+        sc.pp.pca(adata, n_comps=50, use_highly_variable=True)
+
+    batch_effect_correction(adata=adata, **batch_correct_dict)
+    neighborhood_graph(adata=adata, **neighbor_dict)
+    clustering(adata=adata, **cluster_dict)
+    diff_gene_exp(adata=adata, **dge_dict)
+
+    # adata.write(Path(RESULT_PATH, "adata_processed.h5ad"))
 
 
 if __name__ == "__main__":
@@ -436,8 +470,6 @@ if __name__ == "__main__":
         help="Set whether figures will be generated.",
     )
     args = parser.parse_args()
-    print(args.data)
-    sys.exit()
 
     run_analysis(
         data_path=args.data,
