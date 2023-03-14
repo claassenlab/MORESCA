@@ -90,7 +90,7 @@ def quality_control(
 
     sc.pp.calculate_qc_metrics(
         adata,
-        qc_vars=["mt", "ribo", "hb"],
+        qc_vars=["mt", "rb", "hb"],
         percent_top=[20],
         log1p=True,
         inplace=True,
