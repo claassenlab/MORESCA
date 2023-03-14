@@ -20,9 +20,24 @@ def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool)
     outlier = (M < np.median(M) - nmads * MAD) | (np.median(M) + nmads * MAD < M)
     return outlier
 
+def load_type(data_path: Path) -> AnnData:
+    if data_path.is_dir():
+        pass
+    if data_path.is_file():
+        match data_path.suffix:
+            case ".hdf5":
+                pass
+            case ".h5ad":
+                pass
+            case ".loom":
+                pass
+            case ".txt":
+                pass
+
+
 
 def run_analysis(
-    h5ad_path: Path, yaml_path: Path, figures: bool, verbose: bool
+    data_path: Path, yaml_path: Path, figures: bool, verbose: bool
 ) -> None:
     FIGURE_PATH = Path("figures")
     FIGURE_PATH_PRE = Path(FIGURE_PATH, "preQC")
@@ -42,8 +57,23 @@ def run_analysis(
     except FileNotFoundError:
         sys.exit(f"Parameter YAML file {yaml_path} not found.")
 
-    # Load data.
-    adata = sc.read(h5ad_path)
+    # Todo: Loading the data should be possible for different formats.
+
+    #   Check whether list or single path
+    #   If list:
+    #       Check 
+    # 
+    #
+
+    match data_path.suffix:
+        case ".h5ad":
+            adata = sc.read(data_path)
+        case ".loom":
+            adata = sc.read_loom(data_path)
+        case ".mtx":
+            pass
+        case ".hdf5":
+            adata = sc.read_10x_h5(data_path)
 
     # Quality control
     qc_dict = param_dict["QC"]
@@ -382,6 +412,7 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=Path,
+        nargs="+",
         default=Path("data/data_raw.h5ad"),
         help="Path to the H5AD file.",
     )
@@ -405,9 +436,11 @@ if __name__ == "__main__":
         help="Set whether figures will be generated.",
     )
     args = parser.parse_args()
+    print(args.data)
+    sys.exit()
 
     run_analysis(
-        h5ad_path=args.data,
+        data_path=args.data,
         yaml_path=args.parameters,
         figures=args.figures,
         verbose=args.verbose,

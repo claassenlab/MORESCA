@@ -1,5 +1,6 @@
 import argparse
 import re
+import subprocess
 import sys
 import warnings
 import yaml
@@ -334,6 +335,15 @@ sc.pp.pca(adata, n_comps=50, use_highly_variable=True)
 
     with open(file_name, mode="w") as file:
         file.write(generated_code)
+
+    # Path to the file you want to format
+    file_path = "generated_code.py"
+
+    # Command to run Black on the file
+    black_cmd = f"conda run -n scTemplate black {file_path}"
+
+    # Run the command using subprocess
+    subprocess.run(black_cmd, shell=True)
 
 
 if __name__ == "__main__":

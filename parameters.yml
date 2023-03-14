@@ -1,6 +1,7 @@
 Info:
   sample_key: null
 QC:
+  run: False
   doublet_removal: False
   min_genes: 200
   min_cells: 10
@@ -28,3 +29,8 @@ Clustering:
 DiffGeneExp:
   method: wilcoxon
   tables: True
+Plotting:
+  pre_qc: False
+  post_qc: False
+  rank_genes_groups: False
+  cluster_volcano: False
