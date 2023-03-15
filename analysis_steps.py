@@ -1,4 +1,5 @@
-from utils import remove_cells_by_pct_counts, remove_genes
+from utils import remove_cells_by_pct_counts
+from utils import remove_genes
 
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
@@ -97,7 +98,7 @@ def quality_control(
         case False | None:
             print("No removal based on n_genes_by_counts.")
         case _:
-            sys.exit("Invalid value for n_genes_by_counts.")
+            ValueError("Invalid value for n_genes_by_counts.")
 
     # Todo: Test this!
     remove_cells_by_pct_counts(adata=adata, genes="mt", threshold=mt_threshold)
@@ -162,7 +163,7 @@ def normalization(
             print("No normalization applied.")
             return None
         case _:
-            sys.exit(f"Normalization method {method} not available.")
+            ValueError(f"Normalization method {method} not available.")
 
     if save:
         if isinstance(save, Path | str):
@@ -210,7 +211,7 @@ def feature_selection(
             print("No feature selection applied.")
             return None
         case _:
-            sys.exit(f"Selected feature selection method {method} not available.")
+            ValueError(f"Selected feature selection method {method} not available.")
 
     if save:
         if isinstance(save, Path | str):
@@ -243,7 +244,7 @@ def batch_effect_correction(
             print("No batch effect correction applied.")
             return None
         case _:
-            sys.exit("Invalid choice for batch effect correction method.")
+            ValueError("Invalid choice for batch effect correction method.")
 
     if save:
         if isinstance(save, Path | str):
@@ -299,7 +300,7 @@ def clustering(
             print("No clustering done. Exiting.")
             return None
         case _:
-            sys.exit(f"Clustering method {method} not available.")
+            ValueError(f"Clustering method {method} not available.")
 
     if save:
         if isinstance(save, Path | str):

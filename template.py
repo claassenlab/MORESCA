@@ -11,8 +11,14 @@ import yaml
 
 from typing import Optional
 
-from analysis_steps import load_data, quality_control, normalization, feature_selection, batch_effect_correction, \
-    neighborhood_graph, clustering, diff_gene_exp
+from analysis_steps import batch_effect_correction
+from analysis_steps import clustering
+from analysis_steps import diff_gene_exp
+from analysis_steps import feature_selection
+from analysis_steps import load_data
+from analysis_steps import neighborhood_graph
+from analysis_steps import normalization
+from analysis_steps import quality_control
 from utils import remove_cells_by_pct_counts
 from utils import remove_genes
 
@@ -38,7 +44,7 @@ def run_analysis(
         with open(yaml_path, "r") as f:
             param_dict = list(yaml.load_all(f, Loader=SafeLoader))[0]
     except FileNotFoundError:
-        sys.exit(f"Parameter YAML file {yaml_path} not found.")
+        FileNotFoundError(f"Parameter YAML file {yaml_path} not found.")
 
     qc_dict = param_dict["QC"]
     norm_dict = param_dict["Normalization"]

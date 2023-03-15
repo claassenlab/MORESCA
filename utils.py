@@ -4,7 +4,11 @@ from typing import Optional
 
 
 def remove_cells_by_pct_counts(
-    adata: AnnData, genes: str, threshold: Optional[Union[int, float, str, bool]], inplace=True, save=False
+    adata: AnnData,
+    genes: str,
+    threshold: Optional[Union[int, float, str, bool]],
+    inplace=True,
+    save=False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
