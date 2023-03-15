@@ -141,7 +141,7 @@ def quality_control(
 
 
 def normalization(
-    adata: AnnData, method: str, inplace=True, save=False
+    adata: AnnData, method: str, inplace: bool = True, save: bool = False
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -176,7 +176,11 @@ def normalization(
 
 
 def feature_selection(
-    adata: AnnData, method: str, number_features=None, inplace=True, save=False
+    adata: AnnData,
+    method: str,
+    number_features=None,
+    inplace: bool = True,
+    save: bool = False,
 ):
     if not inplace:
         adata = adata.copy()
@@ -225,7 +229,11 @@ def feature_selection(
 
 
 def batch_effect_correction(
-    adata: AnnData, method: str, batch_key: str, inplace=True, save=False
+    adata: AnnData,
+    method: str,
+    batch_key: str,
+    inplace: bool = True,
+    save: bool = False,
 ) -> None:
     if not inplace:
         adata = adata.copy()
@@ -257,7 +265,11 @@ def batch_effect_correction(
 
 
 def neighborhood_graph(
-    adata: AnnData, n_neighbors: int, n_pcs: int, inplace=True, save=False
+    adata: AnnData,
+    n_neighbors: int,
+    n_pcs: int,
+    inplace: bool = True,
+    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -282,7 +294,11 @@ def neighborhood_graph(
 
 
 def clustering(
-    adata: AnnData, method: str, resolution=None, inplace=True, save=False
+    adata: AnnData,
+    method: str,
+    resolution=None,
+    inplace: bool = True,
+    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -316,10 +332,10 @@ def diff_gene_exp(
     adata: AnnData,
     method: str,
     groupby: str,
-    use_raw=True,
-    tables=True,
-    inplace=True,
-    save=False,
+    use_raw: bool = True,
+    tables: bool = True,
+    inplace: bool = True,
+    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -364,6 +380,7 @@ def diff_gene_exp(
 
             case False | None:
                 print("No DGE performed.")
+                return None
 
     if save:
         if isinstance(save, Path | str):
