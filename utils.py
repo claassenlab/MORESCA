@@ -18,7 +18,10 @@ def remove_cells_by_pct_counts(
         case threshold if isinstance(threshold, (int, float)) and not isinstance(
             threshold, bool
         ):
-            adata = adata[adata.obs[f"pct_counts_{genes}"] < threshold, :]
+            if genes == "rb":
+                adata = adata[adata.obs[f"pct_counts_{genes}"] > threshold, :]
+            else:
+                adata = adata[adata.obs[f"pct_counts_{genes}"] < threshold, :]
         case "auto":
             # Todo: Implement automatic selection of threshold.
             ValueError(f"Auto selection for {genes}_threshold not implemented.")
@@ -47,11 +50,3 @@ def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
             pass
         case _:
             ValueError(f"Invalid choice for remove_{gene_key}.")
-
-
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    main()
