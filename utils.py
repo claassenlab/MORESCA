@@ -4,7 +4,7 @@ from typing import Optional
 
 
 def remove_cells_by_pct_counts(
-    adata: AnnData, genes: str, threshold, inplace=True, save=False
+    adata: AnnData, genes: str, threshold: Optional[Union[int, float, str, bool]], inplace=True, save=False
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -42,7 +42,7 @@ def remove_cells_by_pct_counts(
 
 
 # Todo: Is this the best way to do it? Manipulating the list inplace feels liek a gotcha.
-def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
+def remove_genes(gene_lst: list, rmv_lst: list, gene_key: Optional[bool]) -> None:
     match gene_key:
         case True:
             rmv_lst.append(gene_lst)
