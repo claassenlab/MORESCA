@@ -43,20 +43,20 @@ def load_data(data_path):
 # Todo: Implement utility functions for matching etc.
 def quality_control(
     adata: AnnData,
-    doublet_removal,
-    outlier_removal,
-    min_genes,
-    min_cells,
-    n_genes_by_counts,
-    mt_threshold,
-    rb_threshold,
-    hb_threshold,
-    remove_mt,
-    remove_rb,
-    remove_hb,
+    doublet_removal: bool,
+    outlier_removal: bool,
+    min_genes: int,
+    min_cells: int,
+    n_genes_by_counts: Optional[Union[float, str, bool]],
+    mt_threshold: Optional[Union[int, float, str, bool]],
+    rb_threshold: Optional[Union[int, float, str, bool]],
+    hb_threshold: Optional[Union[int, float, str, bool]],
+    remove_mt: Optional[bool],
+    remove_rb: Optional[bool],
+    remove_hb: Optional[bool],
     remove_custom_genes,
-    inplace=True,
-    save=False,
+    inplace: bool = True,
+    save: Union[Path, str, bool] = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
