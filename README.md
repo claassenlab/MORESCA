@@ -60,12 +60,9 @@ Info:
   sample_key: null
 QC:
   doublet_removal: False
+  outlier_removal: True
   min_genes: 200
   min_cells: 10
-  normalization: PFlog1pPF
-  feature_selection: seurat_v3
-  number_features: 3000
-  scale: True
   n_genes_by_counts: null
   mt_threshold: null
   rb_threshold: null
@@ -74,6 +71,13 @@ QC:
   remove_rb: False
   remove_hb: False
   remove_custom_genes : null
+Normalization:
+  method: PFlog1pPF
+FeatureSelection:
+  method: seurat_v3
+  number_features: 1000
+Scale: True
+PCA: True
 BatchEffectCorrection:
   method: null
   batch_key: null
@@ -85,7 +89,14 @@ Clustering:
   resolution: 1.0
 DiffGeneExp:
   method: wilcoxon
-```
+  groupby : leiden_r1.0
+  tables: False
+Plotting:
+  pre_qc: False
+  post_qc: False
+  rank_genes_groups: False
+  cluster_volcano: False
+  ```
 The following values of the parameters are currently possible
 
 
