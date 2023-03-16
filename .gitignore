@@ -149,3 +149,4 @@ MORESCA/results/
 MORESCA/data/
 MORESCA/figures/
 MORESCA/*.ipynb
+MORESCA/foo.py
