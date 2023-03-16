@@ -10,6 +10,7 @@ import warnings
 import yaml
 
 from typing import Optional
+from typing import Union
 
 from analysis_steps import batch_effect_correction
 from analysis_steps import clustering

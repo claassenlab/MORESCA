@@ -1,5 +1,16 @@
+import numpy as np
+import pandas as pd
+import scanpy as sc
+import scipy.stats as ss
+import warnings
+
+from anndata import AnnData
+from typing import Optional
+from typing import Union
 from utils import remove_cells_by_pct_counts
 from utils import remove_genes
+
+from pathlib import Path
 
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
@@ -22,6 +33,20 @@ def load_data(data_path):
         return sc.read_10x_h5(data_path)
     else:
         raise ValueError(f"Unknown file format: {file_extension}")
+
+
+def func_template(adata, inplace, save):
+    if not inplace:
+        adata = adata.copy()
+
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            adata.write("results/post_qc.h5ad")
+
+    if not inplace:
+        return adata
 
 
 # Todo: Implement utility functions for matching etc.
@@ -69,7 +94,7 @@ def quality_control(
     adata.obs["n_genes"] = (adata.X > 0).sum(1)
 
     adata.var["mt"] = adata.var_names.str.startswith("MT-")
-    adata.var["ribo"] = adata.var_names.str.contains(("^RP[SL]"))
+    adata.var["rb"] = adata.var_names.str.contains(("^RP[SL]"))
     adata.var["hb"] = adata.var_names.str.contains(("^HB[^(P)]"))
 
     sc.pp.calculate_qc_metrics(
