@@ -146,5 +146,6 @@ figures/
 
 MORESCA/generated_code.py
 MORESCA/results/
+MORESCA/data/
 MORESCA/figures/
 MORESCA/*.ipynb
