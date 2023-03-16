@@ -144,4 +144,7 @@ figures/
 
 .idea/
 
-generated_code.py
+MORESCA/generated_code.py
+MORESCA/results/
+MORESCA/figures/
+MORESCA/*.ipynb
