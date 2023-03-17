@@ -198,7 +198,6 @@ def feature_selection(
     inplace: bool = True,
     save: bool = False,
 ):
-
     if not inplace:
         adata = adata.copy()
 
@@ -308,7 +307,6 @@ def batch_effect_correction(
     inplace: bool = True,
     save: bool = False,
 ) -> None:
-
     if batch_key is None:
         return None
 

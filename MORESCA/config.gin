@@ -16,7 +16,7 @@ normalization:
     method = "PFlog1pPF"
 
 feature_selection:
-    method="seurat"
+    method = "seurat"
     number_features = 2000
 
 scaling:
