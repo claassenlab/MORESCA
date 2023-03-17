@@ -9,8 +9,11 @@ INSTALL_REQUIRES = [
     "harmonypy==0.0.9",
     "openpyxl==3.1.1",
     "anticor-features==0.2.0",
-    "numpy==1.23"
+    "numpy==1.23",
+    "black=23.1.0"
 ]
+
+TESTS_REQUIRE = ["pytest"]
 
 with open("README.md", "r", encoding="utf-8") as file:
     long_description = file.read()
@@ -29,6 +32,7 @@ setup(
     keywords=["scRNA-seq", "reproducibility", "workflow management"],
     install_requires=INSTALL_REQUIRES,
     test_suite="tests",
+    tests_require=TESTS_REQUIRE,
     classifiers=[
         "Development Status :: 1 - Planning",
         "Intended Audience :: Science/Research",
