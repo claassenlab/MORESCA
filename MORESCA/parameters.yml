@@ -1,5 +1,3 @@
-Info:
-  sample_key: null
 QC:
   doublet_removal: False
   outlier_removal: True

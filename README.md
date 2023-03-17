@@ -1,4 +1,6 @@
+
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 # MORESCA (MOdular and REproducible Single-Cell Analysis)
@@ -9,32 +11,19 @@ This repository provides a template  on standardized scRNA-seq analysis using Py
 
 ### Setting up the environment
 
-Create a virtual environment using Conda with Python version 3.10:
+1. Create a virtual environment using Conda with Python version >=3.10
 
-`conda create -n <envName> -f environment.yml`
+    conda create -n envName python=3.10
 
-Install the needed packages using the requirements.txt file:
+2. Activate the environment
 
-The overall folder structure looks like this:
+    conda activate envName
 
-```
-project
-├── data
-│   └── data_raw.h5ad
-├── figures
-│   ├── postQC
-│   └── preQC
-│      └── highest_expr_genes.pdf
-├── parameters.yml
-├── results
-│   ├── adata_processed.h5ad
-│   └── dge_leiden_r1.0_wilcoxon.xlsx
-└── template.py
-```
+ 3. Install MORESCA using:
 
-By default, ```template.py``` expects the data in ```H5AD``` format to be in ```data```. The two folders ```figures``` and ```results``` are generated on the fly if they don't exist yet.
+    python setup.py develop
 
-Currently, the script will perform the most common operations from doublet removal to DEG analysis of found clusters. If you want to apply ambient RNA correction beforehand, you need to run this separately.
+This creates a symbolic link, making changes to the code basis instantanious.
 
 ### Calling the template
 
@@ -44,6 +33,10 @@ Currently, the script will perform the most common operations from doublet remov
 | -p, --parameters | Path | Path to the YAML file | *parameters.yml* |
 | -v, --verbose | Boolean | If set, prints to output | *False* |
 | -f, --figures | Boolean | If set, figures will be generated | *False* |
+
+By default, ```template.py``` expects the data in ```H5AD``` format to be in ```data```. The two folders ```figures``` and ```results``` are generated on the fly if they don't exist yet.
+
+Currently, the script will perform the most common operations from doublet removal to DEG analysis of found clusters. If you want to apply ambient RNA correction beforehand, you need to run this separately.
 
 The following example executes the template with the h5ad file example_data.h5ad, the parameter file example_param.yml and enables both print-statements and figures.
 
@@ -56,8 +49,6 @@ By default, the used parameter file looks like this:
 
 ``` yaml
 # parameters.yml
-Info:
-  sample_key: null
 QC:
   doublet_removal: False
   outlier_removal: True
@@ -97,8 +88,8 @@ Plotting:
   rank_genes_groups: False
   cluster_volcano: False
   ```
+  
 The following values of the parameters are currently possible
-
 
 | Parameter | Values 
 | - | -
@@ -134,10 +125,3 @@ The following values of the parameters are currently possible
 ### Code generator
 
 After deciding for a suitable pipeline and specific parameters, you can create a Python file which reflects the exact step in a minimal fashion. 
-
-## Todo
-
-- Better figures (matplotlib.pyplot.subplot_mosaic looks interesting)
-- Make all needed methods aware of batch_keys
-- Auto-modes where possible
-- ..?
