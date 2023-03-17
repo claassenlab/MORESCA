@@ -9,9 +9,6 @@ import sys
 import warnings
 import yaml
 
-from typing import Optional
-from typing import Union
-
 from analysis_steps import batch_effect_correction
 from analysis_steps import clustering
 from analysis_steps import diff_gene_exp
@@ -20,8 +17,6 @@ from analysis_steps import load_data
 from analysis_steps import neighborhood_graph
 from analysis_steps import normalization
 from analysis_steps import quality_control
-from utils import remove_cells_by_pct_counts
-from utils import remove_genes
 
 from anndata import AnnData
 from pathlib import Path
