@@ -198,6 +198,7 @@ def feature_selection(
     inplace: bool = True,
     save: bool = False,
 ):
+
     if not inplace:
         adata = adata.copy()
 
@@ -259,7 +260,7 @@ def scaling(
     if not apply:
         return None
 
-    # sc.pp.scale(X=adata)
+    sc.pp.scale(adata, max_value=max_value)
 
     if save:
         if isinstance(save, Path | str):
@@ -307,6 +308,10 @@ def batch_effect_correction(
     inplace: bool = True,
     save: bool = False,
 ) -> None:
+
+    if batch_key is None:
+        return None
+
     if not inplace:
         adata = adata.copy()
 

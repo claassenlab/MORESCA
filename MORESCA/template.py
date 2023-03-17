@@ -42,17 +42,15 @@ def run_analysis(
     gin.parse_config_file("config.gin")
 
     adata = load_data(data_path)
-
     adata.layers["counts"] = adata.X.copy()
     quality_control(adata=adata)
-    sys.exit()
     normalization(adata=adata)
     feature_selection(adata=adata)
     adata.layers["unscaled"] = adata.X.copy()
     adata.raw = adata.copy()
     scaling(adata=adata)
     pca(adata)
-    # batch_effect_correction(adata=adata)
+    batch_effect_correction(adata=adata)
     neighborhood_graph(adata=adata)
     clustering(adata=adata)
     diff_gene_exp(adata=adata)
