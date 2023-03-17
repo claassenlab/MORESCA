@@ -1,5 +1,6 @@
 import argparse
 import doubletdetection
+import gin
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -36,26 +37,15 @@ def run_analysis(
     FIGURE_PATH_PRE.mkdir(exist_ok=True)
     FIGURE_PATH_POST.mkdir(exist_ok=True)
 
-    try:
-        with open(yaml_path, "r") as f:
-            param_dict = list(yaml.load_all(f, Loader=SafeLoader))[0]
-    except FileNotFoundError:
-        FileNotFoundError(f"Parameter YAML file {yaml_path} not found.")
-
-    qc_dict = param_dict["QC"]
-    norm_dict = param_dict["Normalization"]
-    feature_dict = param_dict["FeatureSelection"]
-    batch_correct_dict = param_dict["BatchEffectCorrection"]
-    neighbor_dict = param_dict["NeighborhoodGraph"]
-    cluster_dict = param_dict["Clustering"]
-    dge_dict = param_dict["DiffGeneExp"]
+    gin.parse_config_file("config.gin")
 
     adata = load_data(data_path)
     adata.layers["counts"] = adata.X.copy()
-    quality_control(adata=adata, **qc_dict)
-    normalization(adata=adata, **norm_dict)
-    feature_selection(adata=adata, **feature_dict)
+    quality_control(adata=adata)
+    normalization(adata=adata)
+    feature_selection(adata=adata)
 
+    # Todo set and load constant value from config.gin
     if param_dict["Scale"]:
         # Todo: Better naming.
         adata.layers["unscaled"] = adata.X.copy()
@@ -64,10 +54,12 @@ def run_analysis(
     if param_dict["PCA"]:
         sc.pp.pca(adata, n_comps=50, use_highly_variable=True)
 
-    batch_effect_correction(adata=adata, **batch_correct_dict)
-    neighborhood_graph(adata=adata, **neighbor_dict)
-    clustering(adata=adata, **cluster_dict)
-    diff_gene_exp(adata=adata, **dge_dict)
+    #batch_effect_correction(adata=adata)
+    neighborhood_graph(adata=adata)
+    clustering(adata=adata)
+    diff_gene_exp(adata=adata)
+
+    sys.exit()
 
     # adata.write(Path(RESULT_PATH, "adata_processed.h5ad"))
 

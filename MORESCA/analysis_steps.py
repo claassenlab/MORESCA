@@ -1,16 +1,18 @@
+import gin
 import numpy as np
 import pandas as pd
 import scanpy as sc
 import scipy.stats as ss
 import warnings
 
+import scanpy.external as sce
+
 from anndata import AnnData
+from pathlib import Path
 from typing import Optional
 from typing import Union
 from utils import remove_cells_by_pct_counts
 from utils import remove_genes
-
-from pathlib import Path
 
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
@@ -35,21 +37,7 @@ def load_data(data_path):
         raise ValueError(f"Unknown file format: {file_extension}")
 
 
-def func_template(adata, inplace, save):
-    if not inplace:
-        adata = adata.copy()
-
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/post_qc.h5ad")
-
-    if not inplace:
-        return adata
-
-
-# Todo: Implement utility functions for matching etc.
+@gin.configurable
 def quality_control(
     adata: AnnData,
     doublet_removal: bool,
@@ -164,7 +152,7 @@ def quality_control(
     if not inplace:
         return adata
 
-
+@gin.configurable
 def normalization(
     adata: AnnData, method: str, inplace: bool = True, save: bool = False
 ) -> Optional[AnnData]:
@@ -199,7 +187,7 @@ def normalization(
     if not inplace:
         return adata
 
-
+@gin.configurable
 def feature_selection(
     adata: AnnData,
     method: str,
@@ -252,7 +240,7 @@ def feature_selection(
     if not inplace:
         return adata
 
-
+@gin.configurable
 def batch_effect_correction(
     adata: AnnData,
     method: str,
@@ -289,6 +277,7 @@ def batch_effect_correction(
         return adata
 
 
+@gin.configurable
 def neighborhood_graph(
     adata: AnnData,
     n_neighbors: int,
@@ -317,7 +306,7 @@ def neighborhood_graph(
     if not inplace:
         return adata
 
-
+@gin.configurable
 def clustering(
     adata: AnnData,
     method: str,
@@ -352,7 +341,7 @@ def clustering(
     if not inplace:
         return adata
 
-
+@gin.configurable
 def diff_gene_exp(
     adata: AnnData,
     method: str,

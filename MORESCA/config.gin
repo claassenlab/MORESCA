@@ -1,0 +1,32 @@
+quality_control.doublet_removal = False
+quality_control.outlier_removal = False
+quality_control.min_genes = 200
+quality_control.min_cells = 10
+quality_control.n_genes_by_counts = None
+quality_control.mt_threshold = 50
+quality_control.rb_threshold = 10
+quality_control.hb_threshold = 2
+quality_control.remove_mt = False
+quality_control.remove_rb = False
+quality_control.remove_hb = False
+quality_control.remove_custom_genes = False
+
+normalization.method = "PFlog1pPF"
+
+feature_selection.method = "seurat"
+feature_selection.number_features = 2000
+
+batch_effect_correction.method = "harmony"
+batch_effect_correction.batch_key = None
+
+neighborhood_graph.n_neighbors = 15
+neighborhood_graph.n_pcs = None
+
+clustering.method = "leiden"
+clustering.resolution = 1.0
+
+diff_gene_exp.method = "wilcoxon"
+diff_gene_exp.groupby = "leiden_r1.0"
+diff_gene_exp.use_raw = True
+diff_gene_exp.tables = False
+
