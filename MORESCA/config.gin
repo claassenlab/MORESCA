@@ -9,12 +9,19 @@ quality_control.hb_threshold = 2
 quality_control.remove_mt = False
 quality_control.remove_rb = False
 quality_control.remove_hb = False
-quality_control.remove_custom_genes = False
+quality_control.remove_custom_genes = None
 
 normalization.method = "PFlog1pPF"
 
 feature_selection.method = "seurat"
 feature_selection.number_features = 2000
+
+scaling.apply = True
+scaling.max_value = 10
+
+pca.apply = True
+pca.n_comps = 50
+pca.use_highly_variable = True
 
 batch_effect_correction.method = "harmony"
 batch_effect_correction.batch_key = None
@@ -30,3 +37,5 @@ diff_gene_exp.groupby = "leiden_r1.0"
 diff_gene_exp.use_raw = True
 diff_gene_exp.tables = False
 
+
+MACRO_VAL = 5

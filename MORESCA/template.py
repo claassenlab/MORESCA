@@ -17,7 +17,9 @@ from analysis_steps import feature_selection
 from analysis_steps import load_data
 from analysis_steps import neighborhood_graph
 from analysis_steps import normalization
+from analysis_steps import pca
 from analysis_steps import quality_control
+from analysis_steps import scaling
 
 from anndata import AnnData
 from pathlib import Path
@@ -40,26 +42,20 @@ def run_analysis(
     gin.parse_config_file("config.gin")
 
     adata = load_data(data_path)
+
     adata.layers["counts"] = adata.X.copy()
     quality_control(adata=adata)
+    sys.exit()
     normalization(adata=adata)
     feature_selection(adata=adata)
-
-    # Todo set and load constant value from config.gin
-    if param_dict["Scale"]:
-        # Todo: Better naming.
-        adata.layers["unscaled"] = adata.X.copy()
-        sc.pp.scale(adata)
-    adata.raw = adata
-    if param_dict["PCA"]:
-        sc.pp.pca(adata, n_comps=50, use_highly_variable=True)
-
-    #batch_effect_correction(adata=adata)
+    adata.layers["unscaled"] = adata.X.copy()
+    adata.raw = adata.copy()
+    scaling(adata=adata)
+    pca(adata)
+    # batch_effect_correction(adata=adata)
     neighborhood_graph(adata=adata)
     clustering(adata=adata)
     diff_gene_exp(adata=adata)
-
-    sys.exit()
 
     # adata.write(Path(RESULT_PATH, "adata_processed.h5ad"))
 

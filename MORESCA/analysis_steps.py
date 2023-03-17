@@ -51,7 +51,8 @@ def quality_control(
     remove_mt: Optional[bool],
     remove_rb: Optional[bool],
     remove_hb: Optional[bool],
-    remove_custom_genes,
+    # Todo: Only for testing, this should be a list.
+    remove_custom_genes: Optional[bool],
     inplace: bool = True,
     save: Union[Path, str, bool] = False,
 ) -> Optional[AnnData]:
@@ -131,7 +132,7 @@ def quality_control(
     remove_genes(gene_lst=rb_genes, rmv_lst=gene_stack_lst, gene_key=remove_rb)
     remove_genes(gene_lst=hb_genes, rmv_lst=gene_stack_lst, gene_key=remove_hb)
 
-    if remove_custom_genes is not None:
+    if (remove_custom_genes is not None) or remove_custom_genes:
         warnings.warn(
             "Removing custom genes is not implemented yet. Continue without doing this.",
             category=RuntimeWarning,
@@ -151,6 +152,7 @@ def quality_control(
 
     if not inplace:
         return adata
+
 
 @gin.configurable
 def normalization(
@@ -186,6 +188,7 @@ def normalization(
 
     if not inplace:
         return adata
+
 
 @gin.configurable
 def feature_selection(
@@ -239,6 +242,62 @@ def feature_selection(
 
     if not inplace:
         return adata
+
+
+# Todo: This is just a wrapper, to make the usage of config.gin consistent Does this make sense?
+@gin.configurable
+def scaling(
+    adata: AnnData,
+    apply: bool,
+    max_value: Optional[Union[int, float]],
+    inplace: bool = True,
+    save: bool = False,
+):
+    if not inplace:
+        adata = adata.copy()
+
+    if not apply:
+        return None
+
+    # sc.pp.scale(X=adata)
+
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            # Todo: Do we have to save here?
+            adata.write("results/scaled.h5ad")
+
+    if not inplace:
+        return adata
+
+
+@gin.configurable
+def pca(
+    adata: AnnData,
+    apply: bool,
+    n_comps: int = 50,
+    use_highly_variable: int = True,
+    inplace: bool = True,
+    save: bool = False,
+):
+    if not inplace:
+        adata = adata.copy()
+
+    if not apply:
+        return None
+    sc.pp.pca(adata, n_comps=n_comps, use_highly_variable=use_highly_variable)
+
+    if save:
+        if isinstance(save, Path | str):
+            adata.write(save)
+        else:
+            # Todo: Do we have to save here?
+            adata.write("results/pca.h5ad")
+
+    if not inplace:
+        return adata
+
 
 @gin.configurable
 def batch_effect_correction(
@@ -306,6 +365,7 @@ def neighborhood_graph(
     if not inplace:
         return adata
 
+
 @gin.configurable
 def clustering(
     adata: AnnData,
@@ -340,6 +400,7 @@ def clustering(
 
     if not inplace:
         return adata
+
 
 @gin.configurable
 def diff_gene_exp(
