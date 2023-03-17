@@ -1,2 +1,52 @@
+[project]
+name = "moresca"
+version = "0.1.0"
+description = "Reproducible boilerplate-free workflow management for Scanpy-based scRNA-seq analysis."
+license = { text = "AGPL-3.0 license" }
+homepage = "https://github.com/claassenlab/MORESCA/"
+requires-python = ">=3.10"
+
+
+authors = [
+    { name = "Matthias Bruhns", 
+      email = "matthias.bruhns@posteo.de" }
+      ]
+
+keywords = [
+  "workflow management",
+  "scRNA-seq",
+  "reproducibility"
+]
+
+classifiers = [
+        "Development Status :: 1 - Planning",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Topic :: Scientific/Engineering :: Bio-Informatics"
+    ]
+
+dependencies = [
+    "scanpy==1.9.3",
+    "pyyaml==6.0",
+    "doubletdetection==4.2",
+    "harmonypy==0.0.9",
+    "openpyxl==3.1.1",
+    "anticor-features==0.2.0",
+    "numpy==1.23",
+    "black=23.1.0",
+    "gin-config==0.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8",
+    "pytest"
+]
+
 [tool.black]
 line-length = 88
+target-version = ["py310", "py311"]
+include = "\.pyi?$"

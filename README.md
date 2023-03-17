@@ -43,66 +43,62 @@ The following example executes the template with the h5ad file example_data.h5ad
 ```python template.py -d example_data.h5ad -p example_param.yml -v -f```
 
 
-### Using the YAML
+### Using the config.gin
 
 By default, the used parameter file looks like this:
 
-``` yaml
-# parameters.yml
-QC:
-  doublet_removal: False
-  outlier_removal: True
-  min_genes: 200
-  min_cells: 10
-  n_genes_by_counts: null
-  mt_threshold: null
-  rb_threshold: null
-  hb_threshold: null
-  remove_mt: False
-  remove_rb: False
-  remove_hb: False
-  remove_custom_genes : null
-Normalization:
-  method: PFlog1pPF
-FeatureSelection:
-  method: seurat_v3
-  number_features: 1000
-Scale: True
-PCA: True
-BatchEffectCorrection:
-  method: null
-  batch_key: null
-NeighborhoodGraph:
-  n_neighbors: 15
-  n_pcs: null
-Clustering:
-  method: leiden
-  resolution: 1.0
-DiffGeneExp:
-  method: wilcoxon
-  groupby : leiden_r1.0
-  tables: False
-Plotting:
-  pre_qc: False
-  post_qc: False
-  rank_genes_groups: False
-  cluster_volcano: False
+``` yml
+# config.gin
+quality_control:
+    doublet_removal = False
+    outlier_removal = False
+    min_genes = 200
+    min_cells = 10
+    n_genes_by_counts = None
+    mt_threshold = 50
+    rb_threshold = 10
+    hb_threshold = 2
+    remove_mt = False
+    remove_rb = False
+    remove_hb = False
+    remove_custom_genes = None
+normalization:
+    method = "PFlog1pPF"
+feature_selection:
+    method = "seurat"
+    number_features = 2000
+scaling:
+    apply = True
+    max_value = None
+pca:
+    apply = True
+    n_comps = 50
+    use_highly_variable = True
+batch_effect_correction:
+    method = "harmony"
+    batch_key = None
+neighborhood_graph:
+    n_neighbors = 15
+    n_pcs = None
+clustering:
+    method = "leiden"
+    resolution = 1.0
+diff_gene_exp:
+    method = "wilcixon"
+    groupby = "leiden_r1.0"
+    use_raw = True
+    tables = False
   ```
   
 The following values of the parameters are currently possible
 
 | Parameter | Values 
 | - | -
-| **INFO** 
-| sample_key | *str* |
-| **QC** 
+| **quality_control** 
+| doublet_removal | *bool* |
 | doublet_removal | *bool* |
 | min_genes | *int*, *null* | 
 | min_cells| *int*, *null* |
-| normalization| *log1pCP10k*, *log1PF*, *PFlog1pPF*, *pearson_residuals*, *null*|
-| number_features| *seurat*, *seurat_v3*, *pearson_residuals*, *anti_correlation*, *null* |
-| feature_selection| *int*, *null* |
-| scale| *bool* |
 | mt_threshold| *float*, *null* |
 | rb_threshold| *float*, *null* |
 | hb_threshold| *float*, *null* |
@@ -110,17 +106,28 @@ The following values of the parameters are currently possible
 | remove_rb| *float*, *null* |
 | remove_hb| *float*, *null* |
 | remove_custom_genes| *list(str)*, *null* |
-| **BatchEffectCorrection**
+| **normalization**
+| method| *log1pCP10k*, *log1PF*, *PFlog1pPF*, *pearson_residuals*, *null*|
+| **feature_selection**
+| method| *seurat*, *seurat_v3*, *pearson_residuals*, *anti_correlation*, *null*|
+| number_features| *int*, *null* |
+| **scaling**
+| apply| *bool* |
+| max_value| *int*, *float* |
+| **batch_effect_correction**
 | method| *harmony*, *null* |
-| batch_ley| Not implemented / *null* |
-| **NeighborhoodGraph**
+| batch_key| Not implemented / *null* |
+| **neighborhood_graph**
 | n_neighbors| *int* |
 | n_pcs| *int*, *null* |
-| **Clustering**
+| **clustering**
 | method| *str*, *null* |
 | resolution| *float*|
-| **DiffGeneExp**
+| **diff_gene_exp**
 | method| *wilcoxon*, *logreg*, *t-test*, *t-test_overestim_var* |
+| groupy| *str* |
+| use_raw| *bool* |
+| tables| *bool* |
 
 ### Code generator
 
