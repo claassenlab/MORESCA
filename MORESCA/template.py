@@ -8,7 +8,6 @@ import scanpy.external as sce
 import scipy.stats as ss
 import sys
 import warnings
-import yaml
 
 from analysis_steps import batch_effect_correction
 from analysis_steps import clustering
