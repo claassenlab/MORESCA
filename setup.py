@@ -4,11 +4,12 @@ from setuptools import setup
 
 INSTALL_REQUIRES = [
     "scanpy==1.9.3",
-    "pyyaml=6.0",
+    "pyyaml==6.0",
     "doubletdetection==4.2",
     "harmonypy==0.0.9",
     "openpyxl==3.1.1",
     "anticor-features==0.2.0",
+    "numpy==1.23"
 ]
 
 
