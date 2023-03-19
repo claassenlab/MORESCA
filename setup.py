@@ -10,7 +10,7 @@ INSTALL_REQUIRES = [
     "gin-config==0.5.0",
     "loompy==3.0.7",
     "leidenalg==0.9.1",
-    "igraph==0.10.4"
+    "igraph==0.10.4",
 ]
 
 TESTS_REQUIRE = ["pytest"]

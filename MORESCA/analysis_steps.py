@@ -12,13 +12,27 @@ from anndata import AnnData
 
 from MORESCA.utils import remove_cells_by_pct_counts, remove_genes
 
+try:
+    from anticor_features.anticor_features import get_anti_cor_genes
+
+    anti_cor_import_error = False
+except ImportError:
+    anti_cor_import_error = True
+    warnings.warn(
+        "Could not import anticor_features,\
+        install it using 'pip install anticor-features'"
+    )
+
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
-    M = adata.obs[metric]
-    MAD = ss.median_abs_deviation(M)
-    return (M < np.median(M) - nmads * MAD) | (np.median(M) + nmads * MAD < M)
+    data = adata.obs[metric]
+    med_abs_dev = ss.median_abs_deviation(data)
+    return (data < np.median(data) - nmads * med_abs_dev) | (
+        np.median(data) + nmads * med_abs_dev < data
+    )
 
 
+# Todo: Should this happen inplace and just mutate a None-adata?
 def load_data(data_path) -> AnnData:
     if isinstance(data_path, str):
         data_path = Path(data_path)
@@ -26,14 +40,15 @@ def load_data(data_path) -> AnnData:
         # Todo: Implement this for paths.
         pass
     file_extension = data_path.suffix
-    if file_extension == ".h5ad":
-        return sc.read(data_path)
-    elif file_extension == ".loom":
-        return sc.read_loom(data_path)
-    elif file_extension == ".hdf5":
-        return sc.read_10x_h5(data_path)
-    else:
-        raise ValueError(f"Unknown file format: {file_extension}")
+    match file_extension:
+        case ".h5ad":
+            return sc.read(data_path)
+        case ".loom":
+            return sc.read_loom(data_path)
+        case "hdf5":
+            return sc.read_10x_h5(data_path)
+        case _:
+            raise ValueError(f"Unknown file format: {file_extension}")
 
 
 @gin.configurable
@@ -133,7 +148,8 @@ def quality_control(
 
     if (remove_custom_genes is not None) or remove_custom_genes:
         warnings.warn(
-            "Removing custom genes is not implemented yet. Continue without doing this.",
+            "Removing custom genes is not implemented yet.\
+            Continue without doing this.",
             category=RuntimeWarning,
         )
 
@@ -218,7 +234,12 @@ def feature_selection(
             )
             # This is experimental and has to be tested and discussed!
             # Todo: Implement mapping for species according to provided YAML.
-            from anticor_features.anticor_features import get_anti_cor_genes
+
+            if anti_cor_import_error:
+                warnings.warn(
+                    "Anti_cor is not available.\
+                    Install it using 'pip install anticor-features."
+                )
 
             anti_cor_table = get_anti_cor_genes(
                 adata.X.T, adata.var.index.tolist(), species="hsapiens"
@@ -243,7 +264,8 @@ def feature_selection(
         return adata
 
 
-# Todo: This is just a wrapper, to make the usage of config.gin consistent Does this make sense?
+# Todo: This is just a wrapper, to make the usage of config.gin consistent.
+# Does this make sense?
 @gin.configurable
 def scaling(
     adata: AnnData,
@@ -251,7 +273,7 @@ def scaling(
     max_value: Optional[Union[int, float]],
     inplace: bool = True,
     save: bool = False,
-)-> Optional[AnnData]:
+) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
@@ -279,7 +301,7 @@ def pca(
     use_highly_variable: int = True,
     inplace: bool = True,
     save: bool = False,
-)-> Optional[AnnData]:
+) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
