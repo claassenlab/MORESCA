@@ -1,4 +1,8 @@
 import argparse
+import sys
+import warnings
+from pathlib import Path
+
 import doubletdetection
 import gin
 import numpy as np
@@ -6,22 +10,10 @@ import pandas as pd
 import scanpy as sc
 import scanpy.external as sce
 import scipy.stats as ss
-import sys
-import warnings
-
-from analysis_steps import batch_effect_correction
-from analysis_steps import clustering
-from analysis_steps import diff_gene_exp
-from analysis_steps import feature_selection
-from analysis_steps import load_data
-from analysis_steps import neighborhood_graph
-from analysis_steps import normalization
-from analysis_steps import pca
-from analysis_steps import quality_control
-from analysis_steps import scaling
-
+from analysis_steps import (batch_effect_correction, clustering, diff_gene_exp,
+                            feature_selection, load_data, neighborhood_graph,
+                            normalization, pca, quality_control, scaling)
 from anndata import AnnData
-from pathlib import Path
 from yaml.loader import SafeLoader
 
 

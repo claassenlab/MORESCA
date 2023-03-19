@@ -1,8 +1,9 @@
+from pathlib import Path
+
 import pytest
 import scanpy as sc
 
 from MORESCA import analysis_steps
-from pathlib import Path
 
 PATH_H5AD = Path("../data/data_raw.h5ad")
 STR_H5AD = "../data/data_raw.h5ad"

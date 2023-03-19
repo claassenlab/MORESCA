@@ -1,18 +1,16 @@
+import warnings
+from pathlib import Path
+from typing import Optional, Union
+
 import gin
 import numpy as np
 import pandas as pd
 import scanpy as sc
-import scipy.stats as ss
-import warnings
-
 import scanpy.external as sce
-
-from MORESCA.utils import remove_cells_by_pct_counts
-from MORESCA.utils import remove_genes
+import scipy.stats as ss
 from anndata import AnnData
-from pathlib import Path
-from typing import Optional
-from typing import Union
+
+from MORESCA.utils import remove_cells_by_pct_counts, remove_genes
 
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):

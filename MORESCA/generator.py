@@ -3,10 +3,10 @@ import re
 import subprocess
 import sys
 import warnings
-import yaml
-
 from datetime import datetime
 from pathlib import Path
+
+import yaml
 from yaml.loader import SafeLoader
 
 
