@@ -1,20 +1,24 @@
 
 
+
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 # MORESCA (MOdular and REproducible Single-Cell Analysis)
 
-This repository provides a template  on standardized scRNA-seq analysis using Python and the Scanpy library. All parameters of the workflow are controlled with single YAML file.
+This repository provides a template  on standardized scRNA-seq analysis using Python and the Scanpy library. All parameters of the workflow are controlled with single config file.
 
 ## Usage
 
 ### Setting up the environment
 
-Clone the repository and change into the directory
+Clone the repository 
 
     git clone git@github.com:claassenlab/MORESCA.git
+    
+Change into the directory
+
     cd MORESCA
 
 Create a virtual environment using Conda with Python version >=3.10
@@ -36,7 +40,7 @@ This creates a symbolic link, making changes to the code basis instantanious.
 | Flag | Type | Description | Default |
 | - | -  | - | - |
 | -d, --data | Path | Path to the h5ad file | *data/adata_raw.h5ad*
-| -p, --parameters | Path | Path to the YAML file | *parameters.yml* |
+| -p, --parameters | Path | Path to the config file | *config.gin* |
 | -v, --verbose | Boolean | If set, prints to output | *False* |
 | -f, --figures | Boolean | If set, figures will be generated | *False* |
 
