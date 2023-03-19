@@ -7,9 +7,7 @@ name = "moresca"
 version = "0.1.0"
 description = "Reproducible boilerplate-free workflow management for Scanpy-based scRNA-seq analysis."
 license = { text = "AGPL-3.0 license" }
-homepage = "https://github.com/claassenlab/MORESCA/"
 requires-python = ">=3.10"
-
 
 authors = [
   {email = "matthias.bruhns@posteo.de"},

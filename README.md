@@ -1,4 +1,5 @@
 
+
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -11,6 +12,11 @@ This repository provides a template  on standardized scRNA-seq analysis using Py
 
 ### Setting up the environment
 
+Clone the repository and change into the directory
+
+    git clone git@github.com:claassenlab/MORESCA.git
+    cd MORESCA
+
 Create a virtual environment using Conda with Python version >=3.10
 
     conda create -n <envName> python=3.10
@@ -21,7 +27,7 @@ Activate the environment
 
 Install MORESCA using:
 
-    python setup.py develop
+    pip install -e .
 
 This creates a symbolic link, making changes to the code basis instantanious.
 
