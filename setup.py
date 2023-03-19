@@ -4,13 +4,12 @@ from setuptools import setup
 
 INSTALL_REQUIRES = [
     "scanpy==1.9.3",
-    "pyyaml==6.0",
     "doubletdetection==4.2",
     "harmonypy==0.0.9",
     "openpyxl==3.1.1",
     "anticor-features==0.2.0",
     "numpy==1.23",
-    "black=23.1.0"
+    "gin-config==0.5.0",
 ]
 
 TESTS_REQUIRE = ["pytest"]
@@ -19,9 +18,9 @@ with open("README.md", "r", encoding="utf-8") as file:
     long_description = file.read()
 
 setup(
-    name="MORESCA",
+    name="moresca",
     version="0.1.0",
-    description="Reproducible workflow management for Scanpy-based scRNA-seq analysis.",
+    description="Reproducible boilerplate-free workflow management for Scanpy-based scRNA-seq analysis.",
     license="AGPL-3.0 license",
     packages=find_packages(),
     author="Matthias Bruhns",
@@ -33,6 +32,7 @@ setup(
     install_requires=INSTALL_REQUIRES,
     test_suite="tests",
     tests_require=TESTS_REQUIRE,
+    extras_require={"dev": ["black", "flake8"]},
     classifiers=[
         "Development Status :: 1 - Planning",
         "Intended Audience :: Science/Research",

@@ -1,8 +1,4 @@
-import numpy as np
-import scanpy as sc
-
 from anndata import AnnData
-from pathlib import Path
 from pathlib import Path
 from typing import Optional
 from typing import Union

@@ -1,0 +1,47 @@
+quality_control:
+    doublet_removal = False
+    outlier_removal = False
+    min_genes = 200
+    min_cells = 10
+    n_genes_by_counts = None
+    mt_threshold = 50
+    rb_threshold = 10
+    hb_threshold = 2
+    remove_mt = False
+    remove_rb = False
+    remove_hb = False
+    remove_custom_genes = None
+
+normalization:
+    method = "PFlog1pPF"
+
+feature_selection:
+    method = "seurat"
+    number_features = 2000
+
+scaling:
+    apply = True
+    max_value = None
+
+pca:
+    apply = True
+    n_comps = 50
+    use_highly_variable = True
+
+batch_effect_correction:
+    method = "harmony"
+    batch_key = None
+
+neighborhood_graph:
+    n_neighbors = 15
+    n_pcs = None
+
+clustering:
+    method = "leiden"
+    resolution = 1.0
+
+diff_gene_exp:
+    method = "wilcixon"
+    groupby = "leiden_r1.0"
+    use_raw = True
+    tables = False
