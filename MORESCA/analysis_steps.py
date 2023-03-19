@@ -19,7 +19,7 @@ def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool)
     return (M < np.median(M) - nmads * MAD) | (np.median(M) + nmads * MAD < M)
 
 
-def load_data(data_path):
+def load_data(data_path) -> AnnData:
     if isinstance(data_path, str):
         data_path = Path(data_path)
     if data_path.is_dir():
@@ -196,7 +196,7 @@ def feature_selection(
     number_features=None,
     inplace: bool = True,
     save: bool = False,
-):
+) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
@@ -251,7 +251,7 @@ def scaling(
     max_value: Optional[Union[int, float]],
     inplace: bool = True,
     save: bool = False,
-):
+)-> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
@@ -279,7 +279,7 @@ def pca(
     use_highly_variable: int = True,
     inplace: bool = True,
     save: bool = False,
-):
+)-> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
@@ -305,7 +305,7 @@ def batch_effect_correction(
     batch_key: str,
     inplace: bool = True,
     save: bool = False,
-) -> None:
+) -> Optional[AnnData]:
     if batch_key is None:
         return None
 

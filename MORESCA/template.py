@@ -78,6 +78,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Set whether figures will be generated.",
     )
+
     args = parser.parse_args()
 
     run_analysis(

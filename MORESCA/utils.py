@@ -8,8 +8,8 @@ def remove_cells_by_pct_counts(
     adata: AnnData,
     genes: str,
     threshold: Optional[Union[int, float, str, bool]],
-    inplace=True,
-    save=False,
+    inplace: bool = True,
+    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
