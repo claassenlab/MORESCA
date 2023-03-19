@@ -7,22 +7,23 @@ import warnings
 
 import scanpy.external as sce
 
+from MORESCA.utils import remove_cells_by_pct_counts
+from MORESCA.utils import remove_genes
 from anndata import AnnData
 from pathlib import Path
 from typing import Optional
 from typing import Union
-from utils import remove_cells_by_pct_counts
-from utils import remove_genes
 
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
     M = adata.obs[metric]
     MAD = ss.median_abs_deviation(M)
-    outlier = (M < np.median(M) - nmads * MAD) | (np.median(M) + nmads * MAD < M)
-    return outlier
+    return (M < np.median(M) - nmads * MAD) | (np.median(M) + nmads * MAD < M)
 
 
 def load_data(data_path):
+    if isinstance(data_path, str):
+        data_path = Path(data_path)
     if data_path.is_dir():
         # Todo: Implement this for paths.
         pass
@@ -423,12 +424,12 @@ def diff_gene_exp(
 
         # Todo: Should "logreg" be the default?
         match method:
-            case method if method in [
+            case method if method in {
                 "wilcoxon",
                 "t-test",
                 "logreg",
                 "t-test_overestim_var",
-            ]:
+            }:
                 key_added = f"{groupby}_{method}"
                 sc.tl.rank_genes_groups(
                     adata=adata,

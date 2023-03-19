@@ -8,9 +8,9 @@ requires-python = ">=3.10"
 
 
 authors = [
-    { name = "Matthias Bruhns", 
-      email = "matthias.bruhns@posteo.de" }
-      ]
+  {email = "matthias.bruhns@posteo.de"},
+  {name = "Matthias Bruhns"}
+]
 
 keywords = [
   "workflow management",
@@ -48,4 +48,32 @@ dev = [
 [tool.black]
 line-length = 88
 target-version = ["py310", "py311"]
-include = "\.pyi?$"
+include = '\.pyi?$'
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.pylint.MASTER]
+# Specify a score threshold to be exceeded before program exits with error.
+fail-under = "7.0"
+
+# Add files or directories to the blacklist. They should be base names, not
+# paths.
+ignore = ".git"
+
+# Add files or directories matching the regex patterns to the blacklist. The
+# regex matches against base names, not paths.
+ignore-patterns = ""
+
+# Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
+# number of processors available to use.
+jobs = 0
+
+# When enabled, pylint would attempt to guess common misconfiguration and emit
+# user-friendly hints instead of false-positive error messages.
+suggestion-mode = "yes"
+
+# Allow loading of arbitrary C extensions. Extensions are imported into the
+# active Python interpreter and may run arbitrary code.
+unsafe-load-any-extension = "no"
+
