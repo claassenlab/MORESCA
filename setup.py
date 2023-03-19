@@ -10,7 +10,7 @@ INSTALL_REQUIRES = [
     "openpyxl==3.1.1",
     "anticor-features==0.2.0",
     "numpy==1.23",
-    "black=23.1.0"
+    "black==23.1.0"
 ]
 
 TESTS_REQUIRE = ["pytest"]
