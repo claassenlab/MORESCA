@@ -96,7 +96,7 @@ def quality_control(
     adata.obs["log_counts"] = np.log(adata.obs["n_counts"])
     adata.obs["n_genes"] = (adata.X > 0).sum(1)
 
-    adata.var["mt"] = adata.var_names.str.startswith("(?i)MT-")
+    adata.var["mt"] = adata.var_names.str.contains("(?i)^MT-")
     adata.var["rb"] = adata.var_names.str.contains(("(?i)^RP[SL]"))
     adata.var["hb"] = adata.var_names.str.contains(("(?i)^HB[^(P)]"))
 
@@ -126,9 +126,8 @@ def quality_control(
         case False | None:
             print("No removal based on n_genes_by_counts.")
         case _:
-            ValueError("Invalid value for n_genes_by_counts.")
+            raise ValueError("Invalid value for n_genes_by_counts.")
 
-    # Todo: Test this!
     remove_cells_by_pct_counts(adata=adata, genes="mt", threshold=mt_threshold)
     remove_cells_by_pct_counts(adata=adata, genes="rb", threshold=rb_threshold)
     remove_cells_by_pct_counts(adata=adata, genes="hb", threshold=hb_threshold)
@@ -136,7 +135,7 @@ def quality_control(
     sc.pp.filter_cells(adata, min_genes=min_genes)
     sc.pp.filter_genes(adata, min_cells=min_cells)
 
-    mt_genes = adata.var_names.str.startswith("(?i)MT-")
+    mt_genes = adata.var_names.str.contains("(?i)^MT-")
     rb_genes = adata.var_names.str.contains(("(?i)^RP[SL]"))
     hb_genes = adata.var_names.str.contains("(?i)^HB[^(P)]")
 
@@ -193,7 +192,7 @@ def normalization(
             print("No normalization applied.")
             return None
         case _:
-            ValueError(f"Normalization method {method} not available.")
+            raise ValueError(f"Normalization method {method} not available.")
 
     if save:
         if isinstance(save, Path | str):
@@ -251,7 +250,7 @@ def feature_selection(
             print("No feature selection applied.")
             return None
         case _:
-            ValueError(f"Selected feature selection method {method} not available.")
+            raise ValueError(f"Selected feature selection method {method} not available.")
 
     if save:
         if isinstance(save, Path | str):
@@ -348,7 +347,7 @@ def batch_effect_correction(
             print("No batch effect correction applied.")
             return None
         case _:
-            ValueError("Invalid choice for batch effect correction method.")
+            raise ValueError("Invalid choice for batch effect correction method.")
 
     if save:
         if isinstance(save, Path | str):
@@ -414,7 +413,7 @@ def clustering(
             print("No clustering done. Exiting.")
             return None
         case _:
-            ValueError(f"Clustering method {method} not available.")
+            raise ValueError(f"Clustering method {method} not available.")
 
     if save:
         if isinstance(save, Path | str):
