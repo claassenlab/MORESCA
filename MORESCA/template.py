@@ -23,7 +23,6 @@ from analysis_steps import (
     scaling,
 )
 from anndata import AnnData
-from yaml.loader import SafeLoader
 
 
 def run_analysis(

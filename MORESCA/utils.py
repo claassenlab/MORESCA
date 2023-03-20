@@ -47,7 +47,7 @@ def remove_cells_by_pct_counts(
         return adata
 
 
-# Todo: Is this the best way to do it? Manipulating the list inplace feels liek a gotcha.
+# Todo: Is this the best way to do it? Manipulating the list inplace feels like a gotcha.
 def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
     match gene_key:
         case True:

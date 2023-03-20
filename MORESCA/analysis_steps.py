@@ -118,7 +118,7 @@ def quality_control(
         adata = adata[(~adata.obs.outlier)]
 
     match n_genes_by_counts:
-        case n_genes_by_counts if isinstance(n_genes_by_counts, float):
+        case n_genes_by_counts if isinstance(n_genes_by_counts, float | int):
             adata = adata[adata.obs.n_genes_by_counts < n_genes_by_counts, :]
         # Todo: Implement automatic selection of threshold.
         case "auto":

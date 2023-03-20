@@ -1,67 +1,53 @@
 from pathlib import Path
 
+import gin
 import pytest
 import scanpy as sc
-
-from MORESCA import analysis_steps
+from MORESCA.analysis_steps import (
+    feature_selection,
+    load_data,
+    normalization,
+    quality_control,
+    scaling,
+    pca,
+    batch_effect_correction,
+)
 
 PATH_H5AD = Path("../data/data_raw.h5ad")
 STR_H5AD = "../data/data_raw.h5ad"
 ADATA = sc.read(PATH_H5AD)
+ADATA.layers["counts"] = ADATA.X.copy()
+ADATA_BATCH = ADATA.copy()
+ADATA_BATCH.obs["batch"] = 1350 * ["a"] + 1350 * ["b"]
+
+gin.parse_config_file("test-config.gin")
 
 
-# Todo: Add cases for each supported format.
 @pytest.mark.parametrize("test_data_path", [(PATH_H5AD), (STR_H5AD)])
 def test_load_data(test_data_path):
-    assert analysis_steps.load_data(test_data_path)
+    assert load_data(test_data_path)
 
 
-@pytest.mark.parametrize(
-    """adata,
-    doublet_removal,
-    outlier_removal,
-    min_genes,
-    min_cells,
-    n_genes_by_counts,
-    mt_threshold,
-    rb_threshold,
-    hb_threshold,
-    remove_mt,
-    remove_rb,
-    remove_hb,
-    remove_custom_genes
-    """,
-    [
-        (
-            ADATA,
-            False,
-            False,
-            200,
-            10,
-            None,
-            False,
-            False,
-            False,
-            False,
-            False,
-            False,
-            False,
-        )
-    ],
-)
-def test_quality_control(
-    adata,
-    doublet_removal,
-    outlier_removal,
-    min_genes,
-    min_cells,
-    n_genes_by_counts,
-    mt_threshold,
-    rb_threshold,
-    hb_threshold,
-    remove_mt,
-    remove_rb,
-    remove_hb,
-    remove_custom_genes,
-):
-    assert analysis_steps.quality_control()
+def test_quality_control():
+    quality_control(adata=ADATA)
+
+
+def test_normalization():
+    normalization(adata=ADATA)
+
+
+def test_feature_selection():
+    feature_selection(adata=ADATA)
+
+
+def test_scaling():
+    scaling(adata=ADATA)
+
+
+def test_pca():
+    pca(adata=ADATA)
+
+
+def test_batch_effect_correction():
+    pca(ADATA_BATCH, use_highly_variable=False)
+    batch_effect_correction(adata=ADATA_BATCH)
