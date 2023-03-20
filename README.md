@@ -145,7 +145,7 @@ The following values of the parameters are currently possible
 After deciding for a suitable pipeline and specific parameters, you can create a Python file which reflects the exact step in a minimal fashion. 
 
 
-### Contributing
+## Contributing
 
 For contribution purposes, you should install MORESCA in dev mode:
 

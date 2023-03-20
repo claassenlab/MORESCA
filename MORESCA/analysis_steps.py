@@ -96,9 +96,9 @@ def quality_control(
     adata.obs["log_counts"] = np.log(adata.obs["n_counts"])
     adata.obs["n_genes"] = (adata.X > 0).sum(1)
 
-    adata.var["mt"] = adata.var_names.str.startswith("MT-")
-    adata.var["rb"] = adata.var_names.str.contains(("^RP[SL]"))
-    adata.var["hb"] = adata.var_names.str.contains(("^HB[^(P)]"))
+    adata.var["mt"] = adata.var_names.str.startswith("(?i)MT-")
+    adata.var["rb"] = adata.var_names.str.contains(("(?i)^RP[SL]"))
+    adata.var["hb"] = adata.var_names.str.contains(("(?i)^HB[^(P)]"))
 
     sc.pp.calculate_qc_metrics(
         adata,
