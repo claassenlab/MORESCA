@@ -1,6 +1,7 @@
 
 
 
+
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -48,9 +49,9 @@ By default, ```template.py``` expects the data in ```H5AD``` format to be in ```
 
 Currently, the script will perform the most common operations from doublet removal to DEG analysis of found clusters. If you want to apply ambient RNA correction beforehand, you need to run this separately.
 
-The following example executes the template with the h5ad file example_data.h5ad, the parameter file example_param.yml and enables both print-statements and figures.
+The following example executes the template with the h5ad file example_data.h5ad, the parameter file config.gin and enables both print-statements and figures.
 
-```python template.py -d example_data.h5ad -p example_param.yml -v -f```
+```python template.py -d example_data.h5ad -p config.gin -v -f```
 
 
 ### Using the config.gin
@@ -94,7 +95,7 @@ clustering:
     method = "leiden"
     resolution = 1.0
 diff_gene_exp:
-    method = "wilcixon"
+    method = "wilcoxon"
     groupby = "leiden_r1.0"
     use_raw = True
     tables = False
@@ -142,3 +143,13 @@ The following values of the parameters are currently possible
 ### Code generator
 
 After deciding for a suitable pipeline and specific parameters, you can create a Python file which reflects the exact step in a minimal fashion. 
+
+
+### Contributing
+
+For contribution purposes, you should install MORESCA in dev mode:
+
+    pip install -e .[dev]
+
+This additionally install `flake8`, `Black` and `pylint`, which we use for formatting and code style control. Please run these before you commit new code.
+Note: This will be made mandatory by using pre-commit hooks.
