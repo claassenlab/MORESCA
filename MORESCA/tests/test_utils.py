@@ -3,7 +3,8 @@ import scanpy as sc
 
 from MORESCA.utils import remove_cells_by_pct_counts, remove_genes
 
-example_data = sc.read("../data/data_raw.h5ad")
+
+example_data = adata = sc.datasets.pbmc3k()
 example_data.var["mt"] = example_data.var_names.str.contains("(?i)^MT-")
 example_data.var["rb"] = example_data.var_names.str.contains(("(?i)^RP[SL]"))
 example_data.var["hb"] = example_data.var_names.str.contains(("(?i)^HB[^(P)]"))

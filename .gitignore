@@ -144,6 +144,8 @@ figures/
 
 .idea/
 
+*.h5ad
+
 MORESCA/generated_code.py
 MORESCA/results/
 MORESCA/data/
