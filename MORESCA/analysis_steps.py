@@ -2,6 +2,7 @@ import warnings
 from pathlib import Path
 from typing import Optional, Union
 
+import doubletdetection
 import gin
 import numpy as np
 import pandas as pd
@@ -250,7 +251,9 @@ def feature_selection(
             print("No feature selection applied.")
             return None
         case _:
-            raise ValueError(f"Selected feature selection method {method} not available.")
+            raise ValueError(
+                f"Selected feature selection method {method} not available."
+            )
 
     if save:
         if isinstance(save, Path | str):

@@ -3,14 +3,15 @@ from pathlib import Path
 import gin
 import pytest
 import scanpy as sc
+
 from MORESCA.analysis_steps import (
+    batch_effect_correction,
     feature_selection,
     load_data,
     normalization,
+    pca,
     quality_control,
     scaling,
-    pca,
-    batch_effect_correction,
 )
 
 PATH_H5AD = Path("../data/data_raw.h5ad")

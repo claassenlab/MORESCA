@@ -1,8 +1,8 @@
+import sys
 from pathlib import Path
 from typing import Optional, Union
 
 from anndata import AnnData
-import sys
 
 
 def remove_cells_by_pct_counts(

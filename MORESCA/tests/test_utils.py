@@ -1,5 +1,6 @@
 import pytest
 import scanpy as sc
+
 from MORESCA.utils import remove_cells_by_pct_counts, remove_genes
 
 example_data = sc.read("../data/data_raw.h5ad")
