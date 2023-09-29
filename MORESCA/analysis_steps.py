@@ -99,7 +99,7 @@ def quality_control(
 
     adata.var["mt"] = adata.var_names.str.contains("(?i)^MT-")
     adata.var["rb"] = adata.var_names.str.contains(("(?i)^RP[SL]"))
-    adata.var["hb"] = adata.var_names.str.contains(("(?i)^HB[^(P)]"))
+    adata.var["hb"] = adata.var_names.str.contains(("(?i)^HB(?!EGF|S1L|P1).+"))
 
     sc.pp.calculate_qc_metrics(
         adata,
