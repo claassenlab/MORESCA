@@ -189,11 +189,7 @@ adata.var['highly_variable'] = anti_cor_table.selected.copy()"""
                 f"Selected feature selection method {feature_method} not available."
             )
 
-    scale_str = ""
-
-    if qc_dict["scale"]:
-        scale_str = "sc.pp.scale(adata)"
-
+    scale_str = "sc.pp.scale(adata)" if qc_dict["scale"] else ""
     batch_dict = param_dict["BatchEffectCorrection"]
 
     batch_correct_str = ""

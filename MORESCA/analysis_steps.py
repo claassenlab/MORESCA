@@ -15,7 +15,6 @@ from MORESCA.utils import remove_cells_by_pct_counts, remove_genes
 
 try:
     from anticor_features.anticor_features import get_anti_cor_genes
-
     anti_cor_import_error = False
 except ImportError:
     anti_cor_import_error = True
@@ -98,8 +97,8 @@ def quality_control(
     adata.obs["n_genes"] = (adata.X > 0).sum(1)
 
     adata.var["mt"] = adata.var_names.str.contains("(?i)^MT-")
-    adata.var["rb"] = adata.var_names.str.contains(("(?i)^RP[SL]"))
-    adata.var["hb"] = adata.var_names.str.contains(("(?i)^HB(?!EGF|S1L|P1).+"))
+    adata.var["rb"] = adata.var_names.str.contains("(?i)^RP[SL]")
+    adata.var["hb"] = adata.var_names.str.contains("(?i)^HB(?!EGF|S1L|P1).+")
 
     sc.pp.calculate_qc_metrics(
         adata,
@@ -137,7 +136,7 @@ def quality_control(
     sc.pp.filter_genes(adata, min_cells=min_cells)
 
     mt_genes = adata.var_names.str.contains("(?i)^MT-")
-    rb_genes = adata.var_names.str.contains(("(?i)^RP[SL]"))
+    rb_genes = adata.var_names.str.contains("(?i)^RP[SL]")
     hb_genes = adata.var_names.str.contains("(?i)^HB[^(P)]")
 
     gene_stack_lst = []

@@ -35,13 +35,8 @@ def remove_cells_by_pct_counts(
         case _:
             raise ValueError("Error.")
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            # Todo: Revisit this.
-            pass
-
+    if save and isinstance(save, Path | str):
+        adata.write(save)
     if not inplace:
         return adata
 
