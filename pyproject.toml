@@ -50,42 +50,60 @@ dev = [
     "pytest"
 ]
 
-[tool.black]
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Same as Black.
 line-length = 88
-target-version = ["py310", "py311"]
-include = '\.pyi?$'
+indent-width = 4
 
-[tool.pylint.format]
-max-line-length = 88
+# Assume Python 3.8
+target-version = "py310"
 
-[tool.pylint.MASTER]
-# Specify a score threshold to be exceeded before program exits with error.
-fail-under = "7.0"
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
 
-# Add files or directories to the blacklist. They should be base names, not
-# paths.
-ignore = ".git"
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
 
-# Add files or directories matching the regex patterns to the blacklist. The
-# regex matches against base names, not paths.
-ignore-patterns = ""
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-# Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
-# number of processors available to use.
-jobs = 0
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
 
-# When enabled, pylint would attempt to guess common misconfiguration and emit
-# user-friendly hints instead of false-positive error messages.
-suggestion-mode = "yes"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
 
-# Allow loading of arbitrary C extensions. Extensions are imported into the
-# active Python interpreter and may run arbitrary code.
-unsafe-load-any-extension = "no"
+# Like Black, respect magic trailing commas.
+magic-trailing-comma = "respect"
 
-
-[tool.pylint."MESSAGES CONTROL"]
-
-# Only show warnings with the listed confidence levels. Leave empty to show
-# all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED.
-confidence = ""
-disable = "fixme, missing-module-docstring, missing-function-docstring"
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
