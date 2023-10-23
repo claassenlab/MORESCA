@@ -1,15 +1,7 @@
 import argparse
-import sys
-import warnings
 from pathlib import Path
 
-import doubletdetection
 import gin
-import numpy as np
-import pandas as pd
-import scanpy as sc
-import scanpy.external as sce
-import scipy.stats as ss
 from analysis_steps import (
     batch_effect_correction,
     clustering,
@@ -22,7 +14,6 @@ from analysis_steps import (
     quality_control,
     scaling,
 )
-from anndata import AnnData
 
 
 def run_analysis(

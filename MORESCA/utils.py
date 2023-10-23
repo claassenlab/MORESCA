@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from typing import Optional, Union
 
@@ -55,4 +54,4 @@ def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
         case False | None:
             pass
         case _:
-            raise ValueError(f"Invalid choice for gene_key.")
+            raise ValueError("Invalid choice for gene_key.")
