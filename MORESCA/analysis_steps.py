@@ -15,6 +15,7 @@ from MORESCA.utils import remove_cells_by_pct_counts, remove_genes
 
 try:
     from anticor_features.anticor_features import get_anti_cor_genes
+
     anti_cor_import_error = False
 except ImportError:
     anti_cor_import_error = True
@@ -101,11 +102,7 @@ def quality_control(
     adata.var["hb"] = adata.var_names.str.contains("(?i)^HB(?!EGF|S1L|P1).+")
 
     sc.pp.calculate_qc_metrics(
-        adata,
-        qc_vars=["mt", "rb", "hb"],
-        percent_top=[20],
-        log1p=True,
-        inplace=True,
+        adata, qc_vars=["mt", "rb", "hb"], percent_top=[20], log1p=True, inplace=True
     )
 
     if outlier_removal:
@@ -374,11 +371,7 @@ def neighborhood_graph(
 
     # Make this depending on integration choice.
     sc.pp.neighbors(
-        adata,
-        n_neighbors=n_neighbors,
-        n_pcs=n_pcs,
-        use_rep="X_pca",
-        random_state=0,
+        adata, n_neighbors=n_neighbors, n_pcs=n_pcs, use_rep="X_pca", random_state=0
     )
 
     if save:

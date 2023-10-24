@@ -66,10 +66,7 @@ if __name__ == "__main__":
         help="Path to the config.gin.",
     )
     parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Set verbosity level.",
+        "-v", "--verbose", action="store_true", help="Set verbosity level."
     )
     parser.add_argument(
         "-f",
