@@ -144,8 +144,6 @@ def normalization(
     remove_mt: Optional[bool],
     remove_rb: Optional[bool],
     remove_hb: Optional[bool],
-    # Todo: Only for testing, this should be a list.
-    remove_custom_genes: Optional[bool],
     inplace: bool = True,
     save: bool = False
 ) -> Optional[AnnData]:
@@ -180,13 +178,6 @@ def normalization(
     remove_genes(gene_lst=mt_genes, rmv_lst=gene_stack_lst, gene_key=remove_mt)
     remove_genes(gene_lst=rb_genes, rmv_lst=gene_stack_lst, gene_key=remove_rb)
     remove_genes(gene_lst=hb_genes, rmv_lst=gene_stack_lst, gene_key=remove_hb)
-
-    if (remove_custom_genes is not None) or remove_custom_genes:
-        warnings.warn(
-            "Removing custom genes is not implemented yet.\
-            Continue without doing this.",
-            category=RuntimeWarning,
-        )
 
     # Add zero array in case all three selection are not selected.
     gene_stack_lst.append(np.zeros_like(a=adata.var_names))

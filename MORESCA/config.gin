@@ -13,7 +13,6 @@ normalization:
     remove_mt = False
     remove_rb = False
     remove_hb = False
-    remove_custom_genes = None
 
 feature_selection:
     method = "seurat"
