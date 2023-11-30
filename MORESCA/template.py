@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 
 import gin
-from analysis_steps import (
+from MORESCA.analysis_steps import (
     batch_effect_correction,
     clustering,
     diff_gene_exp,
@@ -17,19 +17,18 @@ from analysis_steps import (
 
 
 def run_analysis(
-    data_path: Path, config_path: Path, figures: bool, verbose: bool
+    data_path: Path, config_path: Path, figures: bool, verbose: bool, result_path: Path = Path("results")
 ) -> None:
     FIGURE_PATH = Path("figures")
     FIGURE_PATH_PRE = Path(FIGURE_PATH, "preQC")
     FIGURE_PATH_POST = Path(FIGURE_PATH, "postQC")
-    RESULT_PATH = Path("results")
 
     FIGURE_PATH.mkdir(exist_ok=True)
-    RESULT_PATH.mkdir(exist_ok=True)
     FIGURE_PATH_PRE.mkdir(exist_ok=True)
     FIGURE_PATH_POST.mkdir(exist_ok=True)
+    result_path.mkdir(exist_ok=True)
 
-    gin.parse_config_file("config.gin")
+    gin.parse_config_file(config_path)
 
     adata = load_data(data_path)
     adata.layers["counts"] = adata.X.copy()
@@ -45,7 +44,7 @@ def run_analysis(
     clustering(adata=adata)
     diff_gene_exp(adata=adata)
 
-    # adata.write(Path(RESULT_PATH, "adata_processed.h5ad"))
+    adata.write(Path(result_path, "data_processed.h5ad"))
 
 
 if __name__ == "__main__":
@@ -59,10 +58,18 @@ if __name__ == "__main__":
         help="Path to the data.",
     )
     parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        nargs="+",
+        default=Path("results"),
+        help="Path to the processed output data."
+    )
+    parser.add_argument(
         "-p",
         "--parameters",
         type=Path,
-        default=Path("parameters.yml"),
+        default=Path("config.gin"),
         help="Path to the config.gin.",
     )
     parser.add_argument(
@@ -79,6 +86,7 @@ if __name__ == "__main__":
 
     run_analysis(
         data_path=args.data,
+        result_path=args.output,
         config_path=args.parameters,
         figures=args.figures,
         verbose=args.verbose,
