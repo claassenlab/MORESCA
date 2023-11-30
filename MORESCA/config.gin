@@ -42,7 +42,7 @@ clustering:
     resolution = 1.0
 
 diff_gene_exp:
-    method = "wilcixon"
+    method = "wilcoxon"
     groupby = "leiden_r1.0"
     use_raw = True
-    tables = Falsee
+    tables = False
