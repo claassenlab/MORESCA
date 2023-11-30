@@ -40,7 +40,8 @@ dependencies = [
     "loompy==3.0.7",
     "leidenalg==0.9.1",
     "igraph==0.10.4",
-    "scikit-misc==0.1.4"
+    "scikit-misc==0.1.4",
+    "pynndescent>=0.5.10"
 ]
 
 [project.optional-dependencies]
