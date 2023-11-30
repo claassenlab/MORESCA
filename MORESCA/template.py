@@ -31,12 +31,12 @@ def run_analysis(
     gin.parse_config_file(config_path)
 
     adata = load_data(data_path)
+    adata.raw = adata.copy()
     adata.layers["counts"] = adata.X.copy()
     quality_control(adata=adata)
     normalization(adata=adata)
     feature_selection(adata=adata)
     adata.layers["unscaled"] = adata.X.copy()
-    adata.raw = adata.copy()
     scaling(adata=adata)
     pca(adata)
     batch_effect_correction(adata=adata)

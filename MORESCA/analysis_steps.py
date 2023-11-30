@@ -64,7 +64,6 @@ def quality_control(
     rb_threshold: Optional[Union[int, float, str, bool]],
     hb_threshold: Optional[Union[int, float, str, bool]],
     inplace: bool = True,
-    save: Union[Path, str, bool] = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -127,12 +126,6 @@ def quality_control(
     sc.pp.filter_cells(adata, min_genes=min_genes)
     sc.pp.filter_genes(adata, min_cells=min_cells)
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/post_qc.h5ad")
-
     if not inplace:
         return adata
 
@@ -145,7 +138,6 @@ def normalization(
     remove_rb: Optional[bool],
     remove_hb: Optional[bool],
     inplace: bool = True,
-    save: bool = False
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -185,12 +177,6 @@ def normalization(
     keep = np.invert(remove)
     adata = adata[:, keep]
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/normalized.h5ad")
-
     if not inplace:
         return adata
 
@@ -201,7 +187,6 @@ def feature_selection(
     method: str,
     number_features=None,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -245,13 +230,6 @@ def feature_selection(
                 f"Selected feature selection method {method} not available."
             )
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            # Todo: Do we have to save here?
-            adata.write("results/feature_selection.h5ad")
-
     if not inplace:
         return adata
 
@@ -264,7 +242,6 @@ def scaling(
     apply: bool,
     max_value: Optional[Union[int, float]],
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -273,13 +250,6 @@ def scaling(
         return None
 
     sc.pp.scale(adata, max_value=max_value)
-
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            # Todo: Do we have to save here?
-            adata.write("results/scaled.h5ad")
 
     if not inplace:
         return adata
@@ -292,7 +262,6 @@ def pca(
     n_comps: int = 50,
     use_highly_variable: int = True,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -300,13 +269,6 @@ def pca(
     if not apply:
         return None
     sc.pp.pca(adata, n_comps=n_comps, use_highly_variable=use_highly_variable)
-
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            # Todo: Do we have to save here?
-            adata.write("results/pca.h5ad")
 
     if not inplace:
         return adata
@@ -318,7 +280,6 @@ def batch_effect_correction(
     method: str,
     batch_key: str,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if batch_key is None:
         return None
@@ -342,12 +303,6 @@ def batch_effect_correction(
         case _:
             raise ValueError("Invalid choice for batch effect correction method.")
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/batch_corrected.h5ad")
-
     if not inplace:
         return adata
 
@@ -359,7 +314,6 @@ def neighborhood_graph(
     n_pcs: int,
     metric: str = "cosine",
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -374,12 +328,6 @@ def neighborhood_graph(
         random_state=0
     )
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/neighborhood_graph.h5ad")
-
     if not inplace:
         return adata
 
@@ -390,7 +338,6 @@ def clustering(
     method: str,
     resolution=None,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -410,12 +357,6 @@ def clustering(
         case _:
             raise ValueError(f"Clustering method {method} not available.")
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/clustered.h5ad")
-
     if not inplace:
         return adata
 
@@ -428,7 +369,6 @@ def diff_gene_exp(
     use_raw: bool = True,
     tables: bool = True,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -474,12 +414,6 @@ def diff_gene_exp(
             case False | None:
                 print("No DGE performed.")
                 return None
-
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/DGE.h5ad")
 
     if not inplace:
         return adata
