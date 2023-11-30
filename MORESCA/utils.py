@@ -68,15 +68,11 @@ def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
             raise ValueError("Invalid choice for gene_key.")
 
 
-def ddqc(
-    adata: AnnData,
-    genes: str,
-    threshold: Optional[Union[int, float, str, bool]],
-    inplace: bool = True,
-    save: bool = False,
-) -> Optional[AnnData]:
+def ddqc(adata: AnnData, inplace: bool = True, save: bool = False) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    adata_raw = adata.copy()
 
     adata_raw = adata.copy()
     sc.pp.calculate_qc_metrics(
@@ -127,7 +123,7 @@ def ddqc(
         passed[indices] = full_passing_mask
 
     # Subselect 'adata' based on the 'passed' mask
-    adata = adata[passed].copy()
+    adata = adata_raw[passed].copy()
 
     if not inplace:
         return adata
