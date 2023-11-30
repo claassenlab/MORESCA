@@ -363,6 +363,7 @@ def neighborhood_graph(
     adata: AnnData,
     n_neighbors: int,
     n_pcs: int,
+    metric: str = "cosine",
     inplace: bool = True,
     save: bool = False,
 ) -> Optional[AnnData]:
@@ -371,7 +372,12 @@ def neighborhood_graph(
 
     # Make this depending on integration choice.
     sc.pp.neighbors(
-        adata, n_neighbors=n_neighbors, n_pcs=n_pcs, use_rep="X_pca", random_state=0
+        adata,
+        n_neighbors=n_neighbors,
+        n_pcs=n_pcs,
+        use_rep="X_pca",
+        metric=metric,
+        random_state=0
     )
 
     if save:
