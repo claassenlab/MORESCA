@@ -63,11 +63,6 @@ def quality_control(
     mt_threshold: Optional[Union[int, float, str, bool]],
     rb_threshold: Optional[Union[int, float, str, bool]],
     hb_threshold: Optional[Union[int, float, str, bool]],
-    remove_mt: Optional[bool],
-    remove_rb: Optional[bool],
-    remove_hb: Optional[bool],
-    # Todo: Only for testing, this should be a list.
-    remove_custom_genes: Optional[bool],
     inplace: bool = True,
     save: Union[Path, str, bool] = False,
 ) -> Optional[AnnData]:
@@ -132,29 +127,6 @@ def quality_control(
     sc.pp.filter_cells(adata, min_genes=min_genes)
     sc.pp.filter_genes(adata, min_cells=min_cells)
 
-    mt_genes = adata.var_names.str.contains("(?i)^MT-")
-    rb_genes = adata.var_names.str.contains("(?i)^RP[SL]")
-    hb_genes = adata.var_names.str.contains("(?i)^HB[^(P)]")
-
-    gene_stack_lst = []
-
-    remove_genes(gene_lst=mt_genes, rmv_lst=gene_stack_lst, gene_key=remove_mt)
-    remove_genes(gene_lst=rb_genes, rmv_lst=gene_stack_lst, gene_key=remove_rb)
-    remove_genes(gene_lst=hb_genes, rmv_lst=gene_stack_lst, gene_key=remove_hb)
-
-    if (remove_custom_genes is not None) or remove_custom_genes:
-        warnings.warn(
-            "Removing custom genes is not implemented yet.\
-            Continue without doing this.",
-            category=RuntimeWarning,
-        )
-
-    # Add zero array in case all three selection are not selected.
-    gene_stack_lst.append(np.zeros_like(a=adata.var_names))
-    remove = np.stack(gene_stack_lst).sum(axis=0).astype(bool)
-    keep = np.invert(remove)
-    adata = adata[:, keep]
-
     if save:
         if isinstance(save, Path | str):
             adata.write(save)
@@ -167,7 +139,13 @@ def quality_control(
 
 @gin.configurable
 def normalization(
-    adata: AnnData, method: str, inplace: bool = True, save: bool = False
+    adata: AnnData,
+    method: str,
+    remove_mt: Optional[bool],
+    remove_rb: Optional[bool],
+    remove_hb: Optional[bool],
+    inplace: bool = True,
+    save: bool = False
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -190,6 +168,22 @@ def normalization(
             return None
         case _:
             raise ValueError(f"Normalization method {method} not available.")
+
+    mt_genes = adata.var_names.str.contains("(?i)^MT-")
+    rb_genes = adata.var_names.str.contains("(?i)^RP[SL]")
+    hb_genes = adata.var_names.str.contains("(?i)^HB[^(P)]")
+
+    gene_stack_lst = []
+
+    remove_genes(gene_lst=mt_genes, rmv_lst=gene_stack_lst, gene_key=remove_mt)
+    remove_genes(gene_lst=rb_genes, rmv_lst=gene_stack_lst, gene_key=remove_rb)
+    remove_genes(gene_lst=hb_genes, rmv_lst=gene_stack_lst, gene_key=remove_hb)
+
+    # Add zero array in case all three selection are not selected.
+    gene_stack_lst.append(np.zeros_like(a=adata.var_names))
+    remove = np.stack(gene_stack_lst).sum(axis=0).astype(bool)
+    keep = np.invert(remove)
+    adata = adata[:, keep]
 
     if save:
         if isinstance(save, Path | str):

@@ -7,13 +7,12 @@ quality_control:
     mt_threshold = 50
     rb_threshold = 10
     hb_threshold = 2
-    remove_mt = True
-    remove_rb = True
-    remove_hb = True
-    remove_custom_genes = None
 
 normalization:
     method = "log1pCP10k"
+    remove_mt = True
+    remove_rb = True
+    remove_hb = True
 
 feature_selection:
     method = "seurat_v3"

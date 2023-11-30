@@ -7,13 +7,12 @@ quality_control:
     mt_threshold = 50
     rb_threshold = 10
     hb_threshold = 2
-    remove_mt = False
-    remove_rb = False
-    remove_hb = False
-    remove_custom_genes = None
 
 normalization:
     method = "PFlog1pPF"
+    remove_mt = False
+    remove_rb = False
+    remove_hb = False
 
 feature_selection:
     method = "seurat"
