@@ -35,6 +35,7 @@ batch_effect_correction:
 neighborhood_graph:
     n_neighbors = 15
     n_pcs = None
+    metric = "cosine"
 
 clustering:
     method = "leiden"
@@ -44,4 +45,4 @@ diff_gene_exp:
     method = "wilcixon"
     groupby = "leiden_r1.0"
     use_raw = True
-    tables = False
+    tables = Falsee
