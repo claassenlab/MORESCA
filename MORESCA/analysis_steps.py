@@ -397,13 +397,23 @@ def clustering(
 
     match method:
         case "leiden":
-            resolution = resolution
-            sc.tl.leiden(
-                adata=adata,
-                resolution=resolution,
-                key_added=f"leiden_r{resolution}",
-                random_state=0,
+            if not isinstance(resolution, (float, int, list, tuple)):
+                raise ValueError(
+                    f"Invalid type for resolution: {type(resolution)}."
+                )
+
+            resolutions = (
+                [resolution]
+                if isinstance(resolution, (float, int))
+                else resolution
             )
+            for res in resolutions:
+                sc.tl.leiden(
+                    adata=adata,
+                    resolution=res,
+                    key_added=f"leiden_r{res}",
+                    random_state=0,
+                )
         case False | None:
             print("No clustering done. Exiting.")
             return None
