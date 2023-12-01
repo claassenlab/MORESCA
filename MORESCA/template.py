@@ -13,6 +13,8 @@ from MORESCA.analysis_steps import (
     pca,
     quality_control,
     scaling,
+    umap,
+    plotting,
 )
 
 
@@ -23,13 +25,6 @@ def run_analysis(
     verbose: bool,
     result_path: Path = Path("results"),
 ) -> None:
-    FIGURE_PATH = Path("figures")
-    FIGURE_PATH_PRE = Path(FIGURE_PATH, "preQC")
-    FIGURE_PATH_POST = Path(FIGURE_PATH, "postQC")
-
-    FIGURE_PATH.mkdir(exist_ok=True)
-    FIGURE_PATH_PRE.mkdir(exist_ok=True)
-    FIGURE_PATH_POST.mkdir(exist_ok=True)
     result_path.mkdir(exist_ok=True)
 
     gin.parse_config_file(config_path)
@@ -47,6 +42,8 @@ def run_analysis(
     neighborhood_graph(adata=adata)
     clustering(adata=adata)
     diff_gene_exp(adata=adata)
+    umap(adata=adata)
+    plotting(adata=adata)
 
     adata.write(Path(result_path, "data_processed.h5ad"))
 

@@ -5,7 +5,7 @@ quality_control:
     min_genes = 200
     min_cells = 10
     n_genes_by_counts = None
-    mt_threshold = 50
+    mt_threshold = 10
     rb_threshold = 10
     hb_threshold = 2
 
@@ -54,8 +54,11 @@ diff_gene_exp:
     tables = False
 
 umap:
-    umap_based_on_pca = False
+    apply = True
 
 plotting:
+    apply = True
     umap = True
+    pre_qc = True
+    post_qc = True
     path = "figures/"
