@@ -15,12 +15,22 @@ def plot_qc_vars(adata: AnnData, pre_qc: bool, out_dir: Path) -> None:
         adata.var["mt"] = adata.var_names.str.contains("(?i)^MT-")
         adata.var["rb"] = adata.var_names.str.contains("(?i)^RP[SL]")
         adata.var["hb"] = adata.var_names.str.contains("(?i)^HB(?!EGF|S1L|P1).+")
-        sc.pp.calculate_qc_metrics(adata, qc_vars=["mt", "rb", "hb"], log1p=True, inplace=True)
+        sc.pp.calculate_qc_metrics(
+            adata, qc_vars=["mt", "rb", "hb"], log1p=True, inplace=True
+        )
 
     # Plot cell level QC metrics
-    qc_vars_cells = ["n_genes_by_counts", "total_counts", "pct_counts_mt", "pct_counts_rb", "pct_counts_hb"]
+    qc_vars_cells = [
+        "n_genes_by_counts",
+        "total_counts",
+        "pct_counts_mt",
+        "pct_counts_rb",
+        "pct_counts_hb",
+    ]
     fig, axs = plt.subplots(nrows=2, ncols=3, figsize=(9, 6))
-    sc.pl.scatter(adata, x="total_counts", y="n_genes_by_counts", ax=axs.flat[0], show=False)
+    sc.pl.scatter(
+        adata, x="total_counts", y="n_genes_by_counts", ax=axs.flat[0], show=False
+    )
     for qc_var, ax in zip(qc_vars_cells, axs.flat[1:]):
         sns.violinplot(adata.obs[qc_var], ax=ax)
         sns.stripplot(adata.obs[qc_var], jitter=0.4, s=1, color="black", ax=ax)

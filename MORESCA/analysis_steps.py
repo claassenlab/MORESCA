@@ -750,15 +750,21 @@ def diff_gene_exp(
 
 @gin.configurable
 def umap(
-        adata: AnnData,
-        apply: bool,
-        inplace: bool = True,
+    adata: AnnData,
+    apply: bool,
+    inplace: bool = True,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=plotting.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=plotting.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
@@ -771,20 +777,26 @@ def umap(
 
 @gin.configurable
 def plotting(
-        adata: AnnData,
-        apply: bool,
-        umap: bool,
-        pre_qc: bool,
-        post_qc: bool,
-        path: Path,
-        inplace: bool = True,
+    adata: AnnData,
+    apply: bool,
+    umap: bool,
+    pre_qc: bool,
+    post_qc: bool,
+    path: Path,
+    inplace: bool = True,
 ) -> Optional[AnnData]:
     # TODO: Check before merging if we changed adata
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=plotting.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=plotting.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
