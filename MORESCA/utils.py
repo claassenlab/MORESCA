@@ -88,7 +88,10 @@ def remove_cells_by_pct_counts(
             else:
                 adata = adata[adata.obs[f"pct_counts_{genes}"] < threshold, :]
         case "auto":
-            raise ValueError(f"Auto selection for {genes}_threshold not implemented.")
+            if genes == "hb":
+                adata = ddqc(adata, inplace=False)
+            else:
+                raise ValueError(f"Auto selection for {genes}_threshold not implemented.")
         case False | None:
             print(f"No {genes} filter applied.")
         case _:
@@ -126,7 +129,7 @@ def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
             raise ValueError("Invalid choice for gene_key.")
 
 
-def ddqc(adata: AnnData, inplace: bool = True, save: bool = False) -> Optional[AnnData]:
+def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
     """
     Perform Data-Driven Quality Control (DDQC) on an AnnData object.
 
@@ -148,6 +151,8 @@ def ddqc(adata: AnnData, inplace: bool = True, save: bool = False) -> Optional[A
     if not inplace:
         adata = adata.copy()
 
+    adata_raw = adata.copy()
+
     sc.pp.calculate_qc_metrics(
         adata, qc_vars=["mt"], percent_top=None, log1p=False, inplace=True
     )
@@ -161,7 +166,7 @@ def ddqc(adata: AnnData, inplace: bool = True, save: bool = False) -> Optional[A
     sc.pp.scale(adata)
     sc.tl.pca(adata)
     sc.pp.neighbors(adata, n_neighbors=20, n_pcs=50, metric="euclidean")
-    sc.tl.leiden(adata, resolution=1.0)
+    sc.tl.leiden(adata, resolution=1.4)
 
     # Directly apply the quality control checks and create the 'passed' mask
     passed = np.ones(adata.n_obs, dtype=bool)
@@ -179,7 +184,7 @@ def ddqc(adata: AnnData, inplace: bool = True, save: bool = False) -> Optional[A
 
         passed[indices] = passing_mask_mt & passing_mask_counts & passing_mask_genes
 
-    adata = adata[passed].copy()
+    adata = adata_raw[passed].copy()
 
     if not inplace:
         return adata
