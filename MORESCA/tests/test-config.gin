@@ -5,7 +5,7 @@ quality_control:
     min_genes = 200
     min_cells = 10
     n_genes_by_counts = 8000
-    mt_threshold = "auto"
+    mt_threshold = 15
     rb_threshold = 10
     hb_threshold = 2
 
@@ -49,7 +49,9 @@ diff_gene_exp:
     apply = True
     method = "wilcoxon"
     groupby = "leiden_r1.0"
-    use_raw = True
+    use_raw = False
+    layer = "counts"
+    corr_method = "benjamini-hochberg"
     tables = False
 
 umap:
