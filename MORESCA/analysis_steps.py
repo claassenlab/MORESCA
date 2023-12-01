@@ -742,3 +742,39 @@ def diff_gene_exp(
 
     if not inplace:
         return adata
+
+    @gin.configurable
+    def umap(
+            adata: AnnData,
+            inplace: bool = True,
+    ) -> Optional[AnnData]:
+        if not inplace:
+            adata = adata.copy()
+
+        store_config_params(adata=adata, analysis_step=plotting.__name__, apply=apply,
+                            params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+        sc.tl.umap(adata=adata)
+
+        if not inplace:
+            return adata
+
+    @gin.configurable
+    def plotting(
+            adata: AnnData,
+            umap: bool,
+            path: Path,
+            inplace: bool = True,
+    ) -> Optional[AnnData]:
+        # TODO: Check before merging if we changed adata
+        if not inplace:
+            adata = adata.copy()
+
+        store_config_params(adata=adata, analysis_step=plotting.__name__, apply=apply,
+                            params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+        if umap:
+            sc.pl.umap(adata=adata)
+
+        if not inplace:
+            return adata
