@@ -11,7 +11,7 @@ import scanpy.external as sce
 import scipy.stats as ss
 from anndata import AnnData
 
-from MORESCA.utils import remove_cells_by_pct_counts, remove_genes
+from MORESCA.utils import remove_cells_by_pct_counts, remove_genes, store_config_params
 
 try:
     from anticor_features.anticor_features import get_anti_cor_genes
@@ -55,6 +55,7 @@ def load_data(data_path) -> AnnData:
 @gin.configurable
 def quality_control(
     adata: AnnData,
+    apply: bool,
     doublet_removal: bool,
     outlier_removal: bool,
     min_genes: int,
@@ -67,6 +68,12 @@ def quality_control(
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=quality_control.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     # Todo: This should be aware of the batch key.
     if doublet_removal:
@@ -133,6 +140,7 @@ def quality_control(
 @gin.configurable
 def normalization(
     adata: AnnData,
+    apply: bool,
     method: str,
     remove_mt: Optional[bool],
     remove_rb: Optional[bool],
@@ -141,6 +149,12 @@ def normalization(
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=normalization.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     match method:
         case "log1pCP10k":
@@ -184,12 +198,19 @@ def normalization(
 @gin.configurable
 def feature_selection(
     adata: AnnData,
+    apply: bool,
     method: str,
     number_features=None,
     inplace: bool = True,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=feature_selection.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     match method:
         case "seurat":
@@ -246,6 +267,9 @@ def scaling(
     if not inplace:
         adata = adata.copy()
 
+    store_config_params(adata=adata, analysis_step=scaling.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
     if not apply:
         return None
 
@@ -266,6 +290,9 @@ def pca(
     if not inplace:
         adata = adata.copy()
 
+    store_config_params(adata=adata, analysis_step=pca.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
     if not apply:
         return None
     sc.pp.pca(adata, n_comps=n_comps, use_highly_variable=use_highly_variable)
@@ -277,6 +304,7 @@ def pca(
 @gin.configurable
 def batch_effect_correction(
     adata: AnnData,
+    apply: bool,
     method: str,
     batch_key: str,
     inplace: bool = True,
@@ -286,6 +314,12 @@ def batch_effect_correction(
 
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=batch_effect_correction.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     match method:
         case "harmony":
@@ -310,6 +344,7 @@ def batch_effect_correction(
 @gin.configurable
 def neighborhood_graph(
     adata: AnnData,
+    apply: bool,
     n_neighbors: int,
     n_pcs: int,
     metric: str = "cosine",
@@ -317,6 +352,12 @@ def neighborhood_graph(
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=neighborhood_graph.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     # Make this depending on integration choice.
     sc.pp.neighbors(
@@ -335,12 +376,19 @@ def neighborhood_graph(
 @gin.configurable
 def clustering(
     adata: AnnData,
+    apply: bool,
     method: str,
     resolution=None,
     inplace: bool = True,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=clustering.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     match method:
         case "leiden":
@@ -364,6 +412,7 @@ def clustering(
 @gin.configurable
 def diff_gene_exp(
     adata: AnnData,
+    apply: bool,
     method: str,
     groupby: str,
     use_raw: bool = True,
@@ -372,6 +421,12 @@ def diff_gene_exp(
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=diff_gene_exp.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     with warnings.catch_warnings():
         warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
