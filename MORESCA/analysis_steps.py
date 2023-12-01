@@ -658,6 +658,8 @@ def diff_gene_exp(
     method: str,
     groupby: str,
     use_raw: bool = True,
+    layer: str = "counts",
+    corr_method: str = "benjamini-hochberg",
     tables: bool = True,
     inplace: bool = True,
 ) -> Optional[AnnData]:
@@ -674,6 +676,8 @@ def diff_gene_exp(
             - "t-test_overestim_var": Use the t-test with overestimated variance.
         groupby: The key in `adata.obs` that identifies the groups for comparison.
         use_raw: Whether to use the raw gene expression data or not.
+        layer: The layer in `adata.layers` to use for the differential gene expression analysis.
+        corr_method: The method to use for multiple testing correction.
         tables: Whether to generate result tables or not.
         inplace: Whether to perform the differential gene expression analysis in-place or return a modified copy of the AnnData object.
 
