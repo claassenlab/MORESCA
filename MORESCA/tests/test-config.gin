@@ -43,7 +43,7 @@ neighborhood_graph:
 clustering:
     apply = True
     method = "leiden"
-    resolution = 1.0
+    resolution = (0.2, 1.0)
 
 diff_gene_exp:
     apply = True
