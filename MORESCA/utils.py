@@ -88,7 +88,7 @@ def remove_cells_by_pct_counts(
             else:
                 adata = adata[adata.obs[f"pct_counts_{genes}"] < threshold, :]
         case "auto":
-            if genes == "hb":
+            if genes == "mt":
                 adata = ddqc(adata, inplace=False)
             else:
                 raise ValueError(f"Auto selection for {genes}_threshold not implemented.")
@@ -157,6 +157,8 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
         adata, qc_vars=["mt"], percent_top=None, log1p=False, inplace=True
     )
     adata = adata[adata.obs.pct_counts_mt <= 80, :]
+
+    # Todo: can this be removed?
     adata.layers["counts"] = adata.X.copy()
     sc.pp.normalize_total(adata, target_sum=1e4)
     sc.pp.log1p(adata)
