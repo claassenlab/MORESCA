@@ -34,7 +34,6 @@ def run_analysis(
     adata.raw = adata.copy()
     adata.layers["counts"] = adata.X.copy()
     quality_control(adata=adata)
-
     normalization(adata=adata)
     feature_selection(adata=adata)
     adata.layers["unscaled"] = adata.X.copy()
