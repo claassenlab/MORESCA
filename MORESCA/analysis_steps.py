@@ -754,8 +754,8 @@ def diff_gene_exp(
 def umap(
     adata: AnnData,
     apply: bool,
+    pca_before_umap: bool,
     inplace: bool = True,
-    pca_before_umap : bool,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
@@ -774,7 +774,7 @@ def umap(
 
     if not pca_before_umap:
         # Compute neighbors on original data without PCA (n_pcs=0 uses .X instead of .X_pca)
-        neighbors_key ="neighbors_without_pca"
+        neighbors_key = "neighbors_without_pca"
         sc.pp.neighbors(adata, n_pcs=0, key_added=neighbors_key)
     sc.tl.umap(adata=adata, neighbors_key=neighbors_key)
 
