@@ -571,7 +571,9 @@ def neighborhood_graph(
         adata,
         n_neighbors=n_neighbors,
         n_pcs=n_pcs,
-        use_rep="X_pca_corrected" if "X_pca_corrected" in adata.obsm_keys() else "X_pca",
+        use_rep="X_pca_corrected"
+        if "X_pca_corrected" in adata.obsm_keys()
+        else "X_pca",
         metric=metric,
         random_state=0,
     )
