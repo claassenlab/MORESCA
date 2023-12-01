@@ -213,8 +213,8 @@ def normalization(
         apply: Whether to apply the normalization steps or not.
         method: The normalization method to use. Available options are:
             - "log1pCP10k": Normalize total counts to 10,000 and apply log1p transformation.
-            - "log1PF": Apply log1p transformation without normalizing total counts.
-            - "PFlog1pPF": Normalize total counts, apply log1p transformation, and normalize total counts again.
+            - "log1PF": Normalize counts per cell to median of total counts and apply log1p transformation.
+            - "PFlog1pPF": Normalize counts per cell to median of total counts, apply log1p transformation, and normalize again using the median of total counts.
             - "analytical_pearson": Normalize using analytical Pearson residuals.
         remove_mt: Whether to remove mitochondrial genes or not.
         remove_rb: Whether to remove ribosomal genes or not.
