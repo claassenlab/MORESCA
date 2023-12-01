@@ -26,6 +26,8 @@ except ImportError:
         install it using 'pip install anticor-features'"
     )
 
+neighbors_key = None
+
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
     """
@@ -752,6 +754,7 @@ def diff_gene_exp(
 def umap(
         adata: AnnData,
         apply: bool,
+        pca_before_umap : bool,
         inplace: bool = True,
 ) -> Optional[AnnData]:
     if not inplace:
@@ -763,7 +766,11 @@ def umap(
     if not apply:
         return None
 
-    sc.tl.umap(adata=adata)
+    if not pca_before_umap:
+        # Compute neighbors on original data without PCA (n_pcs=0 uses .X instead of .X_pca)
+        neighbors_key ="neighbors_without_pca"
+        sc.pp.neighbors(adata, n_pcs=0, key_added=neighbors_key)
+    sc.tl.umap(adata=adata, neighbors_key=neighbors_key)
 
     if not inplace:
         return adata
@@ -793,7 +800,7 @@ def plotting(
     path.mkdir(exist_ok=True)
 
     if umap:
-        sc.pl.umap(adata=adata, show=False)
+        sc.pl.umap(adata=adata, show=False, neighbors_key=neighbors_key)
         plt.savefig(Path(path, "umap.png"))
         plt.close()
 
