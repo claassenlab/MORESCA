@@ -28,8 +28,6 @@ def plot_qc_vars(adata: AnnData, pre_qc: bool, out_dir: Path) -> None:
     fig.savefig(Path(out_dir, f"qc_vars_cells_{'pre' if pre_qc else 'post'}_qc.png"))
     plt.close()
 
-    print(adata.var.columns)
-
     # Plot gene level QC metrics
     qc_vars_genes = ["n_cells_by_counts", "pct_dropout_by_counts"]
     fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(6, 3))
