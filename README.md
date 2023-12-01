@@ -151,7 +151,7 @@ After deciding for a suitable pipeline and specific parameters, you can create a
 
 For contribution purposes, you should install MORESCA in dev mode:
 
-    pip install -e .[dev]
+    pip install -e ".[dev]"
 
 This additionally install `flake8`, `Black` and `pylint`, which we use for formatting and code style control. Please run these before you commit new code.
 Note: This will be made mandatory by using pre-commit hooks.
