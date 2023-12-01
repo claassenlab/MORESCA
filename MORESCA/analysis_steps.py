@@ -4,6 +4,7 @@ from typing import Optional, Union
 
 import doubletdetection
 import gin
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -12,6 +13,7 @@ import scipy.stats as ss
 from anndata import AnnData
 
 from MORESCA.utils import remove_cells_by_pct_counts, remove_genes, store_config_params
+from MORESCA.plotting import plot_qc_vars
 
 try:
     from anticor_features.anticor_features import get_anti_cor_genes
@@ -743,38 +745,61 @@ def diff_gene_exp(
     if not inplace:
         return adata
 
-    @gin.configurable
-    def umap(
-            adata: AnnData,
-            inplace: bool = True,
-    ) -> Optional[AnnData]:
-        if not inplace:
-            adata = adata.copy()
 
-        store_config_params(adata=adata, analysis_step=plotting.__name__, apply=apply,
-                            params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+@gin.configurable
+def umap(
+        adata: AnnData,
+        apply: bool,
+        inplace: bool = True,
+) -> Optional[AnnData]:
+    if not inplace:
+        adata = adata.copy()
 
-        sc.tl.umap(adata=adata)
+    store_config_params(adata=adata, analysis_step=plotting.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
 
-        if not inplace:
-            return adata
+    if not apply:
+        return None
 
-    @gin.configurable
-    def plotting(
-            adata: AnnData,
-            umap: bool,
-            path: Path,
-            inplace: bool = True,
-    ) -> Optional[AnnData]:
-        # TODO: Check before merging if we changed adata
-        if not inplace:
-            adata = adata.copy()
+    sc.tl.umap(adata=adata)
 
-        store_config_params(adata=adata, analysis_step=plotting.__name__, apply=apply,
-                            params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    if not inplace:
+        return adata
 
-        if umap:
-            sc.pl.umap(adata=adata)
 
-        if not inplace:
-            return adata
+@gin.configurable
+def plotting(
+        adata: AnnData,
+        apply: bool,
+        umap: bool,
+        pre_qc: bool,
+        post_qc: bool,
+        path: Path,
+        inplace: bool = True,
+) -> Optional[AnnData]:
+    # TODO: Check before merging if we changed adata
+    if not inplace:
+        adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=plotting.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
+
+    path = Path(path)
+    path.mkdir(exist_ok=True)
+
+    if umap:
+        sc.pl.umap(adata=adata, show=False)
+        plt.savefig(Path(path, "umap.png"))
+        plt.close()
+
+    if pre_qc:
+        plot_qc_vars(adata=adata, pre_qc=True, out_dir=path)
+
+    if post_qc:
+        plot_qc_vars(adata=adata, pre_qc=False, out_dir=path)
+
+    if not inplace:
+        return adata

@@ -5,7 +5,7 @@ quality_control:
     min_genes = 200
     min_cells = 10
     n_genes_by_counts = 8000
-    mt_threshold = 50
+    mt_threshold = 10
     rb_threshold = 10
     hb_threshold = 2
 
@@ -51,3 +51,13 @@ diff_gene_exp:
     groupby = "leiden_r1.0"
     use_raw = True
     tables = False
+
+umap:
+    apply = True
+
+plotting:
+    apply = True
+    umap = True
+    pre_qc = True
+    post_qc = True
+    path = "figures/"
