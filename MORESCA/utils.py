@@ -127,3 +127,17 @@ def ddqc(adata: AnnData, inplace: bool = True, save: bool = False) -> Optional[A
 
     if not inplace:
         return adata
+
+
+def store_config_params(adata: AnnData, analysis_step: str, apply: bool, params: dict) -> None:
+    # Create a dictionary for storing config parameters
+    uns_key = "MORESCA"
+    if uns_key not in adata.uns_keys():
+        adata.uns[uns_key] = {}
+    adata.uns[uns_key][analysis_step] = {}
+
+    # Store config parameters, depending on whether the step is applied or not
+    if not apply:
+        params = {key: (False if key == "apply" else None) for key, val in params.items()}
+    adata.uns[uns_key][analysis_step] = {key: (list(val) if isinstance(val, tuple) else val)
+                                         for key, val in params.items()}

@@ -1,4 +1,5 @@
 quality_control:
+    apply = True
     doublet_removal = False
     outlier_removal = False
     min_genes = 200
@@ -9,12 +10,14 @@ quality_control:
     hb_threshold = 2
 
 normalization:
+    apply = True
     method = "PFlog1pPF"
     remove_mt = False
     remove_rb = False
     remove_hb = False
 
 feature_selection:
+    apply = True
     method = "seurat"
     number_features = 2000
 
@@ -28,19 +31,23 @@ pca:
     use_highly_variable = True
 
 batch_effect_correction:
+    apply = True
     method = "harmony"
     batch_key = None
 
 neighborhood_graph:
+    apply = True
     n_neighbors = 15
     n_pcs = None
     metric = "cosine"
 
 clustering:
+    apply = True
     method = "leiden"
     resolution = 1.0
 
 diff_gene_exp:
+    apply = True
     method = "wilcoxon"
     groupby = "leiden_r1.0"
     use_raw = True

@@ -11,7 +11,7 @@ import scanpy.external as sce
 import scipy.stats as ss
 from anndata import AnnData
 
-from MORESCA.utils import remove_cells_by_pct_counts, remove_genes
+from MORESCA.utils import remove_cells_by_pct_counts, remove_genes, store_config_params
 
 try:
     from anticor_features.anticor_features import get_anti_cor_genes
@@ -55,6 +55,7 @@ def load_data(data_path) -> AnnData:
 @gin.configurable
 def quality_control(
     adata: AnnData,
+    apply: bool,
     doublet_removal: bool,
     outlier_removal: bool,
     min_genes: int,
@@ -64,10 +65,15 @@ def quality_control(
     rb_threshold: Optional[Union[int, float, str, bool]],
     hb_threshold: Optional[Union[int, float, str, bool]],
     inplace: bool = True,
-    save: Union[Path, str, bool] = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=quality_control.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     # Todo: This should be aware of the batch key.
     if doublet_removal:
@@ -127,12 +133,6 @@ def quality_control(
     sc.pp.filter_cells(adata, min_genes=min_genes)
     sc.pp.filter_genes(adata, min_cells=min_cells)
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/post_qc.h5ad")
-
     if not inplace:
         return adata
 
@@ -140,15 +140,21 @@ def quality_control(
 @gin.configurable
 def normalization(
     adata: AnnData,
+    apply: bool,
     method: str,
     remove_mt: Optional[bool],
     remove_rb: Optional[bool],
     remove_hb: Optional[bool],
     inplace: bool = True,
-    save: bool = False
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=normalization.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     match method:
         case "log1pCP10k":
@@ -185,12 +191,6 @@ def normalization(
     keep = np.invert(remove)
     adata = adata[:, keep]
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/normalized.h5ad")
-
     if not inplace:
         return adata
 
@@ -198,13 +198,19 @@ def normalization(
 @gin.configurable
 def feature_selection(
     adata: AnnData,
+    apply: bool,
     method: str,
     number_features=None,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=feature_selection.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     match method:
         case "seurat":
@@ -245,13 +251,6 @@ def feature_selection(
                 f"Selected feature selection method {method} not available."
             )
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            # Todo: Do we have to save here?
-            adata.write("results/feature_selection.h5ad")
-
     if not inplace:
         return adata
 
@@ -264,22 +263,17 @@ def scaling(
     apply: bool,
     max_value: Optional[Union[int, float]],
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=scaling.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
 
     if not apply:
         return None
 
     sc.pp.scale(adata, max_value=max_value)
-
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            # Todo: Do we have to save here?
-            adata.write("results/scaled.h5ad")
 
     if not inplace:
         return adata
@@ -292,21 +286,16 @@ def pca(
     n_comps: int = 50,
     use_highly_variable: int = True,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
+    store_config_params(adata=adata, analysis_step=pca.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
     if not apply:
         return None
     sc.pp.pca(adata, n_comps=n_comps, use_highly_variable=use_highly_variable)
-
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            # Todo: Do we have to save here?
-            adata.write("results/pca.h5ad")
 
     if not inplace:
         return adata
@@ -315,16 +304,22 @@ def pca(
 @gin.configurable
 def batch_effect_correction(
     adata: AnnData,
+    apply: bool,
     method: str,
     batch_key: str,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if batch_key is None:
         return None
 
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=batch_effect_correction.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     match method:
         case "harmony":
@@ -342,12 +337,6 @@ def batch_effect_correction(
         case _:
             raise ValueError("Invalid choice for batch effect correction method.")
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/batch_corrected.h5ad")
-
     if not inplace:
         return adata
 
@@ -355,14 +344,20 @@ def batch_effect_correction(
 @gin.configurable
 def neighborhood_graph(
     adata: AnnData,
+    apply: bool,
     n_neighbors: int,
     n_pcs: int,
     metric: str = "cosine",
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=neighborhood_graph.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     # Make this depending on integration choice.
     sc.pp.neighbors(
@@ -374,12 +369,6 @@ def neighborhood_graph(
         random_state=0
     )
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/neighborhood_graph.h5ad")
-
     if not inplace:
         return adata
 
@@ -387,13 +376,19 @@ def neighborhood_graph(
 @gin.configurable
 def clustering(
     adata: AnnData,
+    apply: bool,
     method: str,
     resolution=None,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=clustering.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     match method:
         case "leiden":
@@ -420,12 +415,6 @@ def clustering(
         case _:
             raise ValueError(f"Clustering method {method} not available.")
 
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/clustered.h5ad")
-
     if not inplace:
         return adata
 
@@ -433,15 +422,21 @@ def clustering(
 @gin.configurable
 def diff_gene_exp(
     adata: AnnData,
+    apply: bool,
     method: str,
     groupby: str,
     use_raw: bool = True,
     tables: bool = True,
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
+
+    store_config_params(adata=adata, analysis_step=diff_gene_exp.__name__, apply=apply,
+                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+
+    if not apply:
+        return None
 
     with warnings.catch_warnings():
         warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
@@ -484,12 +479,6 @@ def diff_gene_exp(
             case False | None:
                 print("No DGE performed.")
                 return None
-
-    if save:
-        if isinstance(save, Path | str):
-            adata.write(save)
-        else:
-            adata.write("results/DGE.h5ad")
 
     if not inplace:
         return adata
