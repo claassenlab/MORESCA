@@ -327,8 +327,7 @@ def batch_effect_correction(
                 adata=adata,
                 key=batch_key,
                 basis="X_pca",
-                # Todo: Should this be a different layer?
-                adjusted_basis="X_pca",
+                adjusted_basis="X_pca_corrected",
                 max_iter_harmony=50,
             )
         case False | None:
@@ -359,12 +358,12 @@ def neighborhood_graph(
     if not apply:
         return None
 
-    # Make this depending on integration choice.
+    # Compute neighbors graph based on corrected PCA if batch integration was performed, otherwise use PCA
     sc.pp.neighbors(
         adata,
         n_neighbors=n_neighbors,
         n_pcs=n_pcs,
-        use_rep="X_pca",
+        use_rep="X_pca_corrected" if "X_pca_corrected" in adata.obsm_keys() else "X_pca",
         metric=metric,
         random_state=0
     )
