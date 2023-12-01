@@ -9,4 +9,6 @@ ADATA.write_h5ad(DATA_PATH)
 
 
 def test_run_analysis():
-    run_analysis(DATA_PATH, config_path=Path("test-config.gin"), figures=False, verbose=False)
+    run_analysis(
+        DATA_PATH, config_path=Path("test-config.gin"), figures=False, verbose=False
+    )

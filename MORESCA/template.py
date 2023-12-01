@@ -17,7 +17,11 @@ from MORESCA.analysis_steps import (
 
 
 def run_analysis(
-    data_path: Path, config_path: Path, figures: bool, verbose: bool, result_path: Path = Path("results")
+    data_path: Path,
+    config_path: Path,
+    figures: bool,
+    verbose: bool,
+    result_path: Path = Path("results"),
 ) -> None:
     FIGURE_PATH = Path("figures")
     FIGURE_PATH_PRE = Path(FIGURE_PATH, "preQC")
@@ -63,7 +67,7 @@ if __name__ == "__main__":
         type=Path,
         nargs="+",
         default=Path("results"),
-        help="Path to the processed output data."
+        help="Path to the processed output data.",
     )
     parser.add_argument(
         "-p",

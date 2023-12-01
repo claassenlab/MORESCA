@@ -26,6 +26,17 @@ except ImportError:
 
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
+    """
+    Check if each value in a given metric column of an AnnData object is an outlier.
+
+    Args:
+        adata: An AnnData object containing the data.
+        metric: The name of the metric column to check for outliers.
+        nmads: The number of median absolute deviations (MADs) away from the median to consider a value as an outlier.
+
+    Returns:
+        A pandas Series of boolean values indicating whether each value is an outlier or not.
+    """
     data = adata.obs[metric]
     med_abs_dev = ss.median_abs_deviation(data)
     return (data < np.median(data) - nmads * med_abs_dev) | (
@@ -35,6 +46,22 @@ def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool)
 
 # Todo: Should this happen inplace and just mutate a None-adata?
 def load_data(data_path) -> AnnData:
+    """
+    Load data from a specified file path and return an AnnData object.
+
+    Args:
+        data_path: The path to the data file.
+
+    Returns:
+        An AnnData object containing the loaded data.
+
+    Raises:
+        ValueError: If the file format is unknown.
+
+    Note:
+        Currently supports loading of '.h5ad', '.loom', and '.hdf5' file formats.
+    """
+
     if isinstance(data_path, str):
         data_path = Path(data_path)
     if data_path.is_dir():
@@ -66,16 +93,48 @@ def quality_control(
     hb_threshold: Optional[Union[int, float, str, bool]],
     inplace: bool = True,
 ) -> Optional[AnnData]:
+    """
+    Perform quality control on an AnnData object.
+
+    Args:
+        adata: An AnnData object to perform quality control on.
+        apply: Whether to apply the quality control steps or not.
+        doublet_removal: Whether to perform doublet removal or not.
+        outlier_removal: Whether to remove outliers or not.
+        min_genes: The minimum number of genes required for a cell to pass quality control.
+        min_cells: The minimum number of cells required for a gene to pass quality control.
+        n_genes_by_counts: The threshold for the number of genes detected per cell.
+        mt_threshold: The threshold for the percentage of counts in mitochondrial genes.
+        rb_threshold: The threshold for the percentage of counts in ribosomal genes.
+        hb_threshold: The threshold for the percentage of counts in hemoglobin genes.
+        inplace: Whether to perform the quality control steps in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+
+    Raises:
+        ValueError: If an invalid value is provided for `n_genes_by_counts`.
+
+    Todo:
+        - Implement doublet removal for different batches.
+        - Implement automatic selection of threshold for `n_genes_by_counts`.
+    """
+
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=quality_control.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=quality_control.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
 
-    # Todo: This should be aware of the batch key.
     if doublet_removal:
         clf = doubletdetection.BoostClassifier(
             n_iters=10,
@@ -118,7 +177,6 @@ def quality_control(
     match n_genes_by_counts:
         case n_genes_by_counts if isinstance(n_genes_by_counts, float | int):
             adata = adata[adata.obs.n_genes_by_counts < n_genes_by_counts, :]
-        # Todo: Implement automatic selection of threshold.
         case "auto":
             pass
         case False | None:
@@ -147,11 +205,40 @@ def normalization(
     remove_hb: Optional[bool],
     inplace: bool = True,
 ) -> Optional[AnnData]:
+    """
+    Normalize gene expression data in an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to apply the normalization steps or not.
+        method: The normalization method to use. Available options are:
+            - "log1pCP10k": Normalize total counts to 10,000 and apply log1p transformation.
+            - "log1PF": Apply log1p transformation without normalizing total counts.
+            - "PFlog1pPF": Normalize total counts, apply log1p transformation, and normalize total counts again.
+            - "analytical_pearson": Normalize using analytical Pearson residuals.
+        remove_mt: Whether to remove mitochondrial genes or not.
+        remove_rb: Whether to remove ribosomal genes or not.
+        remove_hb: Whether to remove hemoglobin genes or not.
+        inplace: Whether to perform the normalization steps in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+
+    Raises:
+        ValueError: If an invalid normalization method is provided.
+    """
+
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=normalization.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=normalization.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
@@ -203,11 +290,45 @@ def feature_selection(
     number_features=None,
     inplace: bool = True,
 ) -> Optional[AnnData]:
+    """
+    Perform feature selection on an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to apply the feature selection steps or not.
+        method: The feature selection method to use. Available options are:
+            - "seurat": Use Seurat's highly variable genes method.
+            - "seurat_v3": Use Seurat v3's highly variable genes method.
+            - "analytical_pearson": Use analytical Pearson residuals for feature selection.
+            - "anti_correlation": Use anti-correlation method for feature selection (currently only implemented for human data).
+        number_features: The number of top features to select (only applicable for certain methods).
+        inplace: Whether to perform the feature selection steps in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+
+    Raises:
+        ValueError: If an invalid feature selection method is provided.
+
+    Warnings:
+        - The "anti_correlation" method is currently only implemented for human data.
+        - If the "anti_correlation" method is selected and the `anticor-features` package is not installed, a warning will be raised.
+
+    Todo:
+        - Implement mapping for species according to provided YAML for the "anti_correlation" method.
+    """
+
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=feature_selection.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=feature_selection.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
@@ -264,11 +385,30 @@ def scaling(
     max_value: Optional[Union[int, float]],
     inplace: bool = True,
 ) -> Optional[AnnData]:
+    """
+    Scale the gene expression data in an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to apply the scaling step or not.
+        max_value: The maximum value to which the data will be scaled. If None, the data will be scaled to unit variance.
+        inplace: Whether to perform the scaling in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+    """
+
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=scaling.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=scaling.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
@@ -287,11 +427,31 @@ def pca(
     use_highly_variable: int = True,
     inplace: bool = True,
 ) -> Optional[AnnData]:
+    """
+    Perform principal component analysis (PCA) on the gene expression data in an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to apply the PCA or not.
+        n_comps: The number of principal components to compute.
+        use_highly_variable: Whether to use highly variable genes for PCA computation.
+        inplace: Whether to perform the PCA in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+    """
+
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=pca.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=pca.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
@@ -309,14 +469,41 @@ def batch_effect_correction(
     batch_key: str,
     inplace: bool = True,
 ) -> Optional[AnnData]:
+    """
+    Perform batch effect correction on an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to apply the batch effect correction or not.
+        method: The batch effect correction method to use. Available options are:
+            - "harmony": Use the Harmony algorithm for batch effect correction.
+        batch_key: The key in `adata.obs` that identifies the batches.
+        inplace: Whether to perform the batch effect correction in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+
+    Raises:
+        ValueError: If an invalid batch effect correction method is provided.
+
+    Note:
+        - If `batch_key` is None, no batch effect correction will be performed.
+    """
+
     if batch_key is None:
         return None
 
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=batch_effect_correction.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=batch_effect_correction.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
@@ -350,11 +537,32 @@ def neighborhood_graph(
     metric: str = "cosine",
     inplace: bool = True,
 ) -> Optional[AnnData]:
+    """
+    Compute the neighborhood graph for an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to compute the neighborhood graph or not.
+        n_neighbors: The number of neighbors to consider for each cell.
+        n_pcs: The number of principal components to use for the computation.
+        metric: The distance metric to use for computing the neighborhood graph.
+        inplace: Whether to perform the computation in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+    """
+
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=neighborhood_graph.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=neighborhood_graph.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
@@ -366,7 +574,7 @@ def neighborhood_graph(
         n_pcs=n_pcs,
         use_rep="X_pca",
         metric=metric,
-        random_state=0
+        random_state=0,
     )
 
     if not inplace:
@@ -381,11 +589,38 @@ def clustering(
     resolution=None,
     inplace: bool = True,
 ) -> Optional[AnnData]:
+    """
+    Perform clustering on an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to perform clustering or not.
+        method: The clustering method to use. Available options are:
+            - "leiden": Use the Leiden algorithm for clustering.
+        resolution: The resolution parameter for the clustering method. Can be a single value or a list of values.
+        inplace: Whether to perform the clustering in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+
+    Raises:
+        ValueError: If an invalid clustering method is provided or if the resolution parameter has an invalid type.
+
+    Note:
+        - The resolution parameter determines the granularity of the clustering. Higher values result in more fine-grained clusters.
+    """
+
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=clustering.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=clustering.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None
@@ -393,14 +628,10 @@ def clustering(
     match method:
         case "leiden":
             if not isinstance(resolution, (float, int, list, tuple)):
-                raise ValueError(
-                    f"Invalid type for resolution: {type(resolution)}."
-                )
+                raise ValueError(f"Invalid type for resolution: {type(resolution)}.")
 
             resolutions = (
-                [resolution]
-                if isinstance(resolution, (float, int))
-                else resolution
+                [resolution] if isinstance(resolution, (float, int)) else resolution
             )
             for res in resolutions:
                 sc.tl.leiden(
@@ -429,11 +660,41 @@ def diff_gene_exp(
     tables: bool = True,
     inplace: bool = True,
 ) -> Optional[AnnData]:
+    """
+    Perform differential gene expression analysis on an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to perform differential gene expression analysis or not.
+        method: The differential gene expression analysis method to use. Available options are:
+            - "wilcoxon": Use the Wilcoxon rank-sum test.
+            - "t-test": Use the t-test.
+            - "logreg": Use logistic regression.
+            - "t-test_overestim_var": Use the t-test with overestimated variance.
+        groupby: The key in `adata.obs` that identifies the groups for comparison.
+        use_raw: Whether to use the raw gene expression data or not.
+        tables: Whether to generate result tables or not.
+        inplace: Whether to perform the differential gene expression analysis in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+
+    Note:
+        - The result tables are saved as Excel files if `tables` is True.
+        - Only genes with adjusted p-values less than 0.05 are included in the result tables.
+    """
+
     if not inplace:
         adata = adata.copy()
 
-    store_config_params(adata=adata, analysis_step=diff_gene_exp.__name__, apply=apply,
-                        params={key: val for key, val in locals().items() if key not in ["adata", "inplace"]})
+    store_config_params(
+        adata=adata,
+        analysis_step=diff_gene_exp.__name__,
+        apply=apply,
+        params={
+            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+        },
+    )
 
     if not apply:
         return None

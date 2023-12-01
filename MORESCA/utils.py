@@ -7,6 +7,18 @@ from anndata import AnnData
 
 
 def is_passing_upper(data, nmads, upper_limit=0):
+    """
+    Check if each value in the given data array is passing the upper limit.
+
+    Args:
+        data: An array of values to check.
+        nmads: The number of median absolute deviations (MADs) away from the median to define the upper bound.
+        upper_limit: The upper limit value. Defaults to 0.
+
+    Returns:
+        A boolean array indicating whether each value is passing the upper limit or not.
+    """
+
     med = np.median(data)
     mad = ss.median_abs_deviation(data)
     upper_bound = max(med + nmads * mad, upper_limit)
@@ -14,6 +26,18 @@ def is_passing_upper(data, nmads, upper_limit=0):
 
 
 def is_passing_lower(data, nmads, lower_limit):
+    """
+    Check if each value in the given data array is passing the lower limit.
+
+    Args:
+        data: An array of values to check.
+        nmads: The number of median absolute deviations (MADs) away from the median to define the lower bound.
+        lower_limit: The lower limit value.
+
+    Returns:
+        A boolean array indicating whether each value is passing the lower limit or not.
+    """
+
     med = np.median(data)
     mad = ss.median_abs_deviation(data)
     lower_bound = max(med - nmads * mad, lower_limit)
@@ -27,6 +51,26 @@ def remove_cells_by_pct_counts(
     inplace: bool = True,
     save: bool = False,
 ) -> Optional[AnnData]:
+    """
+    Remove cells from an AnnData object based on the percentage of counts in specific gene categories.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        genes: The gene category to filter cells based on. Accepted values are "mt", "rb", and "hb".
+        threshold: The threshold value for the percentage of counts. Cells with a percentage above or below this threshold will be removed.
+        inplace: Whether to perform the cell removal in-place or return a modified copy of the AnnData object.
+        save: Whether to save the modified AnnData object to a file. If a path or file name is provided, the AnnData object will be saved.
+
+    Returns:
+        If `inplace` is True and `save` is False, returns None. Otherwise, returns a modified copy of the AnnData object.
+
+    Raises:
+        ValueError: If an invalid gene category is provided or if an error occurs during the filtering process.
+
+    Todo:
+        - Implement automatic selection of threshold for "auto" option.
+    """
+
     if not inplace:
         adata = adata.copy()
 
@@ -44,7 +88,6 @@ def remove_cells_by_pct_counts(
             else:
                 adata = adata[adata.obs[f"pct_counts_{genes}"] < threshold, :]
         case "auto":
-            # Todo: Implement automatic selection of threshold.
             raise ValueError(f"Auto selection for {genes}_threshold not implemented.")
         case False | None:
             print(f"No {genes} filter applied.")
@@ -59,6 +102,21 @@ def remove_cells_by_pct_counts(
 
 # Todo: Is this the best way to do it? Manipulating the list inplace feels like a gotcha.
 def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
+    """
+    Remove genes from a list based on a specified condition.
+
+    Args:
+        gene_lst: A list of genes to check.
+        rmv_lst: A list to store the genes to be removed.
+        gene_key: A condition to determine whether to remove the genes or not.
+
+    Returns:
+        None.
+
+    Raises:
+        ValueError: If an invalid choice is provided for `gene_key`.
+    """
+
     match gene_key:
         case True:
             rmv_lst.append(gene_lst)
@@ -69,6 +127,21 @@ def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
 
 
 def ddqc(adata: AnnData, inplace: bool = True, save: bool = False) -> Optional[AnnData]:
+    """
+    Perform Data-Driven Quality Control (DDQC) on an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        inplace: Whether to perform the DDQC in-place or return a modified copy of the AnnData object.
+        save: Whether to save the modified AnnData object to a file. If True, the AnnData object will be saved.
+
+    Returns:
+        If `inplace` is True and `save` is False, returns None. Otherwise, returns a modified copy of the AnnData object.
+
+    Note:
+        - The resulting AnnData object will only contain cells that pass the quality control checks.
+    """
+
     if not inplace:
         adata = adata.copy()
 
@@ -129,7 +202,27 @@ def ddqc(adata: AnnData, inplace: bool = True, save: bool = False) -> Optional[A
         return adata
 
 
-def store_config_params(adata: AnnData, analysis_step: str, apply: bool, params: dict) -> None:
+def store_config_params(
+    adata: AnnData, analysis_step: str, apply: bool, params: dict
+) -> None:
+    """
+    Store configuration parameters for an analysis step in the AnnData object.
+
+    Args:
+        adata: An AnnData object.
+        analysis_step: The name of the analysis step.
+        apply: Whether the analysis step is applied or not.
+        params: A dictionary of configuration parameters for the analysis step.
+
+    Returns:
+        None.
+
+    Note:
+        - The configuration parameters are stored in the `uns` attribute of the AnnData object under the key "MORESCA".
+        - The configuration parameters are stored as a dictionary under the analysis step name.
+        - If `apply` is False, the configuration parameters are set to False or None, depending on the key.
+    """
+
     # Create a dictionary for storing config parameters
     uns_key = "MORESCA"
     if uns_key not in adata.uns_keys():
@@ -138,6 +231,10 @@ def store_config_params(adata: AnnData, analysis_step: str, apply: bool, params:
 
     # Store config parameters, depending on whether the step is applied or not
     if not apply:
-        params = {key: (False if key == "apply" else None) for key, val in params.items()}
-    adata.uns[uns_key][analysis_step] = {key: (list(val) if isinstance(val, tuple) else val)
-                                         for key, val in params.items()}
+        params = {
+            key: (False if key == "apply" else None) for key, val in params.items()
+        }
+    adata.uns[uns_key][analysis_step] = {
+        key: (list(val) if isinstance(val, tuple) else val)
+        for key, val in params.items()
+    }
