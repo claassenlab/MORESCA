@@ -52,3 +52,10 @@ diff_gene_exp:
     groupby = "leiden_r1.0"
     use_raw = True
     tables = False
+
+umap:
+    umap_based_on_pca = False
+
+plotting:
+    umap = True
+    path = "figures/"
