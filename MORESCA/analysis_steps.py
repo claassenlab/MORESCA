@@ -93,6 +93,9 @@ def quality_control(
     mt_threshold: Optional[Union[int, float, str, bool]],
     rb_threshold: Optional[Union[int, float, str, bool]],
     hb_threshold: Optional[Union[int, float, str, bool]],
+    figures: Optional[Union[Path, str]],
+    pre_qc_plots: Optional[bool],
+    post_qc_plots: Optional[bool],
     inplace: bool = True,
 ) -> Optional[AnnData]:
     """
@@ -109,6 +112,9 @@ def quality_control(
         mt_threshold: The threshold for the percentage of counts in mitochondrial genes.
         rb_threshold: The threshold for the percentage of counts in ribosomal genes.
         hb_threshold: The threshold for the percentage of counts in hemoglobin genes.
+        figures: The path to the output directory for the quality control plots.
+        pre_qc_plots: Whether to generate plots of QC covariates before quality control or not.
+        post_qc_plots: Whether to generate plots of QC covariates after quality control or not.
         inplace: Whether to perform the quality control steps in-place or return a modified copy of the AnnData object.
 
     Returns:
@@ -137,6 +143,28 @@ def quality_control(
     if not apply:
         return None
 
+    # Quality control - calculate QC covariates
+    adata.obs["n_counts"] = adata.X.sum(1)
+    adata.obs["log_counts"] = np.log(adata.obs["n_counts"])
+    adata.obs["n_genes"] = (adata.X > 0).sum(1)
+
+    adata.var["mt"] = adata.var_names.str.contains("(?i)^MT-")
+    adata.var["rb"] = adata.var_names.str.contains("(?i)^RP[SL]")
+    adata.var["hb"] = adata.var_names.str.contains("(?i)^HB(?!EGF|S1L|P1).+")
+
+    sc.pp.calculate_qc_metrics(
+        adata, qc_vars=["mt", "rb", "hb"], percent_top=[20], log1p=True, inplace=True
+    )
+
+    if pre_qc_plots:
+        # Make default directory if figures is None or empty string
+        if not figures:
+            figures = "figures/"
+        if isinstance(figures, str):
+            figures = Path(figures)
+        figures.mkdir(exist_ok=True)
+        plot_qc_vars(adata, pre_qc=True, out_dir=figures)
+
     if doublet_removal:
         clf = doubletdetection.BoostClassifier(
             n_iters=10,
@@ -153,19 +181,6 @@ def quality_control(
         adata.obs["doublet_score"] = clf.doublet_score()
 
         adata._inplace_subset_obs(~adata.obs.doublet)
-
-    # Quality control - calculate QC covariates
-    adata.obs["n_counts"] = adata.X.sum(1)
-    adata.obs["log_counts"] = np.log(adata.obs["n_counts"])
-    adata.obs["n_genes"] = (adata.X > 0).sum(1)
-
-    adata.var["mt"] = adata.var_names.str.contains("(?i)^MT-")
-    adata.var["rb"] = adata.var_names.str.contains("(?i)^RP[SL]")
-    adata.var["hb"] = adata.var_names.str.contains("(?i)^HB(?!EGF|S1L|P1).+")
-
-    sc.pp.calculate_qc_metrics(
-        adata, qc_vars=["mt", "rb", "hb"], percent_top=[20], log1p=True, inplace=True
-    )
 
     if outlier_removal:
         adata.obs["outlier"] = (
@@ -192,6 +207,15 @@ def quality_control(
 
     sc.pp.filter_cells(adata, min_genes=min_genes)
     sc.pp.filter_genes(adata, min_cells=min_cells)
+
+    if post_qc_plots:
+        # Make default directory if figures is None or empty string
+        if not figures:
+            figures = "figures/"
+        if isinstance(figures, str):
+            figures = Path(figures)
+        figures.mkdir(exist_ok=True)
+        plot_qc_vars(adata, pre_qc=False, out_dir=figures)
 
     if not inplace:
         return adata
@@ -784,8 +808,6 @@ def plotting(
     adata: AnnData,
     apply: bool,
     umap: bool,
-    pre_qc: bool,
-    post_qc: bool,
     path: Path,
     inplace: bool = True,
 ) -> Optional[AnnData]:
@@ -812,12 +834,6 @@ def plotting(
         sc.pl.umap(adata=adata, show=False)
         plt.savefig(Path(path, "umap.png"))
         plt.close()
-
-    if pre_qc:
-        plot_qc_vars(adata=adata, pre_qc=True, out_dir=path)
-
-    if post_qc:
-        plot_qc_vars(adata=adata, pre_qc=False, out_dir=path)
 
     if not inplace:
         return adata

@@ -8,6 +8,9 @@ quality_control:
     mt_threshold = "auto"
     rb_threshold = 10
     hb_threshold = 2
+    figures = "figures/"
+    pre_qc_plots = True
+    post_qc_plots = True
 
 normalization:
     apply = True
@@ -60,6 +63,4 @@ umap:
 plotting:
     apply = True
     umap = False
-    pre_qc = True
-    post_qc = True
     path = "figures/"
