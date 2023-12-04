@@ -152,7 +152,7 @@ def quality_control(
         adata.obs["doublet"] = adata.obs["doublet"].astype(bool)
         adata.obs["doublet_score"] = clf.doublet_score()
 
-        adata = adata[(~adata.obs.doublet)]
+        adata._inplace_subset_obs(~adata.obs.doublet)
 
     # Quality control - calculate QC covariates
     adata.obs["n_counts"] = adata.X.sum(1)
@@ -174,11 +174,11 @@ def quality_control(
             | is_outlier(adata, "pct_counts_in_top_20_genes", 5)
         )
 
-        adata = adata[(~adata.obs.outlier)]
+        adata._inplace_subset_obs(~adata.obs.outlier)
 
     match n_genes_by_counts:
         case n_genes_by_counts if isinstance(n_genes_by_counts, float | int):
-            adata = adata[adata.obs.n_genes_by_counts < n_genes_by_counts, :]
+            adata._inplace_subset_obs(adata.obs.n_genes_by_counts < n_genes_by_counts)
         case "auto":
             pass
         case False | None:
