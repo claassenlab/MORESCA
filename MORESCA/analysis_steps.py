@@ -162,7 +162,7 @@ def quality_control(
             figures = "figures/"
         if isinstance(figures, str):
             figures = Path(figures)
-        figures.mkdir(exist_ok=True)
+        figures.mkdir(parents=True, exist_ok=True)
         plot_qc_vars(adata, pre_qc=True, out_dir=figures)
 
     if doublet_removal:
@@ -214,7 +214,7 @@ def quality_control(
             figures = "figures/"
         if isinstance(figures, str):
             figures = Path(figures)
-        figures.mkdir(exist_ok=True)
+        figures.mkdir(parents=True, exist_ok=True)
         plot_qc_vars(adata, pre_qc=False, out_dir=figures)
 
     if not inplace:
@@ -828,7 +828,7 @@ def plotting(
         return None
 
     path = Path(path)
-    path.mkdir(exist_ok=True)
+    path.mkdir(parents=True, exist_ok=True)
 
     if umap:
         sc.pl.umap(adata=adata, show=False)
