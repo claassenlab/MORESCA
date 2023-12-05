@@ -5,9 +5,12 @@ quality_control:
     min_genes = 200
     min_cells = 10
     n_genes_by_counts = 8000
-    mt_threshold = 15
+    mt_threshold = "auto"
     rb_threshold = 10
     hb_threshold = 2
+    figures = "figures/"
+    pre_qc_plots = True
+    post_qc_plots = True
 
 normalization:
     apply = True
@@ -53,3 +56,11 @@ diff_gene_exp:
     layer = "counts"
     corr_method = "benjamini-hochberg"
     tables = False
+
+umap:
+    apply = True
+
+plotting:
+    apply = True
+    umap = False
+    path = "figures/"
