@@ -49,7 +49,6 @@ def remove_cells_by_pct_counts(
     genes: str,
     threshold: Optional[Union[int, float, str, bool]],
     inplace: bool = True,
-    save: bool = False,
 ) -> Optional[AnnData]:
     """
     Remove cells from an AnnData object based on the percentage of counts in specific gene categories.
@@ -84,12 +83,12 @@ def remove_cells_by_pct_counts(
             threshold, bool
         ):
             if genes == "rb":
-                adata = adata[adata.obs[f"pct_counts_{genes}"] > threshold, :]
+                adata._inplace_subset_obs(adata.obs[f"pct_counts_{genes}"] > threshold)
             else:
-                adata = adata[adata.obs[f"pct_counts_{genes}"] < threshold, :]
+                adata._inplace_subset_obs(adata.obs[f"pct_counts_{genes}"] < threshold)
         case "auto":
             if genes == "mt":
-                adata = ddqc(adata, inplace=False)
+                ddqc(adata)
             else:
                 raise ValueError(f"Auto selection for {genes}_threshold not implemented.")
         case False | None:
@@ -97,8 +96,6 @@ def remove_cells_by_pct_counts(
         case _:
             raise ValueError("Error.")
 
-    if save and isinstance(save, Path | str):
-        adata.write(save)
     if not inplace:
         return adata
 
@@ -151,32 +148,32 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
-    adata_raw = adata.copy()
+    adata_copy = adata.copy()
 
     sc.pp.calculate_qc_metrics(
-        adata, qc_vars=["mt"], percent_top=None, log1p=False, inplace=True
+        adata_copy, qc_vars=["mt"], percent_top=None, log1p=False, inplace=True
     )
-    adata = adata[adata.obs.pct_counts_mt <= 80, :]
+    adata_copy._inplace_subset_obs(adata_copy.obs.pct_counts_mt <= 80)
 
     # Todo: can this be removed?
-    adata.layers["counts"] = adata.X.copy()
-    sc.pp.normalize_total(adata, target_sum=1e4)
-    sc.pp.log1p(adata)
+    adata_copy.layers["counts"] = adata_copy.X.copy()
+    sc.pp.normalize_total(adata_copy, target_sum=1e4)
+    sc.pp.log1p(adata_copy)
     sc.pp.highly_variable_genes(
-        adata, flavor="seurat_v3", n_top_genes=2000, layer="counts"
+        adata_copy, flavor="seurat_v3", n_top_genes=2000, layer="counts"
     )
-    sc.pp.scale(adata)
-    sc.tl.pca(adata)
-    sc.pp.neighbors(adata, n_neighbors=20, n_pcs=50, metric="euclidean")
-    sc.tl.leiden(adata, resolution=1.4)
+    sc.pp.scale(adata_copy)
+    sc.tl.pca(adata_copy)
+    sc.pp.neighbors(adata_copy, n_neighbors=20, n_pcs=50, metric="euclidean")
+    sc.tl.leiden(adata_copy, resolution=1.4)
 
     # Directly apply the quality control checks and create the 'passed' mask
-    passed = np.ones(adata.n_obs, dtype=bool)
-    for cluster in adata.obs["leiden"].unique():
-        indices = adata.obs["leiden"] == cluster
-        pct_counts_mt_cluster = adata.obs.loc[indices, "pct_counts_mt"].values
-        total_counts_cluster = adata.obs.loc[indices, "total_counts"].values
-        n_genes_cluster = adata.obs.loc[indices, "n_genes"].values
+    passed = np.ones(adata_copy.n_obs, dtype=bool)
+    for cluster in adata_copy.obs["leiden"].unique():
+        indices = adata_copy.obs["leiden"] == cluster
+        pct_counts_mt_cluster = adata_copy.obs.loc[indices, "pct_counts_mt"].values
+        total_counts_cluster = adata_copy.obs.loc[indices, "total_counts"].values
+        n_genes_cluster = adata_copy.obs.loc[indices, "n_genes"].values
 
         passing_mask_mt = is_passing_upper(pct_counts_mt_cluster, nmads=3)
         passing_mask_counts = is_passing_lower(
@@ -186,7 +183,8 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
 
         passed[indices] = passing_mask_mt & passing_mask_counts & passing_mask_genes
 
-    adata = adata_raw[passed].copy()
+    passed = adata_copy[passed].obs_names
+    adata._inplace_subset_obs(passed.values)
 
     if not inplace:
         return adata

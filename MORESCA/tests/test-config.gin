@@ -8,6 +8,9 @@ quality_control:
     mt_threshold = "auto"
     rb_threshold = 10
     hb_threshold = 2
+    figures = "figures/"
+    pre_qc_plots = True
+    post_qc_plots = True
 
 normalization:
     apply = True
@@ -49,7 +52,9 @@ diff_gene_exp:
     apply = True
     method = "wilcoxon"
     groupby = "leiden_r1.0"
-    use_raw = True
+    use_raw = False
+    layer = "counts"
+    corr_method = "benjamini-hochberg"
     tables = False
 
 umap:
@@ -58,6 +63,4 @@ umap:
 plotting:
     apply = True
     umap = True
-    pre_qc = True
-    post_qc = True
     path = "figures/"
