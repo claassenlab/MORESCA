@@ -683,7 +683,7 @@ def diff_gene_exp(
     apply: bool,
     method: str,
     groupby: str,
-    use_raw: bool = True,
+    use_raw: bool = False,
     layer: str = "counts",
     corr_method: str = "benjamini-hochberg",
     tables: bool = True,
@@ -746,7 +746,7 @@ def diff_gene_exp(
                     adata=adata,
                     groupby=groupby,
                     method=method,
-                    use_raw=True,
+                    use_raw=use_raw,
                     key_added=key_added,
                 )
 
