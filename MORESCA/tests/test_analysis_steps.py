@@ -63,8 +63,8 @@ def test_pca():
 
 def test_umap_with_pca():
     feature_selection(adata=ADATA)
-    neighborhood_graph(adata=ADATA)
     pca(adata=ADATA)
+    neighborhood_graph(adata=ADATA)
     umap(adata=ADATA, pca_before_umap=True)
     assert "neighbors" in ADATA.uns
 
@@ -86,6 +86,7 @@ def test_plotting_umap():
 def test_plotting_umap_with_pca():
     feature_selection(adata=ADATA)
     pca(adata=ADATA)
+    neighborhood_graph(adata=ADATA)
     umap(adata=ADATA, pca_before_umap=True)
     plotting(adata=ADATA, umap=True, path="figures/")
     assert os.path.exists("figures/umap.png")
