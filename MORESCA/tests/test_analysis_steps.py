@@ -1,3 +1,5 @@
+import os.path
+
 import gin
 import scanpy as sc
 
@@ -8,6 +10,8 @@ from MORESCA.analysis_steps import (
     pca,
     quality_control,
     scaling,
+    umap,
+    plotting,
 )
 
 # PATH_H5AD = Path("../data/data_raw.h5ad")
@@ -44,7 +48,40 @@ def test_scaling():
 
 
 def test_pca():
+    feature_selection(adata=ADATA)
     pca(adata=ADATA)
+
+
+def test_umap_with_pca():
+    feature_selection(adata=ADATA)
+    pca(adata=ADATA)
+    umap(adata=ADATA, pca_before_umap=True)
+    assert "neighbors" in ADATA.uns
+
+
+def test_umap_without_pca():
+    umap(adata=ADATA, pca_before_umap=False)
+    assert "neighbors_without_pca" in ADATA.uns
+
+
+def test_plotting_umap():
+    umap(adata=ADATA, pca_before_umap=False)
+    plotting(adata=ADATA, umap=True, path="figures/")
+    assert os.path.exists("figures/umap.png")
+
+    # Clean up after test
+    os.remove("figures/umap.png")
+
+
+def test_plotting_umap_with_pca():
+    feature_selection(adata=ADATA)
+    pca(adata=ADATA)
+    umap(adata=ADATA, pca_before_umap=True)
+    plotting(adata=ADATA, umap=True, path="figures/")
+    assert os.path.exists("figures/umap.png")
+
+    # Clean up after test
+    os.remove("figures/umap.png")
 
 
 def test_batch_effect_correction():
