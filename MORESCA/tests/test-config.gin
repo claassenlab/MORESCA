@@ -59,6 +59,7 @@ diff_gene_exp:
 
 umap:
     apply = True
+    pca_before_umap = False
 
 plotting:
     apply = True
