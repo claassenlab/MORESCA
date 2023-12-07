@@ -13,6 +13,7 @@ from MORESCA.analysis_steps import (
     scaling,
     umap,
     plotting,
+    neighborhood_graph,
 )
 
 # PATH_H5AD = Path("../data/data_raw.h5ad")
@@ -62,6 +63,7 @@ def test_pca():
 
 def test_umap_with_pca():
     feature_selection(adata=ADATA)
+    neighborhood_graph(adata=ADATA)
     pca(adata=ADATA)
     umap(adata=ADATA, pca_before_umap=True)
     assert "neighbors" in ADATA.uns

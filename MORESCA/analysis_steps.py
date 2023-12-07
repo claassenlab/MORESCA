@@ -788,7 +788,7 @@ def umap(
 
     store_config_params(
         adata=adata,
-        analysis_step=plotting.__name__,
+        analysis_step=umap.__name__,
         apply=apply,
         params={
             key: val for key, val in locals().items() if key not in ["adata", "inplace"]
@@ -799,10 +799,11 @@ def umap(
         return None
 
     neighbors_key = None
-    if pca_before_umap:
-        sc.pp.neighbors(adata)
-    else:
+    if not pca_before_umap:
         # Compute neighbors on original data without PCA (n_pcs=0 uses .X instead of .X_pca)
+        warnings.warn(
+            "UMAP is computed on all genes in original data and not only on the highly variable genes."
+        )
         neighbors_key = "neighbors_without_pca"
         sc.pp.neighbors(adata, n_pcs=0, key_added=neighbors_key)
     sc.tl.umap(adata=adata, neighbors_key=neighbors_key)
