@@ -26,8 +26,6 @@ except ImportError:
         install it using 'pip install anticor-features'"
     )
 
-neighbors_key = None
-
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
     """
@@ -800,7 +798,10 @@ def umap(
     if not apply:
         return None
 
-    if not pca_before_umap:
+    neighbors_key = None
+    if pca_before_umap:
+        sc.pp.neighbors(adata)
+    else:
         # Compute neighbors on original data without PCA (n_pcs=0 uses .X instead of .X_pca)
         neighbors_key = "neighbors_without_pca"
         sc.pp.neighbors(adata, n_pcs=0, key_added=neighbors_key)
@@ -818,7 +819,6 @@ def plotting(
     path: Path,
     inplace: bool = True,
 ) -> Optional[AnnData]:
-    # TODO: Check before merging if we changed adata
     if not inplace:
         adata = adata.copy()
 
@@ -838,6 +838,9 @@ def plotting(
     path.mkdir(parents=True, exist_ok=True)
 
     if umap:
+        neighbors_key = None
+        if "neighbors_without_pca" in adata.uns:
+            neighbors_key = "neighbors_without_pca"
         sc.pl.umap(adata=adata, show=False, neighbors_key=neighbors_key)
         plt.savefig(Path(path, "umap.png"))
         plt.close()
