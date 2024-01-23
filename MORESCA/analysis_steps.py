@@ -88,6 +88,8 @@ def quality_control(
     doublet_removal: bool = False,
     outlier_removal: bool = False,
     min_genes: Optional[Union[float, int, bool]] = None,
+    min_counts: Optional[Union[float, int, bool]] = None,
+    max_counts: Optional[Union[float, int, bool]] = None,
     min_cells: Optional[Union[float, int, bool]] = None,
     n_genes_by_counts: Optional[Union[float, int, str, bool]] = None,
     mt_threshold: Optional[Union[int, float, str, bool]] = None,
@@ -105,6 +107,8 @@ def quality_control(
         adata: An AnnData object to perform quality control on.
         apply: Whether to apply the quality control steps or not.
         min_genes: The minimum number of genes required for a cell to pass quality control.
+        min_counts: The minimum total counts required for a cell to pass quality control.
+        max_counts: The maximum total counts allowed for a cell to pass quality control.
         min_cells: The minimum number of cells required for a gene to pass quality control.
         n_genes_by_counts: The threshold for the number of genes detected per cell.
         mt_threshold: The threshold for the percentage of counts in mitochondrial genes.
@@ -212,6 +216,22 @@ def quality_control(
             print("No removal based on min_genes.")
         case _:
             raise ValueError("Invalid value for min_genes.")
+
+    match min_counts:
+        case min_counts if isinstance(min_counts, float | int):
+            sc.pp.filter_cells(adata, min_counts=min_counts)
+        case False | None:
+            print("No removal based on min_counts.")
+        case _:
+            raise ValueError("Invalid value for min_counts.")
+
+    match max_counts:
+        case max_counts if isinstance(max_counts, float | int):
+            sc.pp.filter_cells(adata, max_counts=max_counts)
+        case False | None:
+            print("No removal based on max_counts.")
+        case _:
+            raise ValueError("Invalid value for max_counts.")
 
     match min_cells:
         case min_cells if isinstance(min_cells, float | int):
