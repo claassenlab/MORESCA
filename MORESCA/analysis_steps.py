@@ -816,6 +816,7 @@ def diff_gene_exp(
 def umap(
     adata: AnnData,
     apply: bool,
+    pca_before_umap: bool,
     inplace: bool = True,
 ) -> Optional[AnnData]:
     if not inplace:
@@ -823,7 +824,7 @@ def umap(
 
     store_config_params(
         adata=adata,
-        analysis_step=plotting.__name__,
+        analysis_step=umap.__name__,
         apply=apply,
         params={
             key: val for key, val in locals().items() if key not in ["adata", "inplace"]
@@ -833,7 +834,15 @@ def umap(
     if not apply:
         return None
 
-    sc.tl.umap(adata=adata)
+    neighbors_key = None
+    if not pca_before_umap:
+        # Compute neighbors on original data without PCA (n_pcs=0 uses .X instead of .X_pca)
+        warnings.warn(
+            "UMAP is computed on all genes in original data and not only on the highly variable genes."
+        )
+        neighbors_key = "neighbors_without_pca"
+        sc.pp.neighbors(adata, n_pcs=0, key_added=neighbors_key)
+    sc.tl.umap(adata=adata, neighbors_key=neighbors_key)
 
     if not inplace:
         return adata
@@ -847,7 +856,6 @@ def plotting(
     path: Path = Path("figures"),
     inplace: bool = True,
 ) -> Optional[AnnData]:
-    # TODO: Check before merging if we changed adata
     if not inplace:
         adata = adata.copy()
 
@@ -867,7 +875,10 @@ def plotting(
     path.mkdir(parents=True, exist_ok=True)
 
     if umap:
-        sc.pl.umap(adata=adata, show=False)
+        neighbors_key = None
+        if "neighbors_without_pca" in adata.uns:
+            neighbors_key = "neighbors_without_pca"
+        sc.pl.umap(adata=adata, show=False, neighbors_key=neighbors_key)
         plt.savefig(Path(path, "umap.png"))
         plt.close()
 
