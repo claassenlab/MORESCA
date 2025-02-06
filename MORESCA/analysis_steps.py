@@ -634,7 +634,8 @@ def neighborhood_graph(
         n_pcs=n_pcs,
         use_rep="X_pca_corrected"
         if "X_pca_corrected" in adata.obsm_keys()
-        else "X_pca" if "X_pca" in adata.obsm_keys()
+        else "X_pca"
+        if "X_pca" in adata.obsm_keys()
         else None,
         metric=metric,
         random_state=0,
@@ -649,7 +650,9 @@ def clustering(
     adata: AnnData,
     apply: bool,
     method: str = "leiden",
-    resolution: Union[float, int, List[Union[float, int]], Tuple[Union[float, int]]] = 1.0,
+    resolution: Union[
+        float, int, List[Union[float, int]], Tuple[Union[float, int]]
+    ] = 1.0,
     inplace: bool = True,
 ) -> Optional[AnnData]:
     """
@@ -813,11 +816,7 @@ def diff_gene_exp(
 
 
 @gin.configurable
-def umap(
-    adata: AnnData,
-    apply: bool,
-    inplace: bool = True,
-) -> Optional[AnnData]:
+def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 

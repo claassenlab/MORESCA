@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Optional, Union
 import numpy as np
 import scipy.stats as ss
@@ -90,7 +89,9 @@ def remove_cells_by_pct_counts(
             if genes == "mt":
                 ddqc(adata)
             else:
-                raise ValueError(f"Auto selection for {genes}_threshold not implemented.")
+                raise ValueError(
+                    f"Auto selection for {genes}_threshold not implemented."
+                )
         case False | None:
             print(f"No {genes} filter applied.")
         case _:

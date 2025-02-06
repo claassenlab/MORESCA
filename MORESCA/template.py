@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 import gin
+
 from MORESCA.analysis_steps import (
     batch_effect_correction,
     clustering,
@@ -11,10 +12,10 @@ from MORESCA.analysis_steps import (
     neighborhood_graph,
     normalization,
     pca,
+    plotting,
     quality_control,
     scaling,
     umap,
-    plotting,
 )
 
 
