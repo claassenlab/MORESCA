@@ -1,6 +1,6 @@
 import warnings
 from pathlib import Path
-from typing import Optional, Union, List, Tuple
+from typing import List, Optional, Tuple, Union
 
 import doubletdetection
 import gin
@@ -11,9 +11,10 @@ import scanpy as sc
 import scanpy.external as sce
 import scipy.stats as ss
 from anndata import AnnData
+from sklearn.decomposition import PCA
 
-from MORESCA.utils import remove_cells_by_pct_counts, remove_genes, store_config_params
 from MORESCA.plotting import plot_qc_vars
+from MORESCA.utils import remove_cells_by_pct_counts, remove_genes, store_config_params
 
 try:
     from anticor_features.anticor_features import get_anti_cor_genes
@@ -512,6 +513,20 @@ def pca(
         },
     )
 
+    if isinstance(n_comps, int):
+        sc.pp.pca(adata, n_comps=n_comps, use_highly_variable=use_highly_variable)
+    elif n_comps < 1 & n_comps > 0:
+        pca = PCA()
+        pca.fit(adata.X)
+        cumulative_variance = np.cumsum(pca.explained_variance_ratio_)
+        n_components = np.searchsorted(cumulative_variance, n_comps) + 1
+        sc.pp.pca(adata, n_comps=n_comps, use_highly_variable=use_highly_variable)
+    elif n_comps == "auto":
+        # Todo: Implement Parallel analysis here
+        pass
+    else:
+        Warning("AAAH")
+
     if not apply:
         return None
     sc.pp.pca(adata, n_comps=n_comps, use_highly_variable=use_highly_variable)
@@ -634,7 +649,8 @@ def neighborhood_graph(
         n_pcs=n_pcs,
         use_rep="X_pca_corrected"
         if "X_pca_corrected" in adata.obsm_keys()
-        else "X_pca" if "X_pca" in adata.obsm_keys()
+        else "X_pca"
+        if "X_pca" in adata.obsm_keys()
         else None,
         metric=metric,
         random_state=0,
@@ -649,7 +665,9 @@ def clustering(
     adata: AnnData,
     apply: bool,
     method: str = "leiden",
-    resolution: Union[float, int, List[Union[float, int]], Tuple[Union[float, int]]] = 1.0,
+    resolution: Union[
+        float, int, List[Union[float, int]], Tuple[Union[float, int]]
+    ] = 1.0,
     inplace: bool = True,
 ) -> Optional[AnnData]:
     """
@@ -813,11 +831,7 @@ def diff_gene_exp(
 
 
 @gin.configurable
-def umap(
-    adata: AnnData,
-    apply: bool,
-    inplace: bool = True,
-) -> Optional[AnnData]:
+def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
