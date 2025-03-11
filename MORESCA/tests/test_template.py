@@ -1,5 +1,7 @@
-import scanpy as sc
 from pathlib import Path
+
+import scanpy as sc
+
 from MORESCA.template import run_analysis
 
 ADATA = sc.datasets.pbmc3k()
@@ -10,5 +12,8 @@ ADATA.write_h5ad(DATA_PATH)
 
 def test_run_analysis():
     run_analysis(
-        DATA_PATH, config_path=Path("test-config.gin"), figures=False, verbose=False
+        data_path=DATA_PATH,
+        config_path=Path("test-config.gin"),
+        figures=False,
+        verbose=False,
     )
