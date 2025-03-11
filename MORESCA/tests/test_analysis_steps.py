@@ -3,7 +3,10 @@ import scanpy as sc
 
 from MORESCA.analysis_steps import (
     batch_effect_correction,
+    clustering,
+    diff_gene_exp,
     feature_selection,
+    neighborhood_graph,
     normalization,
     pca,
     quality_control,
@@ -50,3 +53,21 @@ def test_pca():
 def test_batch_effect_correction():
     pca(ADATA_BATCH, use_highly_variable=False)
     batch_effect_correction(adata=ADATA_BATCH)
+
+
+def test_neighborhood_graph():
+    pca(adata=ADATA)
+    neighborhood_graph(adata=ADATA)
+
+
+def test_clustering():
+    pca(adata=ADATA)
+    neighborhood_graph(adata=ADATA)
+    clustering(adata=ADATA)
+
+
+def test_diff_gene_exp():
+    pca(adata=ADATA, use_highly_variable=False)
+    neighborhood_graph(adata=ADATA)
+    clustering(adata=ADATA)
+    diff_gene_exp(adata=ADATA)

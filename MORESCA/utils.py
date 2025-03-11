@@ -1,8 +1,8 @@
-from pathlib import Path
 from typing import Optional, Union
+
 import numpy as np
-import scipy.stats as ss
 import scanpy as sc
+import scipy.stats as ss
 from anndata import AnnData
 
 
@@ -90,7 +90,9 @@ def remove_cells_by_pct_counts(
             if genes == "mt":
                 ddqc(adata)
             else:
-                raise ValueError(f"Auto selection for {genes}_threshold not implemented.")
+                raise ValueError(
+                    f"Auto selection for {genes}_threshold not implemented."
+                )
         case False | None:
             print(f"No {genes} filter applied.")
         case _:
@@ -173,7 +175,7 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
         indices = adata_copy.obs["leiden"] == cluster
         pct_counts_mt_cluster = adata_copy.obs.loc[indices, "pct_counts_mt"].values
         total_counts_cluster = adata_copy.obs.loc[indices, "total_counts"].values
-        n_genes_cluster = adata_copy.obs.loc[indices, "n_genes"].values
+        n_genes_cluster = adata_copy.obs.loc[indices, "n_genes_by_counts"].values
 
         passing_mask_mt = is_passing_upper(pct_counts_mt_cluster, nmads=3)
         passing_mask_counts = is_passing_lower(
