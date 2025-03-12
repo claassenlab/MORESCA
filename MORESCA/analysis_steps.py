@@ -527,6 +527,32 @@ def pca(
     if not inplace:
         adata = adata.copy()
 
+    if use_highly_variable:
+        X_data = adata[:, adata.var.highly_variable.values].X
+    else:
+        X_data = adata.X.copy()
+
+    if n_comps == "auto":
+        raise NotImplementedError("auto-mode is not implemented.")
+    else:
+        pca_ = PCA(n_components=n_comps).fit(X_data)
+        X_pca = pca_.transform(X_data)
+
+    pca_params = {}
+    # Todo: This should be dynamic.
+    pca_params["params"] = {
+        "zero_center": True,
+        "use_highly_variable": use_highly_variable,
+        "mask_var": "highly_variable",
+    }
+    pca_params["variance"] = pca_.explained_variance_
+    pca_params["variance_ratio"] = pca_.explained_variance_ratio_
+
+    adata.obsm["X_pca"] = X_pca[..., :n_comps]
+    adata.uns["pca"] = pca_params
+    # Todo: Implement this.
+    # adata.varm["PCs"] = np.zeros_like(adata.X)
+
     store_config_params(
         adata=adata,
         analysis_step=pca.__name__,
@@ -537,30 +563,6 @@ def pca(
             if key not in ["adata", "inplace"]
         },
     )
-
-    if use_highly_variable:
-        X_data = adata[:, adata.var.highly_variable.values].X
-    else:
-        X_data = adata.X.copy()
-
-    if isinstance(n_comps, int):
-        # Use n_comps directly
-        pass
-    elif isinstance(n_comps, float) and 0 < n_comps < 1:
-        # Todo: Consider use_highly_variable.
-        pca = PCA().fit(X_data)
-        cumulative_variance = np.cumsum(pca.explained_variance_ratio_)
-        n_comps = np.searchsorted(cumulative_variance, n_comps) + 1
-    elif n_comps == "auto":
-        raise NotImplementedError(
-            "Parallel analysis for 'auto' mode is not implemented."
-        )
-    else:
-        raise ValueError(f"Invalid choice for n_comps: {n_comps}")
-
-    # Todo: Store results of sklearn PCA directly into adata object.
-
-    sc.pp.pca(adata, n_comps=n_comps, use_highly_variable=use_highly_variable)
 
     if not apply:
         return None
