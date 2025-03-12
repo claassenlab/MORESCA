@@ -1,5 +1,7 @@
-import scanpy as sc
 from pathlib import Path
+
+import scanpy as sc
+
 from MORESCA.template import run_analysis
 
 ADATA = sc.datasets.pbmc3k()

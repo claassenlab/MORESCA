@@ -3,8 +3,7 @@ import scanpy as sc
 
 from MORESCA.utils import remove_cells_by_pct_counts, remove_genes
 
-
-example_data = adata = sc.datasets.pbmc3k()
+example_data = sc.datasets.pbmc3k()
 example_data.var["mt"] = example_data.var_names.str.contains("(?i)^MT-")
 example_data.var["rb"] = example_data.var_names.str.contains(("(?i)^RP[SL]"))
 example_data.var["hb"] = example_data.var_names.str.contains(("(?i)^HB[^(P)]"))
@@ -26,10 +25,24 @@ sc.pp.calculate_qc_metrics(
 # Todo: This should include more cases.
 @pytest.mark.parametrize(
     "adata, genes, threshold",
-    [(example_data, "mt", 1), (example_data, "rb", 1), (example_data, "hb", 1)],
+    [
+        (example_data, "mt", 1),
+        (example_data, "rb", 1),
+        (example_data, "hb", 1),
+        (example_data, "mt", 10),
+        (example_data, "rb", 10),
+        (example_data, "hb", 10),
+        (example_data, "mt", 50),
+        (example_data, "rb", 50),
+        (example_data, "hb", 50),
+    ],
 )
 def test_remove_cells_by_pct_counts(adata, genes, threshold):
     remove_cells_by_pct_counts(adata=adata, genes=genes, threshold=threshold)
+    if genes == "rb":
+        assert adata.obs[f"pct_counts_{genes}"].min() > threshold
+    else:
+        assert adata.obs[f"pct_counts_{genes}"].max() < threshold
 
 
 def test_remove_genes_simple():

@@ -1,6 +1,6 @@
 import warnings
 from pathlib import Path
-from typing import Optional, Union, List, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 import doubletdetection
 import gin
@@ -12,8 +12,8 @@ import scanpy.external as sce
 import scipy.stats as ss
 from anndata import AnnData
 
-from MORESCA.utils import remove_cells_by_pct_counts, remove_genes, store_config_params
 from MORESCA.plotting import plot_qc_vars
+from MORESCA.utils import remove_cells_by_pct_counts, remove_genes, store_config_params
 
 try:
     from anticor_features.anticor_features import get_anti_cor_genes
@@ -27,7 +27,7 @@ except ImportError:
     )
 
 
-def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(dtype=bool):
+def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series:
     """
     Check if each value in a given metric column of an AnnData object is an outlier.
 
@@ -634,7 +634,8 @@ def neighborhood_graph(
         n_pcs=n_pcs,
         use_rep="X_pca_corrected"
         if "X_pca_corrected" in adata.obsm_keys()
-        else "X_pca" if "X_pca" in adata.obsm_keys()
+        else "X_pca"
+        if "X_pca" in adata.obsm_keys()
         else None,
         metric=metric,
         random_state=0,
@@ -649,7 +650,9 @@ def clustering(
     adata: AnnData,
     apply: bool,
     method: str = "leiden",
-    resolution: Union[float, int, List[Union[float, int]], Tuple[Union[float, int]]] = 1.0,
+    resolution: Union[
+        float, int, List[Union[float, int]], Tuple[Union[float, int]]
+    ] = 1.0,
     inplace: bool = True,
 ) -> Optional[AnnData]:
     """
@@ -719,9 +722,9 @@ def diff_gene_exp(
     apply: bool,
     method: str = "wilcoxon",
     groupby: str = "leiden_r1.0",
-    use_raw: bool = False,
-    layer: str = "counts",
-    corr_method: str = "benjamini-hochberg",
+    use_raw: Optional[bool] = False,
+    layer: Optional[str] = "counts",
+    corr_method: Literal["benjamini-hochberg", "bonferroni"] = "benjamini-hochberg",
     tables: bool = True,
     inplace: bool = True,
 ) -> Optional[AnnData]:
@@ -782,8 +785,10 @@ def diff_gene_exp(
                     adata=adata,
                     groupby=groupby,
                     method=method,
+                    corr_method=corr_method,
                     use_raw=use_raw,
                     key_added=key_added,
+                    layer=layer,
                 )
 
                 dedf_leiden = sc.get.rank_genes_groups_df(
@@ -813,11 +818,7 @@ def diff_gene_exp(
 
 
 @gin.configurable
-def umap(
-    adata: AnnData,
-    apply: bool,
-    inplace: bool = True,
-) -> Optional[AnnData]:
+def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
