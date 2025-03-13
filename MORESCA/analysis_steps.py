@@ -550,8 +550,10 @@ def pca(
 
     adata.obsm["X_pca"] = X_pca[..., :n_comps]
     adata.uns["pca"] = pca_params
-    # Todo: Implement this.
-    # adata.varm["PCs"] = np.zeros_like(adata.X)
+    # adata.varm["PCs"] = pca_.components_.T
+    # Todo: We should take a look at the PCA implementation of Scanpy and see what they are doing there.
+    # https://github.com/scverse/scanpy/blob/79a5a1c323504cf6df1a19f5c6155b2a0628745e/src/scanpy/preprocessing/_pca/__init__.py#L381
+    adata.varm["PCs"] = np.zeros(shape=(adata.n_vars, n_comps))
 
     store_config_params(
         adata=adata,
