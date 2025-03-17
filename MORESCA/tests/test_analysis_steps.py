@@ -47,6 +47,7 @@ def test_scaling():
 
 
 def test_pca():
+    feature_selection(adata=ADATA)
     pca(adata=ADATA)
 
 
@@ -56,11 +57,13 @@ def test_batch_effect_correction():
 
 
 def test_neighborhood_graph():
+    feature_selection(adata=ADATA)
     pca(adata=ADATA)
     neighborhood_graph(adata=ADATA)
 
 
 def test_clustering():
+    feature_selection(adata=ADATA)
     pca(adata=ADATA)
     neighborhood_graph(adata=ADATA)
     clustering(adata=ADATA)

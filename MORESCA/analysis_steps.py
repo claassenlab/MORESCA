@@ -11,9 +11,15 @@ import scanpy as sc
 import scanpy.external as sce
 import scipy.stats as ss
 from anndata import AnnData
+from sklearn.metrics import silhouette_score
 
 from MORESCA.plotting import plot_qc_vars
-from MORESCA.utils import remove_cells_by_pct_counts, remove_genes, store_config_params
+from MORESCA.utils import (
+    choose_representation,
+    remove_cells_by_pct_counts,
+    remove_genes,
+    store_config_params,
+)
 
 try:
     from anticor_features.anticor_features import get_anti_cor_genes
@@ -651,7 +657,7 @@ def clustering(
     apply: bool,
     method: str = "leiden",
     resolution: Union[
-        float, int, List[Union[float, int]], Tuple[Union[float, int]]
+        float, int, List[Union[float, int]], Tuple[Union[float, int]], Literal["auto"]
     ] = 1.0,
     inplace: bool = True,
 ) -> Optional[AnnData]:
@@ -693,12 +699,19 @@ def clustering(
 
     match method:
         case "leiden":
-            if not isinstance(resolution, (float, int, list, tuple)):
+            if (
+                not isinstance(resolution, (float, int, list, tuple))
+                and resolution != "auto"
+            ):
                 raise ValueError(f"Invalid type for resolution: {type(resolution)}.")
 
-            resolutions = (
-                [resolution] if isinstance(resolution, (float, int)) else resolution
-            )
+            if isinstance(resolution, (float, int)):
+                resolutions = [resolution]
+            elif resolution == "auto":
+                resolutions = [0.25] + list(np.linspace(0.5, 1.6, 10)) + [2.0]
+            else:
+                resolutions = resolution
+
             for res in resolutions:
                 sc.tl.leiden(
                     adata=adata,
@@ -707,10 +720,36 @@ def clustering(
                     random_state=0,
                 )
         case False | None:
-            print("No clustering done. Exiting.")
             return None
         case _:
             raise ValueError(f"Clustering method {method} not available.")
+
+    # Choose best resolution according to silhouette score
+    if len(resolutions) > 1:
+        neighbors_params = adata.uns["neighbors"]["params"]
+        metric = neighbors_params["metric"]
+        use_rep = (
+            None if "use_rep" not in neighbors_params else neighbors_params["use_rep"]
+        )
+        n_pcs = None if "n_pcs" not in neighbors_params else neighbors_params["n_pcs"]
+
+        # Use the representation used for neighborhood graph computation
+        X = choose_representation(adata, use_rep=use_rep, n_pcs=n_pcs)
+
+        scores = np.zeros(len(resolutions))
+        print(resolutions)
+
+        for i, res in enumerate(resolutions):
+            scores[i] = silhouette_score(
+                X, labels=adata.obs[f"leiden_r{res}"], metric=metric
+            )
+
+        best_res = resolutions[np.argmax(scores)]
+        adata.obs["leiden"] = adata.obs[f"leiden_r{best_res}"]
+
+        adata.uns["MORESCA"]["clustering"]["best_resolution"] = best_res
+        adata.uns["MORESCA"]["clustering"]["resolutions"] = resolutions
+        adata.uns["MORESCA"]["clustering"]["silhouette_scores"] = scores
 
     if not inplace:
         return adata
