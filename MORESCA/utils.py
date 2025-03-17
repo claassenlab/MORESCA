@@ -272,5 +272,5 @@ def choose_representation(
                 f"Did not find {use_rep} in `.obsm.keys()`. "
                 "You need to compute it first."
             )
-            raise ValueError(msg)  # resetting verbosity
+            raise ValueError(msg)
     return X
