@@ -708,7 +708,7 @@ def clustering(
             if isinstance(resolution, (float, int)):
                 resolutions = [resolution]
             elif resolution == "auto":
-                resolutions = [0.25] + list(np.linspace(0.5, 1.6, 10)) + [2.0]
+                resolutions = [0.25] + list(np.linspace(0.5, 1.5, 11)) + [2.0]
             else:
                 resolutions = resolution
 
@@ -737,7 +737,6 @@ def clustering(
         X = choose_representation(adata, use_rep=use_rep, n_pcs=n_pcs)
 
         scores = np.zeros(len(resolutions))
-        print(resolutions)
 
         for i, res in enumerate(resolutions):
             scores[i] = silhouette_score(
