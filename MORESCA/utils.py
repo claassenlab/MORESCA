@@ -4,6 +4,7 @@ import numpy as np
 import scanpy as sc
 import scipy.stats as ss
 from anndata import AnnData
+from scipy.sparse import csr_matrix
 
 
 def is_passing_upper(data, nmads, upper_limit=0):
@@ -228,3 +229,48 @@ def store_config_params(
         key: (list(val) if isinstance(val, tuple) else val)
         for key, val in params.items()
     }
+
+
+def choose_representation(
+    adata: AnnData, use_rep: Optional[str] = None, n_pcs: Optional[int] = None, **kwargs
+) -> Union[np.ndarray, csr_matrix]:
+    # Adapted from https://github.com/scverse/scanpy/blob/29e454429bcb41f3150c2516d82a5c4938f124e1/src/scanpy/tools/_utils.py#L17
+
+    if use_rep is None and n_pcs == 0:
+        use_rep = "X"
+    if use_rep is None:
+        if adata.n_vars > sc.settings.N_PCS:
+            if "X_pca" in adata.obsm:
+                if n_pcs is not None and n_pcs > adata.obsm["X_pca"].shape[1]:
+                    raise ValueError(
+                        "`X_pca` does not have enough PCs. Rerun "
+                        "`sc.pp.pca` with adjusted `n_comps`."
+                    )
+                X = adata.obsm["X_pca"][:, :n_pcs]
+            else:
+                raise ValueError(
+                    "You need to run `sc.pp.pca` first. Alternatively, "
+                    "specify `use_rep`."
+                )
+        else:
+            X = adata.X
+    else:
+        if use_rep in adata.obsm and n_pcs is not None:
+            if n_pcs > adata.obsm[use_rep].shape[1]:
+                raise ValueError(
+                    f"{use_rep} does not have enough dimensions. Provide"
+                    " a representation with equal or more dimensions "
+                    "than `n_pcs` or lower `n_pcs`."
+                )
+            X = adata.obsm[use_rep][:, :n_pcs]
+        elif use_rep in adata.obsm and n_pcs is None:
+            X = adata.obsm[use_rep]
+        elif use_rep == "X":
+            X = adata.X
+        else:
+            msg = (
+                f"Did not find {use_rep} in `.obsm.keys()`. "
+                "You need to compute it first."
+            )
+            raise ValueError(msg)
+    return X
