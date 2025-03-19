@@ -1,3 +1,4 @@
+import inspect
 import warnings
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
@@ -524,6 +525,9 @@ def pca(
         If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
     """
 
+    if not apply:
+        return None
+
     if not inplace:
         adata = adata.copy()
 
@@ -537,6 +541,8 @@ def pca(
     else:
         pca_ = PCA(n_components=n_comps).fit(X_data)
         X_pca = pca_.transform(X_data)
+
+    n_components = pca_.n_components_
 
     pca_params = {}
     # Todo: This should be dynamic.
@@ -555,19 +561,18 @@ def pca(
     # https://github.com/scverse/scanpy/blob/79a5a1c323504cf6df1a19f5c6155b2a0628745e/src/scanpy/preprocessing/_pca/__init__.py#L381
     adata.varm["PCs"] = np.zeros(shape=(adata.n_vars, n_comps))
 
+    # Todo: For both the auto-mode and the threshold-based PCA the values are not stored.
     store_config_params(
         adata=adata,
-        analysis_step=pca.__name__,
+        analysis_step=inspect.currentframe().f_code.co_name,
         apply=apply,
         params={
             key: val
             for key, val in locals().items()
-            if key not in ["adata", "inplace"]
+            if key not in ["adata", "inplace", "X_data", "X_pca", "pca_"]
         },
     )
 
-    if not apply:
-        return None
     if not inplace:
         return adata
 
@@ -619,6 +624,8 @@ def batch_effect_correction(
     )
 
     if not apply:
+        if not inplace:
+            return adata
         return None
 
     match method:
