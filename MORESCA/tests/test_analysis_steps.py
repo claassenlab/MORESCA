@@ -13,21 +13,12 @@ from MORESCA.analysis_steps import (
     scaling,
 )
 
-# PATH_H5AD = Path("../data/data_raw.h5ad")
-# STR_H5AD = "../data/data_raw.h5ad"
 ADATA = sc.datasets.pbmc3k()
-# sc.read(PATH_H5AD)
 ADATA.layers["counts"] = ADATA.X.copy()
 ADATA_BATCH = ADATA.copy()
 ADATA_BATCH.obs["batch"] = 1350 * ["a"] + 1350 * ["b"]
 
 gin.parse_config_file("test-config.gin")
-
-
-# Todo: Adapt the CI tests to automatically download the data.
-# @pytest.mark.parametrize("test_data_path", [(PATH_H5AD), (STR_H5AD)])
-# def test_load_data(test_data_path):
-#    assert load_data(test_data_path)
 
 
 def test_quality_control():
