@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import List, Literal, Tuple, Union
 
 import numpy as np
@@ -7,12 +9,30 @@ import scanpy as sc
 from MORESCA.analysis_steps import (
     clustering,
     feature_selection,
+    load_data,
     neighborhood_graph,
     pca,
 )
 
 ADATA = sc.datasets.pbmc3k()
 ADATA.layers["counts"] = ADATA.X.copy()
+DATA_PATH_PREFIX = "data/adata"
+
+
+@pytest.mark.parametrize(
+    "ext, as_path", [("h5ad", True), ("h5ad", False), ("loom", False)]
+)
+def test_load_data(ext: str, as_path: bool):
+    DATA_PATH = f"{DATA_PATH_PREFIX}.{ext}"
+    if ext == "loom":
+        ADATA.write_loom(DATA_PATH)
+    else:
+        ADATA.write_h5ad(DATA_PATH)
+    if as_path:
+        DATA_PATH = Path(DATA_PATH)
+    adata = load_data(DATA_PATH)
+    assert isinstance(adata, sc.AnnData), "Return value should be an AnnData object."
+    os.remove(DATA_PATH)
 
 
 @pytest.mark.parametrize(

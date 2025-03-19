@@ -67,7 +67,7 @@ def load_data(data_path) -> AnnData:
         ValueError: If the file format is unknown.
 
     Note:
-        Currently supports loading of '.h5ad', '.loom', and '.hdf5' file formats.
+        Currently supports loading of '.h5ad', '.loom', and '.h5' file formats.
     """
 
     if isinstance(data_path, str):
@@ -78,13 +78,16 @@ def load_data(data_path) -> AnnData:
     file_extension = data_path.suffix
     match file_extension:
         case ".h5ad":
-            return sc.read(data_path)
+            return sc.read_h5ad(data_path)
         case ".loom":
             return sc.read_loom(data_path)
-        case "hdf5":
+        case "h5":
             return sc.read_10x_h5(data_path)
         case _:
-            raise ValueError(f"Unknown file format: {file_extension}")
+            try:
+                return sc.read(data_path)
+            except ValueError:
+                raise ValueError(f"Unknown file format: {file_extension}")
 
 
 @gin.configurable
