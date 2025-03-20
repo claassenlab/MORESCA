@@ -52,3 +52,8 @@ def test_template(data_path: list, output_path: list):
     )
     subprocess.run(cmd, check=True)
     shutil.rmtree("res")
+
+
+def test_moresca():
+    cmd = ["moresca", "-d", DATA_PATH, "-p", CONFIG_PATH]
+    subprocess.run(cmd, check=True)

@@ -4,6 +4,7 @@ from typing import List, Union
 
 import gin
 
+import MORESCA
 from MORESCA.analysis_steps import (
     batch_effect_correction,
     clustering,
@@ -72,8 +73,14 @@ def run_analysis(
         adata.write(Path(res_path, f"data_processed{sample_str}.h5ad"))
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+def main():
+    parser = argparse.ArgumentParser(
+        prog="moresca",
+        description="Program: MORESCA (MOdular and REproducible Single-"
+        "Cell Analysis)\n"
+        f"Version: {MORESCA.__version__}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser.add_argument(
         "-d",
         "--data",
@@ -109,3 +116,7 @@ if __name__ == "__main__":
         config_path=args.parameters,
         verbose=args.verbose,
     )
+
+
+if __name__ == "__main__":
+    main()
