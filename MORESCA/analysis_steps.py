@@ -81,7 +81,7 @@ def load_data(data_path) -> AnnData:
             return sc.read_h5ad(data_path)
         case ".loom":
             return sc.read_loom(data_path)
-        case "h5":
+        case ".h5":
             return sc.read_10x_h5(data_path)
         case _:
             try:
