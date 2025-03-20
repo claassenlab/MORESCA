@@ -78,16 +78,18 @@ def load_data(data_path) -> AnnData:
     file_extension = data_path.suffix
     match file_extension:
         case ".h5ad":
-            return sc.read_h5ad(data_path)
+            adata = sc.read_h5ad(data_path)
         case ".loom":
-            return sc.read_loom(data_path)
+            adata = sc.read_loom(data_path)
         case ".h5":
-            return sc.read_10x_h5(data_path)
+            adata = sc.read_10x_h5(data_path)
         case _:
             try:
-                return sc.read(data_path)
+                adata = sc.read(data_path)
             except ValueError:
                 raise ValueError(f"Unknown file format: {file_extension}")
+    adata.var_names_make_unique()
+    return adata
 
 
 @gin.configurable(denylist=["sample_id"])
