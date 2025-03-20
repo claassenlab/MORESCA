@@ -56,7 +56,7 @@ diff_gene_exp:
     method = "wilcoxon"
     groupby = "leiden_r1.0"
     use_raw = True
-    tables = False
+    tables = None
 
 umap:
     apply = True

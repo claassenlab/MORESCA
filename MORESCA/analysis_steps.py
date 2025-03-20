@@ -78,19 +78,21 @@ def load_data(data_path) -> AnnData:
     file_extension = data_path.suffix
     match file_extension:
         case ".h5ad":
-            return sc.read_h5ad(data_path)
+            adata = sc.read_h5ad(data_path)
         case ".loom":
-            return sc.read_loom(data_path)
-        case "h5":
-            return sc.read_10x_h5(data_path)
+            adata = sc.read_loom(data_path)
+        case ".h5":
+            adata = sc.read_10x_h5(data_path)
         case _:
             try:
-                return sc.read(data_path)
+                adata = sc.read(data_path)
             except ValueError:
                 raise ValueError(f"Unknown file format: {file_extension}")
+    adata.var_names_make_unique()
+    return adata
 
 
-@gin.configurable
+@gin.configurable(denylist=["sample_id"])
 def quality_control(
     adata: AnnData,
     apply: bool,
@@ -108,6 +110,7 @@ def quality_control(
     pre_qc_plots: Optional[bool] = None,
     post_qc_plots: Optional[bool] = None,
     inplace: bool = True,
+    sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
     """
     Perform quality control on an AnnData object.
@@ -175,6 +178,11 @@ def quality_control(
             figures = "figures/"
         if isinstance(figures, str):
             figures = Path(figures)
+
+        # Make subfolder if a sample ID is passed (analysis of multiple samples)
+        if sample_id:
+            figures = figures / f"{sample_id}/"
+
         figures.mkdir(parents=True, exist_ok=True)
         plot_qc_vars(adata, pre_qc=True, out_dir=figures)
 
@@ -256,6 +264,10 @@ def quality_control(
             figures = "figures/"
         if isinstance(figures, str):
             figures = Path(figures)
+
+        # Make subfolder if a sample ID is passed (analysis of multiple samples)
+        if not pre_qc_plots and sample_id:
+            figures = figures / f"{sample_id}/"
         figures.mkdir(parents=True, exist_ok=True)
         plot_qc_vars(adata, pre_qc=False, out_dir=figures)
 
@@ -757,7 +769,7 @@ def clustering(
         return adata
 
 
-@gin.configurable
+@gin.configurable(denylist=["sample_id"])
 def diff_gene_exp(
     adata: AnnData,
     apply: bool,
@@ -766,8 +778,9 @@ def diff_gene_exp(
     use_raw: Optional[bool] = False,
     layer: Optional[str] = "counts",
     corr_method: Literal["benjamini-hochberg", "bonferroni"] = "benjamini-hochberg",
-    tables: bool = True,
+    tables: Optional[Union[Path, str]] = Path("results/"),
     inplace: bool = True,
+    sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
     """
     Perform differential gene expression analysis on an AnnData object.
@@ -784,7 +797,7 @@ def diff_gene_exp(
         use_raw: Whether to use the raw gene expression data or not.
         layer: The layer in `adata.layers` to use for the differential gene expression analysis.
         corr_method: The method to use for multiple testing correction.
-        tables: Whether to generate result tables or not.
+        tables: The path to the output directory for the differential expression tables.
         inplace: Whether to perform the differential gene expression analysis in-place or return a modified copy of the AnnData object.
 
     Returns:
@@ -841,8 +854,13 @@ def diff_gene_exp(
                 dedf_leiden = dedf_leiden[dedf_leiden["pvals_adj"] < 0.05]
 
                 if tables:
+                    if isinstance(tables, str):
+                        tables = Path(tables)
+                    if sample_id:
+                        tables = Path(tables) / f"{sample_id}/"
+                    tables.mkdir(parents=True, exist_ok=True)
                     with pd.ExcelWriter(
-                        path=f"results/dge_leiden_r{key_added}.xlsx"
+                        path=f"{tables}/dge_leiden_r{key_added}.xlsx"
                     ) as writer:
                         for cluster_id in dedf_leiden.group.unique():
                             df_sub_cl = dedf_leiden[
@@ -881,13 +899,14 @@ def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]
         return adata
 
 
-@gin.configurable
+@gin.configurable(denylist=["sample_id"])
 def plotting(
     adata: AnnData,
     apply: bool,
     umap: bool = True,
     path: Path = Path("figures"),
     inplace: bool = True,
+    sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
     # TODO: Check before merging if we changed adata
     if not inplace:
@@ -906,6 +925,10 @@ def plotting(
         return None
 
     path = Path(path)
+
+    # Make subfolder if a sample ID is passed (analysis of multiple samples)
+    if sample_id:
+        path = path / f"{sample_id}/"
     path.mkdir(parents=True, exist_ok=True)
 
     if umap:
