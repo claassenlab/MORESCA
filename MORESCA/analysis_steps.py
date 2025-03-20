@@ -769,7 +769,7 @@ def clustering(
         return adata
 
 
-@gin.configurable
+@gin.configurable(denylist=["sample_id"])
 def diff_gene_exp(
     adata: AnnData,
     apply: bool,
@@ -778,8 +778,9 @@ def diff_gene_exp(
     use_raw: Optional[bool] = False,
     layer: Optional[str] = "counts",
     corr_method: Literal["benjamini-hochberg", "bonferroni"] = "benjamini-hochberg",
-    tables: bool = True,
+    tables: Optional[Union[Path, str]] = Path("results/"),
     inplace: bool = True,
+    sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
     """
     Perform differential gene expression analysis on an AnnData object.
@@ -796,7 +797,7 @@ def diff_gene_exp(
         use_raw: Whether to use the raw gene expression data or not.
         layer: The layer in `adata.layers` to use for the differential gene expression analysis.
         corr_method: The method to use for multiple testing correction.
-        tables: Whether to generate result tables or not.
+        tables: The path to the output directory for the differential expression tables.
         inplace: Whether to perform the differential gene expression analysis in-place or return a modified copy of the AnnData object.
 
     Returns:
@@ -853,8 +854,13 @@ def diff_gene_exp(
                 dedf_leiden = dedf_leiden[dedf_leiden["pvals_adj"] < 0.05]
 
                 if tables:
+                    if isinstance(tables, str):
+                        tables = Path(tables)
+                    if sample_id:
+                        tables = Path(tables) / f"{sample_id}/"
+                    tables.mkdir(parents=True, exist_ok=True)
                     with pd.ExcelWriter(
-                        path=f"results/dge_leiden_r{key_added}.xlsx"
+                        path=f"{tables}/dge_leiden_r{key_added}.xlsx"
                     ) as writer:
                         for cluster_id in dedf_leiden.group.unique():
                             df_sub_cl = dedf_leiden[

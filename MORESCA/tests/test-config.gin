@@ -57,7 +57,7 @@ diff_gene_exp:
     use_raw = False
     layer = "counts"
     corr_method = "benjamini-hochberg"
-    tables = False
+    tables = "results/"
 
 umap:
     apply = True

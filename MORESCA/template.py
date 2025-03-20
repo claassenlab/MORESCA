@@ -65,7 +65,7 @@ def run_analysis(
         batch_effect_correction(adata=adata)
         neighborhood_graph(adata=adata)
         clustering(adata=adata)
-        diff_gene_exp(adata=adata)
+        diff_gene_exp(adata=adata, sample_id=sample_id)
         umap(adata=adata)
         plotting(adata=adata, sample_id=sample_id)
 
