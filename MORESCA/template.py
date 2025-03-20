@@ -39,6 +39,7 @@ def run_analysis(
         )
 
     gin.parse_config_file(config_path)
+    sample_id = None
 
     # Run analysis for each data set
     for i, d_path in enumerate(data_path):
@@ -48,11 +49,14 @@ def run_analysis(
             res_path = result_path[i]
         res_path.mkdir(parents=True, exist_ok=True)
 
+        if len(data_path) > 1:
+            sample_id = f"s{i + 1:02d}"
+
         # Run analysis steps
         adata = load_data(d_path)
         adata.raw = adata.copy()
         adata.layers["counts"] = adata.X.copy()
-        quality_control(adata=adata)
+        quality_control(adata=adata, sample_id=sample_id)
         normalization(adata=adata)
         feature_selection(adata=adata)
         adata.layers["unscaled"] = adata.X.copy()
@@ -63,13 +67,13 @@ def run_analysis(
         clustering(adata=adata)
         diff_gene_exp(adata=adata)
         umap(adata=adata)
-        plotting(adata=adata)
+        plotting(adata=adata, sample_id=sample_id)
 
         # Add sample ID if several data sets are processed and output is
         #  saved to the same folder
         sample_str = ""
         if len(data_path) > 1 and len(result_path) == 1:
-            sample_str = f"_s{i + 1:02d}"
+            sample_str = f"_{sample_id}"
         adata.write(Path(res_path, f"data_processed{sample_str}.h5ad"))
 
 

@@ -1,3 +1,4 @@
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -51,6 +52,13 @@ def test_template(data_path: list, output_path: list):
         + ["-p", CONFIG_PATH]
     )
     subprocess.run(cmd, check=True)
+    sample_str = ""
+    for i, path in enumerate(output_path):
+        if len(data_path) > 1 and len(output_path) == 1:
+            sample_str = f"_s{i + 1:02d}"
+        assert os.path.isfile(os.path.join(path, f"data_processed{sample_str}.h5ad")), (
+            "Output file not found."
+        )
     shutil.rmtree("res")
 
 

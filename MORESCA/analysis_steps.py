@@ -90,7 +90,7 @@ def load_data(data_path) -> AnnData:
                 raise ValueError(f"Unknown file format: {file_extension}")
 
 
-@gin.configurable
+@gin.configurable(denylist=["sample_id"])
 def quality_control(
     adata: AnnData,
     apply: bool,
@@ -108,6 +108,7 @@ def quality_control(
     pre_qc_plots: Optional[bool] = None,
     post_qc_plots: Optional[bool] = None,
     inplace: bool = True,
+    sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
     """
     Perform quality control on an AnnData object.
@@ -175,6 +176,11 @@ def quality_control(
             figures = "figures/"
         if isinstance(figures, str):
             figures = Path(figures)
+
+        # Make subfolder if a sample ID is passed (analysis of multiple samples)
+        if sample_id:
+            figures = figures / f"{sample_id}/"
+
         figures.mkdir(parents=True, exist_ok=True)
         plot_qc_vars(adata, pre_qc=True, out_dir=figures)
 
@@ -256,6 +262,10 @@ def quality_control(
             figures = "figures/"
         if isinstance(figures, str):
             figures = Path(figures)
+
+        # Make subfolder if a sample ID is passed (analysis of multiple samples)
+        if not pre_qc_plots and sample_id:
+            figures = figures / f"{sample_id}/"
         figures.mkdir(parents=True, exist_ok=True)
         plot_qc_vars(adata, pre_qc=False, out_dir=figures)
 
@@ -881,13 +891,14 @@ def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]
         return adata
 
 
-@gin.configurable
+@gin.configurable(denylist=["sample_id"])
 def plotting(
     adata: AnnData,
     apply: bool,
     umap: bool = True,
     path: Path = Path("figures"),
     inplace: bool = True,
+    sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
     # TODO: Check before merging if we changed adata
     if not inplace:
@@ -906,6 +917,10 @@ def plotting(
         return None
 
     path = Path(path)
+
+    # Make subfolder if a sample ID is passed (analysis of multiple samples)
+    if sample_id:
+        path = path / f"{sample_id}/"
     path.mkdir(parents=True, exist_ok=True)
 
     if umap:
