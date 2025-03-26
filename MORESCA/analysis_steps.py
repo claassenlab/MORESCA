@@ -1,3 +1,4 @@
+import inspect
 import warnings
 from pathlib import Path
 from typing import List, Literal, Optional, Tuple, Union
@@ -11,6 +12,7 @@ import scanpy as sc
 import scanpy.external as sce
 import scipy.stats as ss
 from anndata import AnnData
+from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
 
 from MORESCA.plotting import plot_qc_vars
@@ -152,7 +154,9 @@ def quality_control(
         analysis_step=quality_control.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
@@ -169,7 +173,11 @@ def quality_control(
     adata.var["hb"] = adata.var_names.str.contains("(?i)^HB(?!EGF|S1L|P1).+")
 
     sc.pp.calculate_qc_metrics(
-        adata, qc_vars=["mt", "rb", "hb"], percent_top=[20], log1p=True, inplace=True
+        adata,
+        qc_vars=["mt", "rb", "hb"],
+        percent_top=[20],
+        log1p=True,
+        inplace=True,
     )
 
     if pre_qc_plots:
@@ -214,7 +222,9 @@ def quality_control(
 
     match n_genes_by_counts:
         case n_genes_by_counts if isinstance(n_genes_by_counts, float | int):
-            adata._inplace_subset_obs(adata.obs.n_genes_by_counts < n_genes_by_counts)
+            adata._inplace_subset_obs(
+                adata.obs.n_genes_by_counts < n_genes_by_counts
+            )
         case "auto":
             pass
         case False | None:
@@ -316,7 +326,9 @@ def normalization(
         analysis_step=normalization.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
@@ -406,7 +418,9 @@ def feature_selection(
         analysis_step=feature_selection.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
@@ -418,7 +432,10 @@ def feature_selection(
             sc.pp.highly_variable_genes(adata, flavor=method)
         case "seurat_v3":
             sc.pp.highly_variable_genes(
-                adata, flavor=method, n_top_genes=number_features, layer="counts"
+                adata,
+                flavor=method,
+                n_top_genes=number_features,
+                layer="counts",
             )
         case "analytical_pearson":
             sc.experimental.pp.highly_variable_genes(
@@ -486,7 +503,9 @@ def scaling(
         analysis_step=scaling.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
@@ -521,21 +540,63 @@ def pca(
         If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
     """
 
-    if not inplace:
-        adata = adata.copy()
-
     store_config_params(
         adata=adata,
-        analysis_step=pca.__name__,
+        analysis_step=inspect.currentframe().f_code.co_name,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
     if not apply:
         return None
-    sc.pp.pca(adata, n_comps=n_comps, use_highly_variable=use_highly_variable)
+
+    if not inplace:
+        adata = adata.copy()
+
+    if use_highly_variable:
+        X_data = adata[:, adata.var.highly_variable.values].X
+    else:
+        X_data = adata.X.copy()
+
+    if n_comps == "auto":
+        raise NotImplementedError("auto-mode is not implemented.")
+    else:
+        pca_ = PCA(n_components=n_comps).fit(X_data)
+        X_pca = pca_.transform(X_data)
+
+    n_components = pca_.n_components_
+
+    pca_params = {}
+    # Todo: This should be dynamic.
+    pca_params["params"] = {
+        "zero_center": True,
+        "use_highly_variable": use_highly_variable,
+        # "mask_var": "highly_variable",
+    }
+    pca_params["variance"] = pca_.explained_variance_
+    pca_params["variance_ratio"] = pca_.explained_variance_ratio_
+
+    adata.obsm["X_pca"] = X_pca[..., :n_comps]
+    adata.uns["pca"] = pca_params
+
+    # Code taken from
+    # https://github.com/scverse/scanpy/blob/79a5a1c323504cf6df1a19f5c6155b2a0628745e/src/scanpy/preprocessing/_pca/__init__.py#L381
+    mask_var = None
+    if use_highly_variable:
+        mask_var = adata.var["highly_variable"].values
+
+    if mask_var is not None:
+        adata.varm["PCs"] = np.zeros(shape=(adata.n_vars, n_comps))
+        adata.varm["PCs"][mask_var] = pca_.components_.T
+    else:
+        adata.varm["PCs"] = pca_.components_.T
+
+    # TODO: Save n_components.
+    adata.uns["MORESCA"]["pca"]["n_components"] = n_components
 
     if not inplace:
         return adata
@@ -581,11 +642,15 @@ def batch_effect_correction(
         analysis_step=batch_effect_correction.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
     if not apply:
+        if not inplace:
+            return adata
         return None
 
     match method:
@@ -603,7 +668,9 @@ def batch_effect_correction(
             print("No batch effect correction applied.")
             return None
         case _:
-            raise ValueError("Invalid choice for batch effect correction method.")
+            raise ValueError(
+                "Invalid choice for batch effect correction method."
+            )
 
     if not inplace:
         return adata
@@ -641,7 +708,9 @@ def neighborhood_graph(
         analysis_step=neighborhood_graph.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
@@ -705,7 +774,9 @@ def clustering(
         analysis_step=clustering.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
@@ -816,7 +887,9 @@ def diff_gene_exp(
         analysis_step=diff_gene_exp.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
@@ -824,7 +897,9 @@ def diff_gene_exp(
         return None
 
     with warnings.catch_warnings():
-        warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
+        warnings.simplefilter(
+            action="ignore", category=pd.errors.PerformanceWarning
+        )
 
         # Todo: Should "logreg" be the default?
         match method:
@@ -866,7 +941,9 @@ def diff_gene_exp(
                             df_sub_cl = dedf_leiden[
                                 dedf_leiden.group == cluster_id
                             ].copy()
-                            df_sub_cl.to_excel(writer, sheet_name=f"c{cluster_id}")
+                            df_sub_cl.to_excel(
+                                writer, sheet_name=f"c{cluster_id}"
+                            )
 
             case False | None:
                 print("No DGE performed.")
@@ -886,7 +963,9 @@ def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]
         analysis_step=plotting.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
@@ -917,7 +996,9 @@ def plotting(
         analysis_step=plotting.__name__,
         apply=apply,
         params={
-            key: val for key, val in locals().items() if key not in ["adata", "inplace"]
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
         },
     )
 
