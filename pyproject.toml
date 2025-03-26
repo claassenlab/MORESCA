@@ -86,6 +86,7 @@ target-version = "py310"
 [tool.ruff.lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 select = ["E4", "E7", "E9", "F"]
+extend-select = ["I"]
 ignore = []
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -114,3 +115,6 @@ where = ["."]  # list of folders that contain the packages (["."] by default)
 include = ["MORESCA"]  # package names should match these glob patterns (["*"] by default)
 exclude = []  # exclude packages matching these glob patterns (empty by default)
 namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+
+[project.scripts]
+moresca = "MORESCA.template:main"

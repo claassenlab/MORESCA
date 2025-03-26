@@ -1,7 +1,7 @@
 import inspect
 import warnings
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import List, Literal, Optional, Tuple, Union
 
 import doubletdetection
 import gin
@@ -13,9 +13,11 @@ import scanpy.external as sce
 import scipy.stats as ss
 from anndata import AnnData
 from sklearn.decomposition import PCA
+from sklearn.metrics import silhouette_score
 
 from MORESCA.plotting import plot_qc_vars
 from MORESCA.utils import (
+    choose_representation,
     remove_cells_by_pct_counts,
     remove_genes,
     store_config_params,
@@ -33,9 +35,7 @@ except ImportError:
     )
 
 
-def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series(
-    dtype=bool
-):
+def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series:
     """
     Check if each value in a given metric column of an AnnData object is an outlier.
 
@@ -69,7 +69,7 @@ def load_data(data_path) -> AnnData:
         ValueError: If the file format is unknown.
 
     Note:
-        Currently supports loading of '.h5ad', '.loom', and '.hdf5' file formats.
+        Currently supports loading of '.h5ad', '.loom', and '.h5' file formats.
     """
 
     if isinstance(data_path, str):
@@ -80,16 +80,21 @@ def load_data(data_path) -> AnnData:
     file_extension = data_path.suffix
     match file_extension:
         case ".h5ad":
-            return sc.read(data_path)
+            adata = sc.read_h5ad(data_path)
         case ".loom":
-            return sc.read_loom(data_path)
-        case "hdf5":
-            return sc.read_10x_h5(data_path)
+            adata = sc.read_loom(data_path)
+        case ".h5":
+            adata = sc.read_10x_h5(data_path)
         case _:
-            raise ValueError(f"Unknown file format: {file_extension}")
+            try:
+                adata = sc.read(data_path)
+            except ValueError:
+                raise ValueError(f"Unknown file format: {file_extension}")
+    adata.var_names_make_unique()
+    return adata
 
 
-@gin.configurable
+@gin.configurable(denylist=["sample_id"])
 def quality_control(
     adata: AnnData,
     apply: bool,
@@ -107,6 +112,7 @@ def quality_control(
     pre_qc_plots: Optional[bool] = None,
     post_qc_plots: Optional[bool] = None,
     inplace: bool = True,
+    sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
     """
     Perform quality control on an AnnData object.
@@ -180,6 +186,11 @@ def quality_control(
             figures = "figures/"
         if isinstance(figures, str):
             figures = Path(figures)
+
+        # Make subfolder if a sample ID is passed (analysis of multiple samples)
+        if sample_id:
+            figures = figures / f"{sample_id}/"
+
         figures.mkdir(parents=True, exist_ok=True)
         plot_qc_vars(adata, pre_qc=True, out_dir=figures)
 
@@ -263,6 +274,10 @@ def quality_control(
             figures = "figures/"
         if isinstance(figures, str):
             figures = Path(figures)
+
+        # Make subfolder if a sample ID is passed (analysis of multiple samples)
+        if not pre_qc_plots and sample_id:
+            figures = figures / f"{sample_id}/"
         figures.mkdir(parents=True, exist_ok=True)
         plot_qc_vars(adata, pre_qc=False, out_dir=figures)
 
@@ -726,7 +741,7 @@ def clustering(
     apply: bool,
     method: str = "leiden",
     resolution: Union[
-        float, int, List[Union[float, int]], Tuple[Union[float, int]]
+        float, int, List[Union[float, int]], Tuple[Union[float, int]], Literal["auto"]
     ] = 1.0,
     inplace: bool = True,
 ) -> Optional[AnnData]:
@@ -770,16 +785,19 @@ def clustering(
 
     match method:
         case "leiden":
-            if not isinstance(resolution, (float, int, list, tuple)):
-                raise ValueError(
-                    f"Invalid type for resolution: {type(resolution)}."
-                )
+            if (
+                not isinstance(resolution, (float, int, list, tuple))
+                and resolution != "auto"
+            ):
+                raise ValueError(f"Invalid type for resolution: {type(resolution)}.")
 
-            resolutions = (
-                [resolution]
-                if isinstance(resolution, (float, int))
-                else resolution
-            )
+            if isinstance(resolution, (float, int)):
+                resolutions = [resolution]
+            elif resolution == "auto":
+                resolutions = [0.25] + list(np.linspace(0.5, 1.5, 11)) + [2.0]
+            else:
+                resolutions = resolution
+
             for res in resolutions:
                 sc.tl.leiden(
                     adata=adata,
@@ -788,26 +806,52 @@ def clustering(
                     random_state=0,
                 )
         case False | None:
-            print("No clustering done. Exiting.")
             return None
         case _:
             raise ValueError(f"Clustering method {method} not available.")
+
+    # Choose best resolution according to silhouette score
+    if len(resolutions) > 1:
+        neighbors_params = adata.uns["neighbors"]["params"]
+        metric = neighbors_params["metric"]
+        use_rep = (
+            None if "use_rep" not in neighbors_params else neighbors_params["use_rep"]
+        )
+        n_pcs = None if "n_pcs" not in neighbors_params else neighbors_params["n_pcs"]
+
+        # Use the representation used for neighborhood graph computation
+        X = choose_representation(adata, use_rep=use_rep, n_pcs=n_pcs)
+
+        scores = np.zeros(len(resolutions))
+
+        for i, res in enumerate(resolutions):
+            scores[i] = silhouette_score(
+                X, labels=adata.obs[f"leiden_r{res}"], metric=metric
+            )
+
+        best_res = resolutions[np.argmax(scores)]
+        adata.obs["leiden"] = adata.obs[f"leiden_r{best_res}"]
+
+        adata.uns["MORESCA"]["clustering"]["best_resolution"] = best_res
+        adata.uns["MORESCA"]["clustering"]["resolutions"] = resolutions
+        adata.uns["MORESCA"]["clustering"]["silhouette_scores"] = scores
 
     if not inplace:
         return adata
 
 
-@gin.configurable
+@gin.configurable(denylist=["sample_id"])
 def diff_gene_exp(
     adata: AnnData,
     apply: bool,
     method: str = "wilcoxon",
     groupby: str = "leiden_r1.0",
-    use_raw: bool = False,
-    layer: str = "counts",
-    corr_method: str = "benjamini-hochberg",
-    tables: bool = True,
+    use_raw: Optional[bool] = False,
+    layer: Optional[str] = "counts",
+    corr_method: Literal["benjamini-hochberg", "bonferroni"] = "benjamini-hochberg",
+    tables: Optional[Union[Path, str]] = Path("results/"),
     inplace: bool = True,
+    sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
     """
     Perform differential gene expression analysis on an AnnData object.
@@ -824,7 +868,7 @@ def diff_gene_exp(
         use_raw: Whether to use the raw gene expression data or not.
         layer: The layer in `adata.layers` to use for the differential gene expression analysis.
         corr_method: The method to use for multiple testing correction.
-        tables: Whether to generate result tables or not.
+        tables: The path to the output directory for the differential expression tables.
         inplace: Whether to perform the differential gene expression analysis in-place or return a modified copy of the AnnData object.
 
     Returns:
@@ -870,8 +914,10 @@ def diff_gene_exp(
                     adata=adata,
                     groupby=groupby,
                     method=method,
+                    corr_method=corr_method,
                     use_raw=use_raw,
                     key_added=key_added,
+                    layer=layer,
                 )
 
                 dedf_leiden = sc.get.rank_genes_groups_df(
@@ -883,8 +929,13 @@ def diff_gene_exp(
                 dedf_leiden = dedf_leiden[dedf_leiden["pvals_adj"] < 0.05]
 
                 if tables:
+                    if isinstance(tables, str):
+                        tables = Path(tables)
+                    if sample_id:
+                        tables = Path(tables) / f"{sample_id}/"
+                    tables.mkdir(parents=True, exist_ok=True)
                     with pd.ExcelWriter(
-                        path=f"results/dge_leiden_r{key_added}.xlsx"
+                        path=f"{tables}/dge_leiden_r{key_added}.xlsx"
                     ) as writer:
                         for cluster_id in dedf_leiden.group.unique():
                             df_sub_cl = dedf_leiden[
@@ -903,9 +954,7 @@ def diff_gene_exp(
 
 
 @gin.configurable
-def umap(
-    adata: AnnData, apply: bool, inplace: bool = True
-) -> Optional[AnnData]:
+def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 
@@ -929,13 +978,14 @@ def umap(
         return adata
 
 
-@gin.configurable
+@gin.configurable(denylist=["sample_id"])
 def plotting(
     adata: AnnData,
     apply: bool,
     umap: bool = True,
     path: Path = Path("figures"),
     inplace: bool = True,
+    sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
     # TODO: Check before merging if we changed adata
     if not inplace:
@@ -956,6 +1006,10 @@ def plotting(
         return None
 
     path = Path(path)
+
+    # Make subfolder if a sample ID is passed (analysis of multiple samples)
+    if sample_id:
+        path = path / f"{sample_id}/"
     path.mkdir(parents=True, exist_ok=True)
 
     if umap:

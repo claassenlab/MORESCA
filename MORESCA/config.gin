@@ -3,6 +3,8 @@ quality_control:
     doublet_removal = False
     outlier_removal = False
     min_genes = 200
+    min_counts = 10
+    max_counts = 6000
     min_cells = 10
     n_genes_by_counts = None
     mt_threshold = 10
@@ -54,7 +56,7 @@ diff_gene_exp:
     method = "wilcoxon"
     groupby = "leiden_r1.0"
     use_raw = True
-    tables = False
+    tables = None
 
 umap:
     apply = True

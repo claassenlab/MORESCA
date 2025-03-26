@@ -1,8 +1,9 @@
 from pathlib import Path
+
 import scanpy as sc
+import seaborn as sns
 from anndata import AnnData
 from matplotlib import pyplot as plt
-import seaborn as sns
 
 
 def plot_qc_vars(adata: AnnData, pre_qc: bool, out_dir: Path) -> None:
