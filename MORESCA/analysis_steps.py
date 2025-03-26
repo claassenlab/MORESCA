@@ -525,6 +525,17 @@ def pca(
         If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
     """
 
+    store_config_params(
+        adata=adata,
+        analysis_step=inspect.currentframe().f_code.co_name,
+        apply=apply,
+        params={
+            key: val
+            for key, val in locals().items()
+            if key not in ["adata", "inplace"]
+        },
+    )
+
     if not apply:
         return None
 
@@ -549,29 +560,28 @@ def pca(
     pca_params["params"] = {
         "zero_center": True,
         "use_highly_variable": use_highly_variable,
-        "mask_var": "highly_variable",
+        # "mask_var": "highly_variable",
     }
     pca_params["variance"] = pca_.explained_variance_
     pca_params["variance_ratio"] = pca_.explained_variance_ratio_
 
     adata.obsm["X_pca"] = X_pca[..., :n_comps]
     adata.uns["pca"] = pca_params
-    # adata.varm["PCs"] = pca_.components_.T
-    # Todo: We should take a look at the PCA implementation of Scanpy and see what they are doing there.
-    # https://github.com/scverse/scanpy/blob/79a5a1c323504cf6df1a19f5c6155b2a0628745e/src/scanpy/preprocessing/_pca/__init__.py#L381
-    adata.varm["PCs"] = np.zeros(shape=(adata.n_vars, n_comps))
 
-    # Todo: For both the auto-mode and the threshold-based PCA the values are not stored.
-    store_config_params(
-        adata=adata,
-        analysis_step=inspect.currentframe().f_code.co_name,
-        apply=apply,
-        params={
-            key: val
-            for key, val in locals().items()
-            if key not in ["adata", "inplace", "X_data", "X_pca", "pca_"]
-        },
-    )
+    # Code taken from
+    # https://github.com/scverse/scanpy/blob/79a5a1c323504cf6df1a19f5c6155b2a0628745e/src/scanpy/preprocessing/_pca/__init__.py#L381
+    mask_var = None
+    if use_highly_variable:
+        mask_var = adata.var["highly_variable"].values
+
+    if mask_var is not None:
+        adata.varm["PCs"] = np.zeros(shape=(adata.n_vars, n_comps))
+        adata.varm["PCs"][mask_var] = pca_.components_.T
+    else:
+        adata.varm["PCs"] = pca_.components_.T
+
+    # TODO: Save n_components.
+    adata.uns["MORESCA"]["pca"]["n_components"] = n_components
 
     if not inplace:
         return adata
