@@ -34,7 +34,7 @@ def is_passing_upper(data, nmads, upper_limit=100):
     return data <= upper_bound
 
 
-def is_passing_lower(data, nmads, lower_limit):
+def is_passing_lower(data, nmads, lower_limit=0):
     """
     Check if each value in the given data array is passing the lower limit.
 
@@ -107,8 +107,8 @@ def remove_cells_by_pct_counts(
     rb_pass = is_passing_lower(adata_aux.obs["pct_counts_rb"], nmads=3)
     hb_pass = is_passing_upper(adata_aux.obs["pct_counts_hb"], nmads=3)
 
-    rb_auto_threshold = adata_aux[rb_pass].obs["pct_counts_mt"].min()
-    hb_auto_threshold = adata_aux[hb_pass].obs["pct_counts_mt"].max()
+    rb_auto_threshold = adata_aux[rb_pass].obs["pct_counts_rb"].min()
+    hb_auto_threshold = adata_aux[hb_pass].obs["pct_counts_hb"].max()
 
     match threshold:
         case threshold if isinstance(
