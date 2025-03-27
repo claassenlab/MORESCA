@@ -18,11 +18,15 @@ print(hb_genes.sum())
 rmv_lst = []
 
 sc.pp.calculate_qc_metrics(
-    example_data, qc_vars=["mt", "rb", "hb"], percent_top=[20], log1p=True, inplace=True
+    example_data,
+    qc_vars=["mt", "rb", "hb"],
+    percent_top=[20],
+    log1p=True,
+    inplace=True,
 )
 
 
-# Todo: This should include more cases.
+# TODO: This should include more cases.
 @pytest.mark.parametrize(
     "adata, genes, threshold",
     [
@@ -35,6 +39,7 @@ sc.pp.calculate_qc_metrics(
         (example_data, "mt", 50),
         (example_data, "rb", 50),
         (example_data, "hb", 50),
+        (example_data, "mt", "auto"),
     ],
 )
 def test_remove_cells_by_pct_counts(adata, genes, threshold):
