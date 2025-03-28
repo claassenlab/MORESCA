@@ -949,7 +949,7 @@ def diff_gene_exp(
                         tables = Path(tables) / f"{sample_id}/"
                     tables.mkdir(parents=True, exist_ok=True)
                     with pd.ExcelWriter(
-                        path=f"{tables}/dge_leiden_r{key_added}.xlsx"
+                        path=f"{tables}/dge_{key_added}.xlsx"
                     ) as writer:
                         for cluster_id in dedf_leiden.group.unique():
                             df_sub_cl = dedf_leiden[
