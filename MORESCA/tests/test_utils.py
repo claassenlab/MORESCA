@@ -30,6 +30,9 @@ sc.pp.calculate_qc_metrics(
 @pytest.mark.parametrize(
     "adata, genes, threshold",
     [
+        (example_data, "mt", "auto"),
+        (example_data, "rb", "auto"),
+        (example_data, "hb", "auto"),
         (example_data, "mt", 1),
         (example_data, "rb", 1),
         (example_data, "hb", 1),
@@ -39,12 +42,10 @@ sc.pp.calculate_qc_metrics(
         (example_data, "mt", 50),
         (example_data, "rb", 50),
         (example_data, "hb", 50),
-        (example_data, "mt", "auto"),
-        (example_data, "rb", "auto"),
-        (example_data, "hb", "auto"),
     ],
 )
 def test_remove_cells_by_pct_counts(adata, genes, threshold):
+    adata = adata.copy()
     remove_cells_by_pct_counts(adata=adata, genes=genes, threshold=threshold)
     if threshold != "auto":
         if genes == "rb":
