@@ -1,8 +1,10 @@
+
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![codecov](https://codecov.io/gh/claassenlab/MORESCA/branch/main/graph/badge.svg?token=WHUCNFSPJF)](https://codecov.io/gh/claassenlab/MORESCA)
 [![Python package](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml/badge.svg)](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml)
+
 
 # MORESCA (MOdular and REproducible Single-Cell Analysis)
 
@@ -10,29 +12,16 @@ This repository provides a template  on standardized scRNA-seq analysis using Py
 
 ## Usage
 
-### Setting up the environment
+### Installation
 
-Clone the repository
+We strongly recommend to install MORESCA into a virtual environment. Here, we use Conda:
 
-    git clone git@github.com:claassenlab/MORESCA.git
+    conda create -n <env_name> python=3.12
 
-Change into the directory
+Then, simply install MORESCA with pip:
 
-    cd MORESCA
+    pip install moresca
 
-Create a virtual environment using Conda with Python version >=3.10
-
-    conda create -n <envName> python=3.10
-
-Activate the environment
-
-    conda activate <envName>
-
-Install MORESCA using:
-
-    pip install -e .
-
-This creates a symbolic link, making changes to the code basis instantanious.
 
 ### Calling the template
 
@@ -59,44 +48,72 @@ By default, the used parameter file looks like this:
 ``` yml
 # config.gin
 quality_control:
+    apply = True
     doublet_removal = False
     outlier_removal = False
     min_genes = 200
+    min_counts = 10
+    max_counts = 6000
     min_cells = 10
     n_genes_by_counts = None
-    mt_threshold = 50
+    mt_threshold = 10
     rb_threshold = 10
     hb_threshold = 2
+    figures = "figures/"
+    pre_qc_plots = True
+    post_qc_plots = True
+
+normalization:
+    apply = True
+    method = "PFlog1pPF"
     remove_mt = False
     remove_rb = False
     remove_hb = False
-    remove_custom_genes = None
-normalization:
-    method = "PFlog1pPF"
+
 feature_selection:
+    apply = True
     method = "seurat"
     number_features = 2000
+
 scaling:
     apply = True
     max_value = None
+
 pca:
     apply = True
     n_comps = 50
     use_highly_variable = True
+
 batch_effect_correction:
+    apply = True
     method = "harmony"
     batch_key = None
+
 neighborhood_graph:
+    apply = True
     n_neighbors = 15
     n_pcs = None
+    metric = "cosine"
+
 clustering:
+    apply = True
     method = "leiden"
     resolution = 1.0
+
 diff_gene_exp:
+    apply = True
     method = "wilcoxon"
     groupby = "leiden_r1.0"
     use_raw = True
-    tables = False
+    tables = None
+
+umap:
+    apply = True
+
+plotting:
+    apply = True
+    umap = True
+    path = "figures/"
   ```
 
 The following values of the parameters are currently possible
