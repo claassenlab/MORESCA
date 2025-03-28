@@ -222,22 +222,23 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
     passed = np.ones(adata_copy.n_obs, dtype=bool)
 
     cellwise_mt_threshold = np.zeros(adata_copy.n_obs, dtype=float)
-    cellwise_n_genes_counts_threshold = np.zeros(adata_copy.n_obs, dtype=float)
-    cellwise_total_counts_threshold = np.zeros(adata_copy.n_obs, dtype=float)
+    # cellwise_n_genes_counts_threshold = np.zeros(adata_copy.n_obs, dtype=float)
+    # cellwise_total_counts_threshold = np.zeros(adata_copy.n_obs, dtype=float)
 
     for cluster in adata_copy.obs["leiden"].unique():
         indices = adata_copy.obs["leiden"] == cluster
         pct_counts_mt_cluster = adata_copy.obs.loc[
             indices, "pct_counts_mt"
         ].values
+
+        passing_mask_mt = is_passing_upper(pct_counts_mt_cluster, nmads=3)
+        """
         total_counts_cluster = adata_copy.obs.loc[
             indices, "total_counts"
         ].values
         n_genes_cluster = adata_copy.obs.loc[
             indices, "n_genes_by_counts"
         ].values
-
-        passing_mask_mt = is_passing_upper(pct_counts_mt_cluster, nmads=3)
         passing_mask_counts = is_passing_lower(
             total_counts_cluster, nmads=3, lower_limit=0
         )
@@ -245,9 +246,6 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
             n_genes_cluster, nmads=3, lower_limit=200
         )
 
-        mt_thresh_ = adata_copy.obs["pct_counts_mt"][indices][
-            passing_mask_mt
-        ].max()
         total_thresh_ = adata_copy.obs["total_counts"][indices][
             passing_mask_counts
         ].min()
@@ -255,13 +253,19 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
             passing_mask_genes
         ].min()
 
-        cellwise_mt_threshold[indices][passing_mask_mt] = mt_thresh_
         cellwise_n_genes_counts_threshold[indices][passing_mask_counts] = (
             total_thresh_
         )
         cellwise_total_counts_threshold[indices][passing_mask_genes] = (
             genes_thresh_
         )
+        """
+
+        mt_thresh_ = adata_copy.obs["pct_counts_mt"][indices][
+            passing_mask_mt
+        ].max()
+
+        cellwise_mt_threshold[indices][passing_mask_mt] = mt_thresh_
 
         # & passing_mask_counts & passing_mask_genes
         passed[indices] = passing_mask_mt
