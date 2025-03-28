@@ -10,8 +10,8 @@ license = { text = "AGPL-3.0 license" }
 requires-python = ">=3.10"
 
 authors = [
-    { email = "matthias.bruhns@posteo.de" },
-    { name = "Matthias Bruhns" },
+    { name = "Matthias Bruhns", email = "matthias.bruhns@posteo.de" },
+    { name = "Jan Thomas Schleicher", email = "jan.schleicher@uni-tuebingen.de" },
 ]
 
 keywords = ["workflow management", "scRNA-seq", "reproducibility"]
