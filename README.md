@@ -1,4 +1,3 @@
-
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -39,7 +38,6 @@ Currently, the script will perform the most common operations from doublet remov
 The following example executes the template with the h5ad file example_data.h5ad, the parameter file config.gin and enables both print-statements and figures.
 
 ```python template.py -d example_data.h5ad -p config.gin -v -f```
-
 
 ### Using the config.gin
 
@@ -121,6 +119,7 @@ The following values of the parameters are currently possible
 | Parameter | Values
 | - | -
 | **quality_control**
+| apply | *bool* |
 | doublet_removal | *bool* |
 | doublet_removal | *bool* |
 | min_genes | *int*, *null* |
@@ -128,30 +127,43 @@ The following values of the parameters are currently possible
 | mt_threshold| *float*, *null* |
 | rb_threshold| *float*, *null* |
 | hb_threshold| *float*, *null* |
-| remove_mt| *float*, *null* |
-| remove_rb| *float*, *null* |
-| remove_hb| *float*, *null* |
-| remove_custom_genes| *list(str)*, *null* |
+| figures| *str*|
+| pre_qc_plots | *bool* |
+| post_qc_plots | *bool* |
 | **normalization**
 | method| *log1pCP10k*, *log1PF*, *PFlog1pPF*, *pearson_residuals*, *null*|
+| remove_mt| *bool*, *null* |
+| remove_rb| *bool*, *null* |
+| remove_hb| *bool*, *null* |
+| remove_custom_genes| Not implemented |
 | **feature_selection**
+| apply| *bool* |
 | method| *seurat*, *seurat_v3*, *pearson_residuals*, *anti_correlation*, *null*|
 | number_features| *int*, *null* |
 | **scaling**
 | apply| *bool* |
 | max_value| *int*, *float* |
+| **pca**
+| apply| *bool* |
+| n_comps| *int*, *float* |
+| use_highly_variable| *bool*|
 | **batch_effect_correction**
+| apply| *bool* |
 | method| *harmony*, *null* |
 | batch_key| Not implemented / *null* |
 | **neighborhood_graph**
+| apply| *bool* |
 | n_neighbors| *int* |
 | n_pcs| *int*, *null* |
+| metric| *str* |
 | **clustering**
+| apply| *bool* |
 | method| *str*, *null* |
 | resolution| *float*|
 | **diff_gene_exp**
+| apply| *bool* |
 | method| *wilcoxon*, *logreg*, *t-test*, *t-test_overestim_var* |
-| groupy| *str* |
+| groupby| *str* |
 | use_raw| *bool* |
 | tables| *bool* |
 
