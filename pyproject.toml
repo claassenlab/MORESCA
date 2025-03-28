@@ -26,18 +26,18 @@ classifiers = [
 ]
 
 dependencies = [
-    "scanpy==1.9.3",
-    "doubletdetection==4.2",
-    "harmonypy==0.0.9",
-    "openpyxl==3.1.1",
-    "anticor-features==0.2.0",
-    "numpy==1.23",
-    "gin-config==0.5.0",
-    "loompy==3.0.7",
-    "leidenalg==0.9.1",
-    "igraph==0.10.4",
-    "scikit-misc==0.1.4",
-    "pynndescent>=0.5.10",
+    "scanpy",
+    "doubletdetection",
+    "harmonypy",
+    "openpyxl",
+    "anticor-features",
+    "numpy",
+    "gin-config",
+    "loompy",
+    "leidenalg",
+    "igraph",
+    "scikit-misc",
+    "pynndescent",
 ]
 
 [project.optional-dependencies]
