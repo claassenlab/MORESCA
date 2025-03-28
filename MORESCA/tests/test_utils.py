@@ -18,14 +18,21 @@ print(hb_genes.sum())
 rmv_lst = []
 
 sc.pp.calculate_qc_metrics(
-    example_data, qc_vars=["mt", "rb", "hb"], percent_top=[20], log1p=True, inplace=True
+    example_data,
+    qc_vars=["mt", "rb", "hb"],
+    percent_top=[20],
+    log1p=True,
+    inplace=True,
 )
 
 
-# Todo: This should include more cases.
+# TODO: This should include more cases.
 @pytest.mark.parametrize(
     "adata, genes, threshold",
     [
+        (example_data, "mt", "auto"),
+        (example_data, "rb", "auto"),
+        (example_data, "hb", "auto"),
         (example_data, "mt", 1),
         (example_data, "rb", 1),
         (example_data, "hb", 1),
@@ -38,11 +45,18 @@ sc.pp.calculate_qc_metrics(
     ],
 )
 def test_remove_cells_by_pct_counts(adata, genes, threshold):
+    adata = adata.copy()
+    adata.uns["MORESCA"] = dict()
+    adata.uns["MORESCA"]["quality_control"] = dict()
     remove_cells_by_pct_counts(adata=adata, genes=genes, threshold=threshold)
-    if genes == "rb":
-        assert adata.obs[f"pct_counts_{genes}"].min() > threshold
+    if threshold != "auto":
+        if genes == "rb":
+            assert adata.obs[f"pct_counts_{genes}"].min() > threshold
+        else:
+            assert adata.obs[f"pct_counts_{genes}"].max() < threshold
     else:
-        assert adata.obs[f"pct_counts_{genes}"].max() < threshold
+        # TODO: How should we design this test?
+        pass
 
 
 def test_remove_genes_simple():

@@ -22,46 +22,55 @@ gin.parse_config_file("test-config.gin")
 
 
 def test_quality_control():
-    quality_control(adata=ADATA)
+    adata = ADATA.copy()
+    quality_control(adata=adata)
 
 
 def test_normalization():
-    normalization(adata=ADATA)
+    adata = ADATA.copy()
+    normalization(adata=adata)
 
 
 def test_feature_selection():
-    feature_selection(adata=ADATA)
+    adata = ADATA.copy()
+    feature_selection(adata=adata)
 
 
 def test_scaling():
-    scaling(adata=ADATA)
+    adata = ADATA.copy()
+    scaling(adata=adata)
 
 
 def test_pca():
-    feature_selection(adata=ADATA)
-    pca(adata=ADATA)
+    adata = ADATA.copy()
+    feature_selection(adata=adata)
+    pca(adata=adata)
 
 
 def test_batch_effect_correction():
-    pca(ADATA_BATCH, use_highly_variable=False)
-    batch_effect_correction(adata=ADATA_BATCH)
+    adata_batch = ADATA_BATCH.copy()
+    pca(adata_batch, use_highly_variable=False)
+    batch_effect_correction(adata=adata_batch)
 
 
 def test_neighborhood_graph():
-    feature_selection(adata=ADATA)
-    pca(adata=ADATA)
-    neighborhood_graph(adata=ADATA)
+    adata = ADATA.copy()
+    feature_selection(adata=adata)
+    pca(adata=adata)
+    neighborhood_graph(adata=adata)
 
 
 def test_clustering():
-    feature_selection(adata=ADATA)
-    pca(adata=ADATA)
-    neighborhood_graph(adata=ADATA)
-    clustering(adata=ADATA)
+    adata = ADATA.copy()
+    feature_selection(adata=adata)
+    pca(adata=adata)
+    neighborhood_graph(adata=adata)
+    clustering(adata=adata)
 
 
 def test_diff_gene_exp():
-    pca(adata=ADATA, use_highly_variable=False)
-    neighborhood_graph(adata=ADATA)
-    clustering(adata=ADATA)
-    diff_gene_exp(adata=ADATA)
+    adata = ADATA.copy()
+    pca(adata=adata, use_highly_variable=False)
+    neighborhood_graph(adata=adata)
+    clustering(adata=adata)
+    diff_gene_exp(adata=adata)
