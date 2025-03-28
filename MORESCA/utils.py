@@ -190,6 +190,7 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
 
     Note:
         - The resulting AnnData object will only contain cells that pass the quality control checks.
+        - We modify the published method by only considering the MT threshold.
 
     Todo:
         - The clustering here is possibly not equivalent to our later clustering routine. Should this match?
@@ -219,6 +220,11 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
 
     # Directly apply the quality control checks and create the 'passed' mask
     passed = np.ones(adata_copy.n_obs, dtype=bool)
+
+    cellwise_mt_threshold = np.zeros(adata_copy.n_obs, dtype=float)
+    cellwise_n_genes_counts_threshold = np.zeros(adata_copy.n_obs, dtype=float)
+    cellwise_total_counts_threshold = np.zeros(adata_copy.n_obs, dtype=float)
+
     for cluster in adata_copy.obs["leiden"].unique():
         indices = adata_copy.obs["leiden"] == cluster
         pct_counts_mt_cluster = adata_copy.obs.loc[
@@ -239,12 +245,36 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
             n_genes_cluster, nmads=3, lower_limit=200
         )
 
-        passed[indices] = (
-            passing_mask_mt & passing_mask_counts & passing_mask_genes
+        mt_thresh_ = adata_copy.obs["pct_counts_mt"][indices][
+            passing_mask_mt
+        ].max()
+        total_thresh_ = adata_copy.obs["total_counts"][indices][
+            passing_mask_counts
+        ].min()
+        genes_thresh_ = adata_copy.obs["n_genes_by_counts"][indices][
+            passing_mask_genes
+        ].min()
+
+        cellwise_mt_threshold[indices][passing_mask_mt] = mt_thresh_
+        cellwise_n_genes_counts_threshold[indices][passing_mask_counts] = (
+            total_thresh_
+        )
+        cellwise_total_counts_threshold[indices][passing_mask_genes] = (
+            genes_thresh_
         )
 
-    # TODO: Store the selected thresholds in a suitable format.
+        # & passing_mask_counts & passing_mask_genes
+        passed[indices] = passing_mask_mt
 
+    cellwise_mt_threshold = cellwise_mt_threshold[passed]
+    # cellwise_n_genes_counts_threshold = cellwise_n_genes_counts_threshold[
+    #    passed
+    # ]
+    # cellwise_total_counts_threshold = cellwise_total_counts_threshold[passed]
+
+    adata.uns["MORESCA"]["quality_control"]["mt_threshold_per_cell"] = (
+        cellwise_mt_threshold
+    )
     passed = adata_copy[passed].obs_names
     adata._inplace_subset_obs(passed.values)
 

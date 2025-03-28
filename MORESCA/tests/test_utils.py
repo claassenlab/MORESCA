@@ -46,6 +46,8 @@ sc.pp.calculate_qc_metrics(
 )
 def test_remove_cells_by_pct_counts(adata, genes, threshold):
     adata = adata.copy()
+    adata.uns["MORESCA"] = dict()
+    adata.uns["MORESCA"]["quality_control"] = dict()
     remove_cells_by_pct_counts(adata=adata, genes=genes, threshold=threshold)
     if threshold != "auto":
         if genes == "rb":
