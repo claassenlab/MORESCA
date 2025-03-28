@@ -1,7 +1,3 @@
-
-
-
-
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -16,10 +12,10 @@ This repository provides a template  on standardized scRNA-seq analysis using Py
 
 ### Setting up the environment
 
-Clone the repository 
+Clone the repository
 
     git clone git@github.com:claassenlab/MORESCA.git
-    
+
 Change into the directory
 
     cd MORESCA
@@ -102,15 +98,15 @@ diff_gene_exp:
     use_raw = True
     tables = False
   ```
-  
+
 The following values of the parameters are currently possible
 
-| Parameter | Values 
+| Parameter | Values
 | - | -
-| **quality_control** 
+| **quality_control**
 | doublet_removal | *bool* |
 | doublet_removal | *bool* |
-| min_genes | *int*, *null* | 
+| min_genes | *int*, *null* |
 | min_cells| *int*, *null* |
 | mt_threshold| *float*, *null* |
 | rb_threshold| *float*, *null* |
@@ -142,16 +138,11 @@ The following values of the parameters are currently possible
 | use_raw| *bool* |
 | tables| *bool* |
 
-### Code generator
-
-After deciding for a suitable pipeline and specific parameters, you can create a Python file which reflects the exact step in a minimal fashion. 
-
-
 ## Contributing
 
 For contribution purposes, you should install MORESCA in dev mode:
 
     pip install -e ".[dev]"
 
-This additionally install `flake8`, `Black` and `pylint`, which we use for formatting and code style control. Please run these before you commit new code.
+This additionally installs `ruff` and `pytest`, which we use for formatting and code style control. Please run these before you commit new code.
 Note: This will be made mandatory by using pre-commit hooks.
