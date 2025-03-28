@@ -10,24 +10,20 @@ license = { text = "AGPL-3.0 license" }
 requires-python = ">=3.10"
 
 authors = [
-  {email = "matthias.bruhns@posteo.de"},
-  {name = "Matthias Bruhns"}
+    { email = "matthias.bruhns@posteo.de" },
+    { name = "Matthias Bruhns" },
 ]
 
-keywords = [
-  "workflow management",
-  "scRNA-seq",
-  "reproducibility"
-]
+keywords = ["workflow management", "scRNA-seq", "reproducibility"]
 
 classifiers = [
-        "Development Status :: 1 - Planning",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: GNU Affero General Public License v3",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Topic :: Scientific/Engineering :: Bio-Informatics"
-    ]
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
 
 dependencies = [
     "scanpy==1.9.3",
@@ -41,15 +37,11 @@ dependencies = [
     "leidenalg==0.9.1",
     "igraph==0.10.4",
     "scikit-misc==0.1.4",
-    "pynndescent>=0.5.10"
+    "pynndescent>=0.5.10",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "black==23.1.0",
-    "flake8==6.0.0",
-    "pytest"
-]
+dev = ["ruff", "pytest"]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -104,17 +96,19 @@ quote-style = "double"
 indent-style = "space"
 
 # Like Black, respect magic trailing commas.
-skip-magic-trailing-comma= true
+skip-magic-trailing-comma = true
 
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
 
 #SOURCE: https://stackoverflow.com/a/76739181
 [tool.setuptools.packages.find]
-where = ["."]  # list of folders that contain the packages (["."] by default)
-include = ["MORESCA"]  # package names should match these glob patterns (["*"] by default)
-exclude = []  # exclude packages matching these glob patterns (empty by default)
-namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+where = ["."] # list of folders that contain the packages (["."] by default)
+include = [
+    "MORESCA",
+] # package names should match these glob patterns (["*"] by default)
+exclude = [] # exclude packages matching these glob patterns (empty by default)
+namespaces = false # to disable scanning PEP 420 namespaces (true by default)
 
 [project.scripts]
 moresca = "MORESCA.template:main"
