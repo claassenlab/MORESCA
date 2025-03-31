@@ -52,30 +52,30 @@ By default, the used parameter file looks like this:
 # config.gin
 quality_control:
     apply = True
-    doublet_removal = False
-    outlier_removal = False
+    doublet_removal = True
+    outlier_removal = True
     min_genes = 200
-    min_counts = 10
-    max_counts = 6000
+    min_counts = None
+    max_counts = None
     min_cells = 10
     n_genes_by_counts = None
-    mt_threshold = 10
+    mt_threshold = 15
     rb_threshold = 10
-    hb_threshold = 2
+    hb_threshold = 1
     figures = "figures/"
     pre_qc_plots = True
     post_qc_plots = True
 
 normalization:
     apply = True
-    method = "PFlog1pPF"
+    method = "log1pPF"
     remove_mt = False
     remove_rb = False
     remove_hb = False
 
 feature_selection:
     apply = True
-    method = "seurat"
+    method = "seurat_v3"
     number_features = 2000
 
 scaling:
@@ -84,17 +84,17 @@ scaling:
 
 pca:
     apply = True
-    n_comps = 50
+    n_comps = 100
     use_highly_variable = True
 
 batch_effect_correction:
-    apply = True
+    apply = False
     method = "harmony"
     batch_key = None
 
 neighborhood_graph:
     apply = True
-    n_neighbors = 15
+    n_neighbors = 30
     n_pcs = None
     metric = "cosine"
 
@@ -107,7 +107,8 @@ diff_gene_exp:
     apply = True
     method = "wilcoxon"
     groupby = "leiden_r1.0"
-    use_raw = True
+    use_raw = False
+    layer = "unscaled"
     tables = None
 
 umap:
@@ -170,6 +171,7 @@ The following values of the parameters are currently possible
 | method| *wilcoxon*, *logreg*, *t-test*, *t-test_overestim_var* |
 | groupby| *str* |
 | use_raw| *bool* |
+| layer| *str*, *null* |
 | tables| *bool* |
 
 ## Contributing
