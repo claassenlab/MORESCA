@@ -1,12 +1,11 @@
-
-
-
-
-[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3109/)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3119/)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3128/)
+[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/release/python-3130/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-red)](https://github.com/astral-sh/ruff)
 [![codecov](https://codecov.io/gh/claassenlab/MORESCA/branch/main/graph/badge.svg?token=WHUCNFSPJF)](https://codecov.io/gh/claassenlab/MORESCA)
 [![Python package](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml/badge.svg)](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml)
+
 
 # MORESCA (MOdular and REproducible Single-Cell Analysis)
 
@@ -14,29 +13,19 @@ This repository provides a template  on standardized scRNA-seq analysis using Py
 
 ## Usage
 
-### Setting up the environment
+### Installation
 
-Clone the repository 
+We strongly recommend to install MORESCA into a virtual environment. Here, we use Conda:
 
-    git clone git@github.com:claassenlab/MORESCA.git
-    
-Change into the directory
+    conda create -n <env_name> python=3.12
+    conda activate <env_name>
 
-    cd MORESCA
+Then, simply install MORESCA with pip:
 
-Create a virtual environment using Conda with Python version >=3.10
+    pip install moresca
 
-    conda create -n <envName> python=3.10
-
-Activate the environment
-
-    conda activate <envName>
-
-Install MORESCA using:
-
-    pip install -e .
-
-This creates a symbolic link, making changes to the code basis instantanious.
+> [!IMPORTANT]
+> If you want to use Python 3.13 on MacOS, make sure to use GCC>=16. This is required for compiling scikit-misc. See [this discussion](https://stackoverflow.com/questions/48174684/fortran-codes-wont-compile-on-mac-with-gfortran) for advice.
 
 ### Calling the template
 
@@ -55,7 +44,6 @@ The following example executes the template with the h5ad file example_data.h5ad
 
 ```python template.py -d example_data.h5ad -p config.gin -v -f```
 
-
 ### Using the config.gin
 
 By default, the used parameter file looks like this:
@@ -63,89 +51,126 @@ By default, the used parameter file looks like this:
 ``` yml
 # config.gin
 quality_control:
+    apply = True
     doublet_removal = False
     outlier_removal = False
     min_genes = 200
+    min_counts = 10
+    max_counts = 6000
     min_cells = 10
     n_genes_by_counts = None
-    mt_threshold = 50
+    mt_threshold = 10
     rb_threshold = 10
     hb_threshold = 2
+    figures = "figures/"
+    pre_qc_plots = True
+    post_qc_plots = True
+
+normalization:
+    apply = True
+    method = "PFlog1pPF"
     remove_mt = False
     remove_rb = False
     remove_hb = False
-    remove_custom_genes = None
-normalization:
-    method = "PFlog1pPF"
+
 feature_selection:
+    apply = True
     method = "seurat"
     number_features = 2000
+
 scaling:
     apply = True
     max_value = None
+
 pca:
     apply = True
     n_comps = 50
     use_highly_variable = True
+
 batch_effect_correction:
+    apply = True
     method = "harmony"
     batch_key = None
+
 neighborhood_graph:
+    apply = True
     n_neighbors = 15
     n_pcs = None
+    metric = "cosine"
+
 clustering:
+    apply = True
     method = "leiden"
     resolution = 1.0
+
 diff_gene_exp:
+    apply = True
     method = "wilcoxon"
     groupby = "leiden_r1.0"
     use_raw = True
-    tables = False
+    tables = None
+
+umap:
+    apply = True
+
+plotting:
+    apply = True
+    umap = True
+    path = "figures/"
   ```
-  
+
 The following values of the parameters are currently possible
 
-| Parameter | Values 
+| Parameter | Values
 | - | -
-| **quality_control** 
+| **quality_control**
+| apply | *bool* |
 | doublet_removal | *bool* |
 | doublet_removal | *bool* |
-| min_genes | *int*, *null* | 
+| min_genes | *int*, *null* |
 | min_cells| *int*, *null* |
 | mt_threshold| *float*, *null* |
 | rb_threshold| *float*, *null* |
 | hb_threshold| *float*, *null* |
-| remove_mt| *float*, *null* |
-| remove_rb| *float*, *null* |
-| remove_hb| *float*, *null* |
-| remove_custom_genes| *list(str)*, *null* |
+| figures| *str*|
+| pre_qc_plots | *bool* |
+| post_qc_plots | *bool* |
 | **normalization**
 | method| *log1pCP10k*, *log1PF*, *PFlog1pPF*, *pearson_residuals*, *null*|
+| remove_mt| *bool*, *null* |
+| remove_rb| *bool*, *null* |
+| remove_hb| *bool*, *null* |
+| remove_custom_genes| Not implemented |
 | **feature_selection**
+| apply| *bool* |
 | method| *seurat*, *seurat_v3*, *pearson_residuals*, *anti_correlation*, *null*|
 | number_features| *int*, *null* |
 | **scaling**
 | apply| *bool* |
 | max_value| *int*, *float* |
+| **pca**
+| apply| *bool* |
+| n_comps| *int*, *float* |
+| use_highly_variable| *bool*|
 | **batch_effect_correction**
+| apply| *bool* |
 | method| *harmony*, *null* |
 | batch_key| Not implemented / *null* |
 | **neighborhood_graph**
+| apply| *bool* |
 | n_neighbors| *int* |
 | n_pcs| *int*, *null* |
+| metric| *str* |
 | **clustering**
+| apply| *bool* |
 | method| *str*, *null* |
 | resolution| *float*|
 | **diff_gene_exp**
+| apply| *bool* |
 | method| *wilcoxon*, *logreg*, *t-test*, *t-test_overestim_var* |
-| groupy| *str* |
+| groupby| *str* |
 | use_raw| *bool* |
 | tables| *bool* |
-
-### Code generator
-
-After deciding for a suitable pipeline and specific parameters, you can create a Python file which reflects the exact step in a minimal fashion. 
-
 
 ## Contributing
 
@@ -153,5 +178,5 @@ For contribution purposes, you should install MORESCA in dev mode:
 
     pip install -e ".[dev]"
 
-This additionally install `flake8`, `Black` and `pylint`, which we use for formatting and code style control. Please run these before you commit new code.
+This additionally installs `ruff` and `pytest`, which we use for formatting and code style control. Please run these before you commit new code.
 Note: This will be made mandatory by using pre-commit hooks.

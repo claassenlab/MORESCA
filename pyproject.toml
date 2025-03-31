@@ -7,7 +7,7 @@ name = "moresca"
 version = "0.1.0"
 description = "Reproducible boilerplate-free workflow management for Scanpy-based scRNA-seq analysis."
 license = { text = "AGPL-3.0 license" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 authors = [
     { name = "Matthias Bruhns", email = "matthias.bruhns@posteo.de" },
@@ -20,24 +20,25 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU Affero General Public License v3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
 dependencies = [
-    "scanpy==1.9.3",
-    "doubletdetection==4.2",
-    "harmonypy==0.0.9",
-    "openpyxl==3.1.1",
-    "anticor-features==0.2.0",
-    "numpy==1.23",
-    "gin-config==0.5.0",
-    "loompy==3.0.7",
-    "leidenalg==0.9.1",
-    "igraph==0.10.4",
-    "scikit-misc==0.1.4",
-    "pynndescent>=0.5.10",
+    "scanpy",
+    "doubletdetection",
+    "harmonypy",
+    "openpyxl",
+    "anticor-features",
+    "numpy",
+    "gin-config",
+    "loompy",
+    "leidenalg",
+    "igraph",
+    "scikit-misc",
+    "pynndescent",
 ]
 
 [project.optional-dependencies]
@@ -73,7 +74,7 @@ exclude = [
 line-length = 88
 
 # Assume Python 3.10.
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
