@@ -16,6 +16,7 @@ This repository provides a template  on standardized scRNA-seq analysis using Py
 We strongly recommend to install MORESCA into a virtual environment. Here, we use Conda:
 
     conda create -n <env_name> python=3.12
+    conda activate <env_name>
 
 Then, simply install MORESCA with pip:
 
