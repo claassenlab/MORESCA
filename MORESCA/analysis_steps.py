@@ -54,7 +54,7 @@ def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series:
     )
 
 
-# Todo: Should this happen inplace and just mutate a None-adata?
+# TODO: Should this happen inplace and just mutate a None-adata?
 def load_data(data_path) -> AnnData:
     """
     Load data from a specified file path and return an AnnData object.
@@ -218,7 +218,7 @@ def quality_control(
         case n_genes_by_counts if isinstance(n_genes_by_counts, float | int):
             adata._inplace_subset_obs(adata.obs.n_genes_by_counts < n_genes_by_counts)
         case "auto":
-            pass
+            raise NotImplementedError("auto-mode is not implemented.")
         case False | None:
             print("No removal based on n_genes_by_counts.")
         case _:
@@ -716,7 +716,11 @@ def clustering(
     apply: bool,
     method: str = "leiden",
     resolution: Union[
-        float, int, List[Union[float, int]], Tuple[Union[float, int]], Literal["auto"]
+        float,
+        int,
+        List[Union[float, int]],
+        Tuple[Union[float, int]],
+        Literal["auto"],
     ] = 1.0,
     inplace: bool = True,
 ) -> Optional[AnnData]:
@@ -762,7 +766,9 @@ def clustering(
                 not isinstance(resolution, (float, int, list, tuple))
                 and resolution != "auto"
             ):
-                raise ValueError(f"Invalid type for resolution: {type(resolution)}.")
+                raise ValueError(
+                    f"Invalid type for resolution: {type(resolution)}."
+                )
 
             if isinstance(resolution, (float, int)):
                 resolutions = [resolution]
@@ -788,9 +794,15 @@ def clustering(
         neighbors_params = adata.uns["neighbors"]["params"]
         metric = neighbors_params["metric"]
         use_rep = (
-            None if "use_rep" not in neighbors_params else neighbors_params["use_rep"]
+            None
+            if "use_rep" not in neighbors_params
+            else neighbors_params["use_rep"]
         )
-        n_pcs = None if "n_pcs" not in neighbors_params else neighbors_params["n_pcs"]
+        n_pcs = (
+            None
+            if "n_pcs" not in neighbors_params
+            else neighbors_params["n_pcs"]
+        )
 
         # Use the representation used for neighborhood graph computation
         X = choose_representation(adata, use_rep=use_rep, n_pcs=n_pcs)
@@ -821,7 +833,9 @@ def diff_gene_exp(
     groupby: str = "leiden_r1.0",
     use_raw: Optional[bool] = False,
     layer: Optional[str] = "counts",
-    corr_method: Literal["benjamini-hochberg", "bonferroni"] = "benjamini-hochberg",
+    corr_method: Literal[
+        "benjamini-hochberg", "bonferroni"
+    ] = "benjamini-hochberg",
     tables: Optional[Union[Path, str]] = Path("results/"),
     inplace: bool = True,
     sample_id: Optional[str] = None,
@@ -904,7 +918,7 @@ def diff_gene_exp(
                         tables = Path(tables) / f"{sample_id}/"
                     tables.mkdir(parents=True, exist_ok=True)
                     with pd.ExcelWriter(
-                        path=f"{tables}/dge_leiden_r{key_added}.xlsx"
+                        path=f"{tables}/dge_{key_added}.xlsx"
                     ) as writer:
                         for cluster_id in dedf_leiden.group.unique():
                             df_sub_cl = dedf_leiden[
@@ -921,7 +935,9 @@ def diff_gene_exp(
 
 
 @gin.configurable
-def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]:
+def umap(
+    adata: AnnData, apply: bool, inplace: bool = True
+) -> Optional[AnnData]:
     if not inplace:
         adata = adata.copy()
 

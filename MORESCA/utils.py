@@ -7,7 +7,15 @@ from anndata import AnnData
 from scipy.sparse import csr_matrix
 
 
-def is_passing_upper(data, nmads, upper_limit=0):
+def is_outlier(adata, metric: str, nmads: int):
+    M = adata.obs[metric]
+    outlier = (M < np.median(M) - nmads * ss.median_abs_deviation(M)) | (
+        np.median(M) + nmads * ss.median_abs_deviation(M) < M
+    )
+    return outlier
+
+
+def is_passing_upper(data, nmads, upper_limit=100):
     """
     Check if each value in the given data array is passing the upper limit.
 
@@ -22,11 +30,11 @@ def is_passing_upper(data, nmads, upper_limit=0):
 
     med = np.median(data)
     mad = ss.median_abs_deviation(data)
-    upper_bound = max(med + nmads * mad, upper_limit)
+    upper_bound = min(med + nmads * mad, upper_limit)
     return data <= upper_bound
 
 
-def is_passing_lower(data, nmads, lower_limit):
+def is_passing_lower(data, nmads, lower_limit=0):
     """
     Check if each value in the given data array is passing the lower limit.
 
@@ -79,17 +87,52 @@ def remove_cells_by_pct_counts(
             f"{genes} is not selectable. Accepted values are ['mt', 'rb'', 'hb']"
         )
 
+    # Should we calculate the auto-thresholds here so they are not affected by other values?
+    # E.g., if we filter MT manually, that resulting distribution will be changed, thus
+    # the auto-mode results for RB might be differnt compared to running auto for MT and RB.
+
+    adata_aux = adata.copy()
+
+    adata_aux.var["mt"] = adata_aux.var_names.str.contains("(?i)^MT-")
+    adata_aux.var["rb"] = adata_aux.var_names.str.contains("(?i)^RP[SL]")
+    adata_aux.var["hb"] = adata_aux.var_names.str.contains(
+        "(?i)^HB(?!EGF|S1L|P1).+"
+    )
+
+    sc.pp.calculate_qc_metrics(
+        adata_aux, qc_vars=["mt", "rb", "hb"], percent_top=None, inplace=True
+    )
+
+    # TODO: Should we use nmads=3 or nmads=5 here?
+    rb_pass = is_passing_lower(adata_aux.obs["pct_counts_rb"], nmads=3)
+    hb_pass = is_passing_upper(adata_aux.obs["pct_counts_hb"], nmads=3)
+
+    rb_auto_threshold = adata_aux[rb_pass].obs["pct_counts_rb"].min()
+    hb_auto_threshold = adata_aux[hb_pass].obs["pct_counts_hb"].max()
+
     match threshold:
-        case threshold if isinstance(threshold, (int, float)) and not isinstance(
-            threshold, bool
-        ):
+        case threshold if isinstance(
+            threshold, (int, float)
+        ) and not isinstance(threshold, bool):
             if genes == "rb":
-                adata._inplace_subset_obs(adata.obs[f"pct_counts_{genes}"] > threshold)
+                adata._inplace_subset_obs(
+                    adata.obs[f"pct_counts_{genes}"] > threshold
+                )
             else:
-                adata._inplace_subset_obs(adata.obs[f"pct_counts_{genes}"] < threshold)
+                adata._inplace_subset_obs(
+                    adata.obs[f"pct_counts_{genes}"] < threshold
+                )
         case "auto":
             if genes == "mt":
                 ddqc(adata)
+            elif genes == "rb":
+                adata._inplace_subset_obs(
+                    adata.obs[f"pct_counts_{genes}"] > rb_auto_threshold
+                )
+            elif genes == "hb":
+                adata._inplace_subset_obs(
+                    adata.obs[f"pct_counts_{genes}"] < hb_auto_threshold
+                )
             else:
                 raise ValueError(
                     f"Auto selection for {genes}_threshold not implemented."
@@ -103,7 +146,7 @@ def remove_cells_by_pct_counts(
         return adata
 
 
-# Todo: Is this the best way to do it? Manipulating the list inplace feels like a gotcha.
+# TODO: Is this the best way to do it? Manipulating the list inplace feels like a gotcha.
 def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
     """
     Remove genes from a list based on a specified condition.
@@ -131,7 +174,11 @@ def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
 
 def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
     """
-    Perform Data-Driven Quality Control (DDQC) on an AnnData object.
+    Perform Data-Driven Quality Control (DDQC) on an AnnData object. Described in the publication
+
+    Biology-inspired data-driven quality control for scientific discovery in single-cell transcriptomics
+
+    https://genomebiology.biomedcentral.com/articles/10.1186/s13059-022-02820-w
 
     Args:
         adata: An AnnData object containing the gene expression data.
@@ -143,6 +190,7 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
 
     Note:
         - The resulting AnnData object will only contain cells that pass the quality control checks.
+        - We modify the published method by only considering the MT threshold.
 
     Todo:
         - The clustering here is possibly not equivalent to our later clustering routine. Should this match?
@@ -154,11 +202,11 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
     adata_copy = adata.copy()
 
     sc.pp.calculate_qc_metrics(
-        adata_copy, qc_vars=["mt"], percent_top=None, log1p=False, inplace=True
+        adata_copy, qc_vars=["mt"], percent_top=None, inplace=True
     )
     adata_copy._inplace_subset_obs(adata_copy.obs.pct_counts_mt <= 80)
 
-    # Todo: can this be removed?
+    # TODO: can this be removed?
     adata_copy.layers["counts"] = adata_copy.X.copy()
     sc.pp.normalize_total(adata_copy, target_sum=1e4)
     sc.pp.log1p(adata_copy)
@@ -172,20 +220,65 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
 
     # Directly apply the quality control checks and create the 'passed' mask
     passed = np.ones(adata_copy.n_obs, dtype=bool)
+
+    cellwise_mt_threshold = np.zeros(adata_copy.n_obs, dtype=float)
+    # cellwise_n_genes_counts_threshold = np.zeros(adata_copy.n_obs, dtype=float)
+    # cellwise_total_counts_threshold = np.zeros(adata_copy.n_obs, dtype=float)
+
     for cluster in adata_copy.obs["leiden"].unique():
         indices = adata_copy.obs["leiden"] == cluster
-        pct_counts_mt_cluster = adata_copy.obs.loc[indices, "pct_counts_mt"].values
-        total_counts_cluster = adata_copy.obs.loc[indices, "total_counts"].values
-        n_genes_cluster = adata_copy.obs.loc[indices, "n_genes_by_counts"].values
+        pct_counts_mt_cluster = adata_copy.obs.loc[
+            indices, "pct_counts_mt"
+        ].values
 
         passing_mask_mt = is_passing_upper(pct_counts_mt_cluster, nmads=3)
+        """
+        total_counts_cluster = adata_copy.obs.loc[
+            indices, "total_counts"
+        ].values
+        n_genes_cluster = adata_copy.obs.loc[
+            indices, "n_genes_by_counts"
+        ].values
         passing_mask_counts = is_passing_lower(
             total_counts_cluster, nmads=3, lower_limit=0
         )
-        passing_mask_genes = is_passing_lower(n_genes_cluster, nmads=3, lower_limit=200)
+        passing_mask_genes = is_passing_lower(
+            n_genes_cluster, nmads=3, lower_limit=200
+        )
 
-        passed[indices] = passing_mask_mt & passing_mask_counts & passing_mask_genes
+        total_thresh_ = adata_copy.obs["total_counts"][indices][
+            passing_mask_counts
+        ].min()
+        genes_thresh_ = adata_copy.obs["n_genes_by_counts"][indices][
+            passing_mask_genes
+        ].min()
 
+        cellwise_n_genes_counts_threshold[indices][passing_mask_counts] = (
+            total_thresh_
+        )
+        cellwise_total_counts_threshold[indices][passing_mask_genes] = (
+            genes_thresh_
+        )
+        """
+
+        mt_thresh_ = adata_copy.obs["pct_counts_mt"][indices][
+            passing_mask_mt
+        ].max()
+
+        cellwise_mt_threshold[indices][passing_mask_mt] = mt_thresh_
+
+        # & passing_mask_counts & passing_mask_genes
+        passed[indices] = passing_mask_mt
+
+    cellwise_mt_threshold = cellwise_mt_threshold[passed]
+    # cellwise_n_genes_counts_threshold = cellwise_n_genes_counts_threshold[
+    #    passed
+    # ]
+    # cellwise_total_counts_threshold = cellwise_total_counts_threshold[passed]
+
+    adata.uns["MORESCA"]["quality_control"]["mt_threshold_per_cell"] = (
+        cellwise_mt_threshold
+    )
     passed = adata_copy[passed].obs_names
     adata._inplace_subset_obs(passed.values)
 
@@ -223,7 +316,8 @@ def store_config_params(
     # Store config parameters, depending on whether the step is applied or not
     if not apply:
         params = {
-            key: (False if key == "apply" else None) for key, val in params.items()
+            key: (False if key == "apply" else None)
+            for key, val in params.items()
         }
     adata.uns[uns_key][analysis_step] = {
         key: (list(val) if isinstance(val, tuple) else val)
@@ -232,7 +326,10 @@ def store_config_params(
 
 
 def choose_representation(
-    adata: AnnData, use_rep: Optional[str] = None, n_pcs: Optional[int] = None, **kwargs
+    adata: AnnData,
+    use_rep: Optional[str] = None,
+    n_pcs: Optional[int] = None,
+    **kwargs,
 ) -> Union[np.ndarray, csr_matrix]:
     # Adapted from https://github.com/scverse/scanpy/blob/29e454429bcb41f3150c2516d82a5c4938f124e1/src/scanpy/tools/_utils.py#L17
 
