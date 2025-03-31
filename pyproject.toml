@@ -27,9 +27,6 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
-[project.urls]
-repository = "https://github.com/claassenlab/MORESCA"
-
 dependencies = [
     "scanpy",
     "doubletdetection",
@@ -44,6 +41,9 @@ dependencies = [
     "scikit-misc",
     "pynndescent",
 ]
+
+[project.urls]
+repository = "https://github.com/claassenlab/MORESCA"
 
 [project.optional-dependencies]
 dev = ["ruff", "pytest"]
