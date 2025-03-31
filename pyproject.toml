@@ -17,7 +17,7 @@ authors = [
 keywords = ["workflow management", "scRNA-seq", "reproducibility"]
 
 classifiers = [
-    "Development Status :: 1 - Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU Affero General Public License v3",
     "Programming Language :: Python :: 3.11",
