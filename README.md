@@ -33,8 +33,6 @@ Then, simply install MORESCA with pip:
 | - | -  | - | - |
 | -d, --data | Path | Path to the h5ad file | *data/adata_raw.h5ad*
 | -p, --parameters | Path | Path to the config file | *config.gin* |
-| -v, --verbose | Boolean | If set, prints to output | *False* |
-| -f, --figures | Boolean | If set, figures will be generated | *False* |
 
 By default, ```template.py``` expects the data in ```H5AD``` format to be in ```data```. The two folders ```figures``` and ```results``` are generated on the fly if they don't exist yet.
 
