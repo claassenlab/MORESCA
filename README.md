@@ -38,9 +38,9 @@ By default, ```template.py``` expects the data in ```H5AD``` format to be in ```
 
 Currently, the script will perform the most common operations from doublet removal to DEG analysis of found clusters. If you want to apply ambient RNA correction beforehand, you need to run this separately.
 
-The following example executes the template with the h5ad file example_data.h5ad, the parameter file config.gin and enables both print-statements and figures.
+The following example executes the pipeline with the h5ad file ```example_data.h5ad``, the parameter file config.gin and enables figure generation.
 
-```python template.py -d example_data.h5ad -p config.gin -v -f```
+```moresca -d example_data.h5ad -p config.gin -f```
 
 ### Using the config.gin
 
