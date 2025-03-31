@@ -25,7 +25,7 @@ Then, simply install MORESCA with pip:
     pip install moresca
 
 > [!IMPORTANT]
-> If you want to use Python 3.13 on MacOS, make sure to use GCC>16. This is required for compiling scikit-misc. See [this discussion](https://stackoverflow.com/questions/48174684/fortran-codes-wont-compile-on-mac-with-gfortran) for advice.
+> If you want to use Python 3.13 on MacOS, make sure to use GCC>=16. This is required for compiling scikit-misc. See [this discussion](https://stackoverflow.com/questions/48174684/fortran-codes-wont-compile-on-mac-with-gfortran) for advice.
 
 ### Calling the template
 
