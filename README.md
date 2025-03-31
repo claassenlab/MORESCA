@@ -120,57 +120,61 @@ plotting:
 
 The following values of the parameters are currently possible
 
-| Parameter | Values
-| - | -
-| **quality_control**
+| Parameter | Values |
+| - | - |
+| **quality_control** | |
 | apply | *bool* |
 | doublet_removal | *bool* |
-| doublet_removal | *bool* |
-| min_genes | *int*, *null* |
-| min_cells| *int*, *null* |
-| mt_threshold| *float*, *null* |
-| rb_threshold| *float*, *null* |
-| hb_threshold| *float*, *null* |
-| figures| *str*|
-| pre_qc_plots | *bool* |
-| post_qc_plots | *bool* |
-| **normalization**
-| method| *log1pCP10k*, *log1PF*, *PFlog1pPF*, *pearson_residuals*, *null*|
-| remove_mt| *bool*, *null* |
-| remove_rb| *bool*, *null* |
-| remove_hb| *bool*, *null* |
-| remove_custom_genes| Not implemented |
-| **feature_selection**
-| apply| *bool* |
-| method| *seurat*, *seurat_v3*, *pearson_residuals*, *anti_correlation*, *null*|
-| number_features| *int*, *null* |
-| **scaling**
-| apply| *bool* |
-| max_value| *int*, *float* |
-| **pca**
-| apply| *bool* |
-| n_comps| *int*, *float* |
-| use_highly_variable| *bool*|
-| **batch_effect_correction**
-| apply| *bool* |
-| method| *harmony*, *null* |
-| batch_key| Not implemented / *null* |
-| **neighborhood_graph**
-| apply| *bool* |
-| n_neighbors| *int* |
-| n_pcs| *int*, *null* |
-| metric| *str* |
-| **clustering**
-| apply| *bool* |
-| method| *str*, *null* |
-| resolution| *float*|
-| **diff_gene_exp**
-| apply| *bool* |
-| method| *wilcoxon*, *logreg*, *t-test*, *t-test_overestim_var* |
-| groupby| *str* |
-| use_raw| *bool* |
-| layer| *str*, *null* |
-| tables| *bool* |
+| outlier_removal | *bool* |
+| min_genes | *int*, *float*, *bool*, *None* |
+| min_counts | *int*, *float*, *bool*, *None* |
+| max_counts | *int*, *float*, *bool*, *None* |
+| min_cells | *int*, *float*, *bool*, *None* |
+| n_genes_by_counts | *int*, *float*, *str*, *bool*, *None* |
+| mt_threshold | *int*, *float*, *str*, *bool*, *None* |
+| rb_threshold | *int*, *float*, *str*, *bool*, *None* |
+| hb_threshold | *int*, *float*, *str*, *bool*, *None* |
+| figures | *str*, *Path*, *None* |
+| pre_qc_plots | *bool*, *None* |
+| post_qc_plots | *bool*, *None* |
+| **normalization** | |
+| apply | *bool* |
+| method | *log1pCP10k*, *log1pPF*, *PFlog1pPF*, *analytical_pearson*, *None*, *False* |
+| remove_mt | *bool*, *None* |
+| remove_rb | *bool*, *None* |
+| remove_hb | *bool*, *None* |
+| **feature_selection** | |
+| apply | *bool* |
+| method | *seurat*, *seurat_v3*, *analytical_pearson*, *anti_correlation*, *None*, *False* |
+| number_features | *int*, *None* |
+| **scaling** | |
+| apply | *bool* |
+| max_value | *int*, *float*, *None* |
+| **pca** | |
+| apply | *bool* |
+| n_comps | *int* |
+| use_highly_variable | *bool* |
+| **batch_effect_correction** | |
+| apply | *bool* |
+| method | *harmony*, *None*, *False* |
+| batch_key | *str* |
+| **neighborhood_graph** | |
+| apply | *bool* |
+| n_neighbors | *int* |
+| n_pcs | *int*, *None* |
+| metric | *str* |
+| **clustering** | |
+| apply | *bool* |
+| method | *leiden*, *None*, *False* |
+| resolution | *float*, *int*, *list*, *tuple*, *auto* |
+| **diff_gene_exp** | |
+| apply | *bool* |
+| method | *wilcoxon*, *t-test*, *logreg*, *t-test_overestim_var* |
+| groupby | *str* |
+| use_raw | *bool*, *None* |
+| layer | *str*, *None* |
+| corr_method | *benjamini-hochberg*, *bonferroni* |
+| tables | *str*, *Path*, *None* |
 
 ## Contributing
 
