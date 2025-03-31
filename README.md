@@ -9,7 +9,7 @@
 
 # MORESCA (MOdular and REproducible Single-Cell Analysis)
 
-This repository provides a template  on standardized scRNA-seq analysis using Python and the Scanpy library. All parameters of the workflow are controlled with single config file.
+This repository provides a template  on standardized scRNA-seq analysis using Python and the Scanpy library. All parameters of the workflow are controlled with a single config file.
 
 ## Usage
 
