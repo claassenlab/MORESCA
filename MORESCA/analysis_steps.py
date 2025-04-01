@@ -961,7 +961,7 @@ def plotting(
     adata: AnnData,
     apply: bool,
     umap: bool = True,
-    path: Path = Path("figures"),
+    path: Union[Path, str] = Path("figures"),
     inplace: bool = True,
     sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:

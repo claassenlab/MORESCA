@@ -31,16 +31,17 @@ Then, simply install MORESCA with pip:
 
 | Flag | Type | Description | Default |
 | - | -  | - | - |
-| -d, --data | Path | Path to the h5ad file | *data/adata_raw.h5ad*
-| -p, --parameters | Path | Path to the config file | *config.gin* |
+| -d, --data | Path | Path to the h5ad file. | *data/adata_raw.h5ad* |
+| -o, --output | Path | Path to the output folder for the processed data. | *results* |
+| -p, --parameters | Path | Path to the config file. | *config.gin* |
 
-By default, ```MORESCA``` expects the data in ```H5AD``` format to be in ```data```. The two folders ```figures``` and ```results``` are generated on the fly if they don't exist yet.
+By default, ```moresca``` expects the data in ```H5AD``` format to be in ```data```. The ```output``` directory as well as figure folders specified in the config are generated on the fly if they don't exist yet.
 
 Currently, the script will perform the most common operations from doublet removal to DEG analysis of found clusters. If you want to apply ambient RNA correction beforehand, you need to run this separately.
 
-The following example executes the pipeline with the h5ad file ```example_data.h5ad``, the parameter file config.gin and enables figure generation.
+The following example executes the pipeline with the h5ad file ```example_data.h5ad``` and the parameter file ```config.gin```, saving the output in the folder ```results```.
 
-```moresca -d example_data.h5ad -p config.gin -f```
+    moresca -d example_data.h5ad -o results -p config.gin
 
 ### Using the config.gin
 
@@ -56,7 +57,7 @@ quality_control:
     min_counts = None
     max_counts = None
     min_cells = 10
-    n_genes_by_counts = None
+    max_genes = None
     mt_threshold = 15
     rb_threshold = 10
     hb_threshold = 1
@@ -120,66 +121,74 @@ plotting:
 
 The following values of the parameters are currently possible
 
-| Parameter | Values |
-| - | - |
-| **quality_control** | |
-| apply | *bool* |
-| doublet_removal | *bool* |
-| outlier_removal | *bool* |
-| min_genes | *int*, *float*, *bool*, *None* |
-| min_counts | *int*, *float*, *bool*, *None* |
-| max_counts | *int*, *float*, *bool*, *None* |
-| min_cells | *int*, *float*, *bool*, *None* |
-| n_genes_by_counts | *int*, *float*, *str*, *bool*, *None* |
-| mt_threshold | *int*, *float*, *str*, *bool*, *None* |
-| rb_threshold | *int*, *float*, *str*, *bool*, *None* |
-| hb_threshold | *int*, *float*, *str*, *bool*, *None* |
-| figures | *str*, *Path*, *None* |
-| pre_qc_plots | *bool*, *None* |
-| post_qc_plots | *bool*, *None* |
-| **normalization** | |
-| apply | *bool* |
-| method | *log1pCP10k*, *log1pPF*, *PFlog1pPF*, *analytical_pearson*, *None*, *False* |
-| remove_mt | *bool*, *None* |
-| remove_rb | *bool*, *None* |
-| remove_hb | *bool*, *None* |
-| **feature_selection** | |
-| apply | *bool* |
-| method | *seurat*, *seurat_v3*, *analytical_pearson*, *anti_correlation*, *None*, *False* |
-| number_features | *int*, *None* |
-| **scaling** | |
-| apply | *bool* |
-| max_value | *int*, *float*, *None* |
-| **pca** | |
-| apply | *bool* |
-| n_comps | *int* |
-| use_highly_variable | *bool* |
-| **batch_effect_correction** | |
-| apply | *bool* |
-| method | *harmony*, *None*, *False* |
-| batch_key | *str* |
-| **neighborhood_graph** | |
-| apply | *bool* |
-| n_neighbors | *int* |
-| n_pcs | *int*, *None* |
-| metric | *str* |
-| **clustering** | |
-| apply | *bool* |
-| method | *leiden*, *None*, *False* |
-| resolution | *float*, *int*, *list*, *tuple*, *auto* |
-| **diff_gene_exp** | |
-| apply | *bool* |
-| method | *wilcoxon*, *t-test*, *logreg*, *t-test_overestim_var* |
-| groupby | *str* |
-| use_raw | *bool*, *None* |
-| layer | *str*, *None* |
-| corr_method | *benjamini-hochberg*, *bonferroni* |
-| tables | *str*, *Path*, *None* |
+| Parameter | Values | Description |
+| - | - | - |
+| **quality_control** | | |
+| apply | *bool* | Whether to apply the quality control steps or not. |
+| doublet_removal | *bool* | Whether to perform doublet removal or not. |
+| outlier_removal | *bool* | Whether to remove outliers or not. |
+| min_genes | *int*, *float*, *bool*, *None* | The minimum number of genes required for a cell to pass quality control. |
+| min_counts | *int*, *float*, *bool*, *None* | The minimum total counts required for a cell to pass quality control. |
+| max_counts | *int*, *float*, *bool*, *None* | The maximum total counts allowed for a cell to pass quality control. |
+| min_cells | *int*, *float*, *bool*, *None* | The minimum number of cells required for a gene to pass quality control. |
+| max_genes | *int*, *float*, *str*, *bool*, *None* | The maximum number of genes allowed for a cell to pass quality control. |
+| mt_threshold | *int*, *float*, *str*, *bool*, *None* | The threshold for the percentage of counts in mitochondrial genes (maximum). |
+| rb_threshold | *int*, *float*, *str*, *bool*, *None* | The threshold for the percentage of counts in ribosomal genes (minimum). |
+| hb_threshold | *int*, *float*, *str*, *bool*, *None* | The threshold for the percentage of counts in hemoglobin genes (maximum). |
+| figures | *str*, *Path*, *None* | The path to the output directory for the quality control plots. |
+| pre_qc_plots | *bool*, *None* | Whether to generate plots of QC covariates before quality control or not. |
+| post_qc_plots | *bool*, *None* | Whether to generate plots of QC covariates after quality control or not. |
+| **normalization** | | |
+| apply | *bool* | Whether to apply the normalization steps or not. |
+| method | *log1pCP10k*, *log1pPF*, *PFlog1pPF*, *analytical_pearson*, *None*, *False* | The normalization method to use. |
+| remove_mt | *bool*, *None* | Whether to remove mitochondrial genes or not. |
+| remove_rb | *bool*, *None* | Whether to remove ribosomal genes or not. |
+| remove_hb | *bool*, *None* | Whether to remove hemoglobin genes or not. |
+| **feature_selection** | | |
+| apply | *bool* | Whether to apply the feature selection steps or not. |
+| method | *seurat*, *seurat_v3*, *analytical_pearson*, *anti_correlation*, *None*, *False* | The feature selection method to use. |
+| number_features | *int*, *None* | The number of top features to select (only applicable for certain methods). |
+| **scaling** | | |
+| apply | *bool* | Whether to apply the scaling step or not. |
+| max_value | *int*, *float*, *None* | The maximum value to which the data will be scaled. If None, the data will be scaled to unit variance. |
+| **pca** | | |
+| apply | *bool* | Whether to apply the PCA or not. |
+| n_comps | *int*, *float* | The number of principal components to compute. A float is interpreted as the proportion of the total variance to retain. |
+| use_highly_variable | *bool* | Whether to use highly variable genes for PCA computation. |
+| **batch_effect_correction** | | |
+| apply | *bool* | Whether to apply the batch effect correction or not. |
+| method | *harmony*, *None*, *False* | The batch effect correction method to use. |
+| batch_key | *str* | The key in `adata.obs` that identifies the batches. |
+| **neighborhood_graph** | | |
+| apply | *bool* | Whether to compute the neighborhood graph or not. |
+| n_neighbors | *int* | The number of neighbors to consider for each cell. |
+| n_pcs | *int*, *None* | The number of principal components to use for the computation. |
+| metric | *str* | The distance metric to use for computing the neighborhood graph. |
+| **clustering** | | |
+| apply | *bool* | Whether to perform clustering or not. |
+| method | *leiden*, *None*, *False* | The clustering method to use. |
+| resolution | *float*, *int*, *list*, *tuple*, *auto* | The resolution parameter for the clustering method. Can be a single value or a list of values. |
+| **diff_gene_exp** | | |
+| apply | *bool* | Whether to perform differential gene expression analysis or not. |
+| method | *wilcoxon*, *t-test*, *logreg*, *t-test_overestim_var* | The differential gene expression analysis method to use. |
+| groupby | *str* | The key in `adata.obs` that identifies the groups for comparison. |
+| use_raw | *bool*, *None* | Whether to use the raw gene expression data or not. |
+| layer | *str*, *None* | The layer in `adata.layers` to use for the differential gene expression analysis. |
+| corr_method | *benjamini-hochberg*, *bonferroni* | The method to use for multiple testing correction. |
+| tables | *str*, *Path*, *None* | The path to the output directory for the differential expression tables. |
+| **umap** | | |
+| apply | *bool* | Whether to run UMAP or not. |
+| ** plotting ** | | |
+| apply | *bool* | Whether to create plots or not. |
+| umap | *bool* | Whether to plot the UMAP or not. |
+| path | *str*, *Path* | The path to the output directory for the plots. |
 
 ## Contributing
 
-For contribution purposes, you should install MORESCA in dev mode:
+For contribution purposes, you should clone MORESCA from GitHub and install it in dev mode:
 
+    git clone git@github.com:claassenlab/MORESCA.git
+    cd MORESCA
     pip install -e ".[dev]"
 
 This additionally installs `ruff` and `pytest`, which we use for formatting and code style control. Please run these before you commit new code.
