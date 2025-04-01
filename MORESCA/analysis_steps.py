@@ -134,6 +134,7 @@ def quality_control(
         doublet_removal: Whether to perform doublet removal or not.
         outlier_removal: Whether to remove outliers or not.
         inplace: Whether to perform the quality control steps in-place or return a modified copy of the AnnData object.
+        sample_id: Sample ID for subfolder creation in the output directory. Not gin-configurable.
 
     Returns:
         If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
@@ -505,7 +506,7 @@ def scaling(
 def pca(
     adata: AnnData,
     apply: bool,
-    n_comps: int = 50,
+    n_comps: Union[int, float] = 50,
     use_highly_variable: bool = True,
     inplace: bool = True,
 ) -> Optional[AnnData]:
@@ -515,7 +516,7 @@ def pca(
     Args:
         adata: An AnnData object containing the gene expression data.
         apply: Whether to apply the PCA or not.
-        n_comps: The number of principal components to compute.
+        n_comps: The number of principal components to compute. A float is interpreted as the proportion of the total variance to retain.
         use_highly_variable: Whether to use highly variable genes for PCA computation.
         inplace: Whether to perform the PCA in-place or return a modified copy of the AnnData object.
 
@@ -716,11 +717,7 @@ def clustering(
     apply: bool,
     method: str = "leiden",
     resolution: Union[
-        float,
-        int,
-        List[Union[float, int]],
-        Tuple[Union[float, int]],
-        Literal["auto"],
+        float, int, List[Union[float, int]], Tuple[Union[float, int]], Literal["auto"]
     ] = 1.0,
     inplace: bool = True,
 ) -> Optional[AnnData]:
@@ -766,9 +763,7 @@ def clustering(
                 not isinstance(resolution, (float, int, list, tuple))
                 and resolution != "auto"
             ):
-                raise ValueError(
-                    f"Invalid type for resolution: {type(resolution)}."
-                )
+                raise ValueError(f"Invalid type for resolution: {type(resolution)}.")
 
             if isinstance(resolution, (float, int)):
                 resolutions = [resolution]
@@ -794,15 +789,9 @@ def clustering(
         neighbors_params = adata.uns["neighbors"]["params"]
         metric = neighbors_params["metric"]
         use_rep = (
-            None
-            if "use_rep" not in neighbors_params
-            else neighbors_params["use_rep"]
+            None if "use_rep" not in neighbors_params else neighbors_params["use_rep"]
         )
-        n_pcs = (
-            None
-            if "n_pcs" not in neighbors_params
-            else neighbors_params["n_pcs"]
-        )
+        n_pcs = None if "n_pcs" not in neighbors_params else neighbors_params["n_pcs"]
 
         # Use the representation used for neighborhood graph computation
         X = choose_representation(adata, use_rep=use_rep, n_pcs=n_pcs)
@@ -833,9 +822,7 @@ def diff_gene_exp(
     groupby: str = "leiden_r1.0",
     use_raw: Optional[bool] = False,
     layer: Optional[str] = "counts",
-    corr_method: Literal[
-        "benjamini-hochberg", "bonferroni"
-    ] = "benjamini-hochberg",
+    corr_method: Literal["benjamini-hochberg", "bonferroni"] = "benjamini-hochberg",
     tables: Optional[Union[Path, str]] = Path("results/"),
     inplace: bool = True,
     sample_id: Optional[str] = None,
@@ -857,6 +844,7 @@ def diff_gene_exp(
         corr_method: The method to use for multiple testing correction.
         tables: The path to the output directory for the differential expression tables.
         inplace: Whether to perform the differential gene expression analysis in-place or return a modified copy of the AnnData object.
+        sample_id: Sample ID for subfolder creation in the output directory. Not gin-configurable.
 
     Returns:
         If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
@@ -935,9 +923,18 @@ def diff_gene_exp(
 
 
 @gin.configurable
-def umap(
-    adata: AnnData, apply: bool, inplace: bool = True
-) -> Optional[AnnData]:
+def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]:
+    """
+    Run UMAP on an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to run UMAP or not.
+        inplace: Whether to run the UMAP in-place or return a modified copy of the AnnData object.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+    """
     if not inplace:
         adata = adata.copy()
 
@@ -968,6 +965,20 @@ def plotting(
     inplace: bool = True,
     sample_id: Optional[str] = None,
 ) -> Optional[AnnData]:
+    """
+    Create plots for an AnnData object.
+
+    Args:
+        adata: An AnnData object containing the gene expression data.
+        apply: Whether to create plots or not.
+        umap: Whether to plot the UMAP or not.
+        path: The path to the output directory for the plots.
+        inplace: Whether to perform the differential gene expression analysis in-place or return a modified copy of the AnnData object.
+        sample_id: Sample ID for subfolder creation in the output directory. Not gin-configurable.
+
+    Returns:
+        If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
+    """
     # TODO: Check before merging if we changed adata
     if not inplace:
         adata = adata.copy()
