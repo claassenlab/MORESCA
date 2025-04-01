@@ -5,6 +5,7 @@
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-red)](https://github.com/astral-sh/ruff)
 [![codecov](https://codecov.io/gh/claassenlab/MORESCA/branch/main/graph/badge.svg?token=WHUCNFSPJF)](https://codecov.io/gh/claassenlab/MORESCA)
 [![Python package](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml/badge.svg)](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml)
+[![PyPI - Version](https://img.shields.io/pypi/v/moresca)](https://pypi.org/project/moresca/)
 
 
 # MORESCA (MOdular and REproducible Single-Cell Analysis)
