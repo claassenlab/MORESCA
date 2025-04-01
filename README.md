@@ -34,7 +34,7 @@ Then, simply install MORESCA with pip:
 | -d, --data | Path | Path to the h5ad file | *data/adata_raw.h5ad*
 | -p, --parameters | Path | Path to the config file | *config.gin* |
 
-By default, ```template.py``` expects the data in ```H5AD``` format to be in ```data```. The two folders ```figures``` and ```results``` are generated on the fly if they don't exist yet.
+By default, ```MORESCA``` expects the data in ```H5AD``` format to be in ```data```. The two folders ```figures``` and ```results``` are generated on the fly if they don't exist yet.
 
 Currently, the script will perform the most common operations from doublet removal to DEG analysis of found clusters. If you want to apply ambient RNA correction beforehand, you need to run this separately.
 
