@@ -104,7 +104,7 @@ def quality_control(
     min_counts: Optional[Union[float, int, bool]] = None,
     max_counts: Optional[Union[float, int, bool]] = None,
     min_cells: Optional[Union[float, int, bool]] = None,
-    n_genes_by_counts: Optional[Union[float, int, str, bool]] = None,
+    max_genes: Optional[Union[float, int, str, bool]] = None,
     mt_threshold: Optional[Union[int, float, str, bool]] = None,
     rb_threshold: Optional[Union[int, float, str, bool]] = None,
     hb_threshold: Optional[Union[int, float, str, bool]] = None,
@@ -124,7 +124,7 @@ def quality_control(
         min_counts: The minimum total counts required for a cell to pass quality control.
         max_counts: The maximum total counts allowed for a cell to pass quality control.
         min_cells: The minimum number of cells required for a gene to pass quality control.
-        n_genes_by_counts: The threshold for the number of genes detected per cell.
+        max_genes: The threshold for the number of genes detected per cell.
         mt_threshold: The threshold for the percentage of counts in mitochondrial genes.
         rb_threshold: The threshold for the percentage of counts in ribosomal genes.
         hb_threshold: The threshold for the percentage of counts in hemoglobin genes.
@@ -140,11 +140,11 @@ def quality_control(
         If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
 
     Raises:
-        ValueError: If an invalid value is provided for `n_genes_by_counts`.
+        ValueError: If an invalid value is provided for `max_genes`.
 
     Todo:
         - Implement doublet removal for different batches.
-        - Implement automatic selection of threshold for `n_genes_by_counts`.
+        - Implement automatic selection of threshold for `max_genes`.
     """
 
     if not inplace:
@@ -215,15 +215,15 @@ def quality_control(
 
         adata._inplace_subset_obs(~adata.obs.outlier)
 
-    match n_genes_by_counts:
-        case n_genes_by_counts if isinstance(n_genes_by_counts, float | int):
-            adata._inplace_subset_obs(adata.obs.n_genes_by_counts < n_genes_by_counts)
+    match max_genes:
+        case max_genes if isinstance(max_genes, float | int):
+            sc.pp.filter_cells(adata, max_genes=max_genes)
         case "auto":
             raise NotImplementedError("auto-mode is not implemented.")
         case False | None:
-            print("No removal based on n_genes_by_counts.")
+            print("No removal based on max_genes.")
         case _:
-            raise ValueError("Invalid value for n_genes_by_counts.")
+            raise ValueError("Invalid value for max_genes.")
 
     remove_cells_by_pct_counts(adata=adata, genes="mt", threshold=mt_threshold)
     remove_cells_by_pct_counts(adata=adata, genes="rb", threshold=rb_threshold)
