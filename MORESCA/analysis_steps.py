@@ -1,4 +1,5 @@
 import inspect
+import logging
 import warnings
 from pathlib import Path
 from typing import List, Literal, Optional, Tuple, Union
@@ -33,6 +34,8 @@ except ImportError:
         "Could not import anticor_features,\
         install it using 'pip install anticor-features'"
     )
+
+log = logging.getLogger(__name__)
 
 
 def is_outlier(adata: AnnData, metric: str, nmads: int) -> pd.Series:
@@ -78,6 +81,9 @@ def load_data(data_path) -> AnnData:
         # Todo: Implement this for paths.
         pass
     file_extension = data_path.suffix
+
+    log.info(f"Loading data from {data_path} with file extension {file_extension}.")
+
     match file_extension:
         case ".h5ad":
             adata = sc.read_h5ad(data_path)
@@ -86,6 +92,9 @@ def load_data(data_path) -> AnnData:
         case ".h5":
             adata = sc.read_10x_h5(data_path)
         case _:
+            log.debug(
+                f"Unknown file format: {file_extension}. Trying to read with `sc.read`."
+            )
             try:
                 adata = sc.read(data_path)
             except ValueError:
@@ -162,6 +171,8 @@ def quality_control(
     if not apply:
         return None
 
+    log.info("Performing quality control.")
+
     # Quality control - calculate QC covariates
     adata.obs["n_counts"] = adata.X.sum(1)
     adata.obs["log_counts"] = np.log(adata.obs["n_counts"])
@@ -176,6 +187,7 @@ def quality_control(
     )
 
     if pre_qc_plots:
+        log.debug("Creating pre-QC plots.")
         # Make default directory if figures is None or empty string
         if not figures:
             figures = "figures/"
@@ -190,6 +202,7 @@ def quality_control(
         plot_qc_vars(adata, pre_qc=True, out_dir=figures)
 
     if doublet_removal:
+        log.debug("Performing doublet removal.")
         clf = doubletdetection.BoostClassifier(
             n_iters=10,
             clustering_algorithm="phenograph",
@@ -207,6 +220,7 @@ def quality_control(
         adata._inplace_subset_obs(~adata.obs.doublet)
 
     if outlier_removal:
+        log.debug("Performing outlier removal.")
         adata.obs["outlier"] = (
             is_outlier(adata, "log1p_total_counts", 5)
             | is_outlier(adata, "log1p_n_genes_by_counts", 5)
@@ -217,11 +231,12 @@ def quality_control(
 
     match max_genes:
         case max_genes if isinstance(max_genes, float | int):
+            log.debug(f"Removing cells with more than {max_genes} genes.")
             sc.pp.filter_cells(adata, max_genes=max_genes)
         case "auto":
             raise NotImplementedError("auto-mode is not implemented.")
         case False | None:
-            print("No removal based on max_genes.")
+            log.debug("No removal based on max_genes.")
         case _:
             raise ValueError("Invalid value for max_genes.")
 
@@ -231,37 +246,42 @@ def quality_control(
 
     match min_genes:
         case min_genes if isinstance(min_genes, float | int):
+            log.debug(f"Removing cells with less than {min_genes} genes.")
             sc.pp.filter_cells(adata, min_genes=min_genes)
         case False | None:
-            print("No removal based on min_genes.")
+            log.debug("No removal based on min_genes.")
         case _:
             raise ValueError("Invalid value for min_genes.")
 
     match min_counts:
         case min_counts if isinstance(min_counts, float | int):
+            log.debug(f"Removing cells with less than {min_counts} counts.")
             sc.pp.filter_cells(adata, min_counts=min_counts)
         case False | None:
-            print("No removal based on min_counts.")
+            log.debug("No removal based on min_counts.")
         case _:
             raise ValueError("Invalid value for min_counts.")
 
     match max_counts:
         case max_counts if isinstance(max_counts, float | int):
+            log.debug(f"Removing cells with more than {max_counts} counts.")
             sc.pp.filter_cells(adata, max_counts=max_counts)
         case False | None:
-            print("No removal based on max_counts.")
+            log.debug("No removal based on max_counts.")
         case _:
             raise ValueError("Invalid value for max_counts.")
 
     match min_cells:
         case min_cells if isinstance(min_cells, float | int):
+            log.debug(f"Removing genes expressed in less than {min_cells} cells.")
             sc.pp.filter_genes(adata, min_cells=min_cells)
         case False | None:
-            print("No removal based on min_cells.")
+            log.debug("No removal based on min_cells.")
         case _:
             raise ValueError("Invalid value for min_cells.")
 
     if post_qc_plots:
+        log.debug("Creating post-QC plots.")
         # Make default directory if figures is None or empty string
         if not figures:
             figures = "figures/"
@@ -326,21 +346,31 @@ def normalization(
     if not apply:
         return None
 
+    log.info("Normalizing total counts per cell.")
+
     match method:
         case "log1pCP10k":
+            log.debug("Normalizing total counts to 10,000 and applying log1p.")
             sc.pp.normalize_total(adata, target_sum=10e4)
             sc.pp.log1p(adata)
         case "log1pPF":
+            log.debug(
+                "Normalizing counts per cell to median of total counts and applying log1p."
+            )
             sc.pp.normalize_total(adata, target_sum=None)
             sc.pp.log1p(adata)
         case "PFlog1pPF":
+            log.debug(
+                "Normalizing counts per cell to median of total counts, applying log1p, and normalizing again."
+            )
             sc.pp.normalize_total(adata, target_sum=None)
             sc.pp.log1p(adata)
             sc.pp.normalize_total(adata, target_sum=None)
         case "analytical_pearson":
+            log.debug("Normalizing using analytical Pearson residuals.")
             sc.experimental.pp.normalize_pearson_residuals(adata)
         case None | False:
-            print("No normalization applied.")
+            log.debug("No normalization applied.")
             return None
         case _:
             raise ValueError(f"Normalization method {method} not available.")
@@ -416,18 +446,24 @@ def feature_selection(
     if not apply:
         return None
 
+    log.info("Performing feature selection.")
+
     match method:
         case "seurat":
+            log.debug("Using Seurat's highly variable genes method.")
             sc.pp.highly_variable_genes(adata, flavor=method)
         case "seurat_v3":
+            log.debug("Using Seurat v3's highly variable genes method.")
             sc.pp.highly_variable_genes(
                 adata, flavor=method, n_top_genes=number_features, layer="counts"
             )
         case "analytical_pearson":
+            log.debug("Using analytical Pearson residuals for feature selection.")
             sc.experimental.pp.highly_variable_genes(
                 adata, flavor="pearson_residuals", n_top_genes=number_features
             )
         case "anti_correlation":
+            log.debug("Using anti-correlation method for feature selection.")
             warnings.warn(
                 "This feature selection is currently only implemented for human data!",
                 category=RuntimeWarning,
@@ -448,7 +484,7 @@ def feature_selection(
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
         case False | None:
             # Todo: Should this be a warning?
-            print("No feature selection applied.")
+            log.debug("No feature selection applied.")
             return None
         case _:
             raise ValueError(
@@ -496,6 +532,8 @@ def scaling(
     if not apply:
         return None
 
+    log.info("Scaling data.")
+
     sc.pp.scale(adata, max_value=max_value)
 
     if not inplace:
@@ -536,12 +574,16 @@ def pca(
     if not apply:
         return None
 
+    log.info("Performing PCA.")
+
     if not inplace:
         adata = adata.copy()
 
     if use_highly_variable:
+        log.debug("Using highly variable genes for PCA.")
         X_data = adata[:, adata.var.highly_variable.values].X
     else:
+        log.debug("Using all genes for PCA.")
         X_data = adata.X.copy()
 
     if n_comps == "auto":
@@ -633,8 +675,11 @@ def batch_effect_correction(
             return adata
         return None
 
+    log.info("Performing batch effect correction.")
+
     match method:
         case "harmony":
+            log.debug("Using Harmony for batch effect correction.")
             if "X_pca" not in adata.obsm_keys():
                 raise KeyError("X_pca not in adata.obsm. Run PCA first.")
             sce.pp.harmony_integrate(
@@ -645,7 +690,7 @@ def batch_effect_correction(
                 max_iter_harmony=50,
             )
         case False | None:
-            print("No batch effect correction applied.")
+            log.debug("No batch effect correction applied.")
             return None
         case _:
             raise ValueError("Invalid choice for batch effect correction method.")
@@ -692,6 +737,8 @@ def neighborhood_graph(
 
     if not apply:
         return None
+
+    log.info("Computing neighborhood graph.")
 
     # Compute neighbors graph based on corrected PCA if batch integration was performed, otherwise use PCA
     sc.pp.neighbors(
@@ -757,8 +804,11 @@ def clustering(
     if not apply:
         return None
 
+    log.info("Performing clustering.")
+
     match method:
         case "leiden":
+            log.debug("Using Leiden algorithm for clustering.")
             if (
                 not isinstance(resolution, (float, int, list, tuple))
                 and resolution != "auto"
@@ -766,10 +816,14 @@ def clustering(
                 raise ValueError(f"Invalid type for resolution: {type(resolution)}.")
 
             if isinstance(resolution, (float, int)):
+                log.debug(f"Using single resolution {resolution} for clustering.")
                 resolutions = [resolution]
             elif resolution == "auto":
+                log.debug("Using auto resolution for clustering.")
                 resolutions = [0.25] + list(np.linspace(0.5, 1.5, 11)) + [2.0]
+                log.debug(f"Tested resolutions: {[float(r) for r in resolutions]}.")
             else:
+                log.debug(f"Using multiple resolutions {resolution} for clustering.")
                 resolutions = resolution
 
             for res in resolutions:
@@ -780,6 +834,7 @@ def clustering(
                     random_state=0,
                 )
         case False | None:
+            log.debug("No clustering applied.")
             return None
         case _:
             raise ValueError(f"Clustering method {method} not available.")
@@ -804,6 +859,7 @@ def clustering(
             )
 
         best_res = resolutions[np.argmax(scores)]
+        log.debug(f"Best resolution: {best_res}.")
         adata.obs["leiden"] = adata.obs[f"leiden_r{best_res}"]
 
         adata.uns["MORESCA"]["clustering"]["best_resolution"] = best_res
@@ -869,6 +925,8 @@ def diff_gene_exp(
     if not apply:
         return None
 
+    log.info("Determining differentially expressed genes.")
+
     with warnings.catch_warnings():
         warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
@@ -881,6 +939,9 @@ def diff_gene_exp(
                 "t-test_overestim_var",
             }:
                 key_added = f"{groupby}_{method}"
+                log.debug(
+                    f"Using method {method}; storing results in adata.uns['{key_added}']."
+                )
                 sc.tl.rank_genes_groups(
                     adata=adata,
                     groupby=groupby,
@@ -904,6 +965,7 @@ def diff_gene_exp(
                         tables = Path(tables)
                     if sample_id:
                         tables = Path(tables) / f"{sample_id}/"
+                    log.debug(f"Saving differential expression tables to {tables}.")
                     tables.mkdir(parents=True, exist_ok=True)
                     with pd.ExcelWriter(
                         path=f"{tables}/dge_{key_added}.xlsx"
@@ -915,7 +977,7 @@ def diff_gene_exp(
                             df_sub_cl.to_excel(writer, sheet_name=f"c{cluster_id}")
 
             case False | None:
-                print("No DGE performed.")
+                log.debug("No DGE performed.")
                 return None
 
     if not inplace:
@@ -949,6 +1011,8 @@ def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]
 
     if not apply:
         return None
+
+    log.info("Running UMAP.")
 
     sc.tl.umap(adata=adata)
 
@@ -995,6 +1059,8 @@ def plotting(
     if not apply:
         return None
 
+    log.info("Creating plots.")
+
     path = Path(path)
 
     # Make subfolder if a sample ID is passed (analysis of multiple samples)
@@ -1003,6 +1069,7 @@ def plotting(
     path.mkdir(parents=True, exist_ok=True)
 
     if umap:
+        log.debug("Creating UMAP plot.")
         sc.pl.umap(adata=adata, show=False)
         plt.savefig(Path(path, "umap.png"))
         plt.close()

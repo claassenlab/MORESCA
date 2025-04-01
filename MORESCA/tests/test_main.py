@@ -16,7 +16,7 @@ CONFIG_PATH = Path("test-config.gin")
 
 
 def test_run_analysis():
-    run_analysis(DATA_PATH, config_path=CONFIG_PATH, verbose=False)
+    run_analysis(DATA_PATH, config_path=CONFIG_PATH)
 
 
 @pytest.mark.parametrize(
@@ -63,5 +63,5 @@ def test_main(data_path: list, output_path: list):
 
 
 def test_moresca():
-    cmd = ["moresca", "-d", DATA_PATH, "-p", CONFIG_PATH]
+    cmd = ["moresca", "-d", DATA_PATH, "-p", CONFIG_PATH, "-v"]
     subprocess.run(cmd, check=True)

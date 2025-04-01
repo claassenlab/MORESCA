@@ -1,10 +1,13 @@
 import argparse
+import logging
+import logging.config
 from pathlib import Path
 from typing import List, Union
 
 import gin
 
 import MORESCA
+import MORESCA.analysis_steps
 from MORESCA.analysis_steps import (
     batch_effect_correction,
     clustering,
@@ -20,11 +23,12 @@ from MORESCA.analysis_steps import (
     umap,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def run_analysis(
     data_path: Union[Path, List[Path]],
     config_path: Path,
-    verbose: bool = False,
     result_path: Union[Path, List[Path]] = Path("results"),
 ) -> None:
     # Check if data_path and result_path are lists or single paths
@@ -50,6 +54,7 @@ def run_analysis(
         res_path.mkdir(parents=True, exist_ok=True)
 
         if len(data_path) > 1:
+            logger.info(f"Processing dataset {i + 1}/{len(data_path)}.")
             sample_id = f"s{i + 1:02d}"
 
         # Run analysis steps
@@ -74,6 +79,10 @@ def run_analysis(
         sample_str = ""
         if len(data_path) > 1 and len(result_path) == 1:
             sample_str = f"_{sample_id}"
+        if sample_id is not None:
+            logger.info(f"Saving results for dataset {i + 1}/{len(data_path)}.")
+        else:
+            logger.info("Saving results.")
         adata.write(Path(res_path, f"data_processed{sample_str}.h5ad"))
 
 
@@ -114,12 +123,49 @@ def main():
 
     args = parser.parse_args()
 
-    run_analysis(
-        data_path=args.data,
-        result_path=args.output,
-        config_path=args.parameters,
-        verbose=args.verbose,
+    # Setup logging
+    log_dir = Path("log")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    logging_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.config.dictConfig(
+        {
+            "version": 1,
+            "formatters": {
+                "simple": {
+                    "format": "[%(asctime)s][%(module)s][%(levelname)s] - %(message)s",
+                    "datefmt": "%Y-%m-%d %H:%M:%S",
+                }
+            },
+            "handlers": {
+                "console": {"class": logging.StreamHandler, "formatter": "simple"},
+                "file": {
+                    "class": logging.FileHandler,
+                    "formatter": "simple",
+                    "filename": log_dir / "moresca.log",
+                    "mode": "w",
+                },
+            },
+            "loggers": {
+                __name__: {"handlers": ["console", "file"], "level": logging_level},
+                MORESCA.analysis_steps.__name__: {
+                    "handlers": ["console", "file"],
+                    "level": logging_level,
+                },
+                MORESCA.utils.__name__: {
+                    "handlers": ["console", "file"],
+                    "level": logging_level,
+                },
+            },
+        }
     )
+    logger.info("Starting MORESCA analysis.")
+    logger.debug(f"Passed arguments: {args}")
+
+    run_analysis(
+        data_path=args.data, result_path=args.output, config_path=args.parameters
+    )
+
+    logger.info("Finished MORESCA analysis.")
 
 
 if __name__ == "__main__":

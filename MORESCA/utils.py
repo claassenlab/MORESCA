@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, Union
 
 import numpy as np
@@ -5,6 +6,8 @@ import scanpy as sc
 import scipy.stats as ss
 from anndata import AnnData
 from scipy.sparse import csr_matrix
+
+log = logging.getLogger(__name__)
 
 
 def is_outlier(adata, metric: str, nmads: int):
@@ -95,9 +98,7 @@ def remove_cells_by_pct_counts(
 
     adata_aux.var["mt"] = adata_aux.var_names.str.contains("(?i)^MT-")
     adata_aux.var["rb"] = adata_aux.var_names.str.contains("(?i)^RP[SL]")
-    adata_aux.var["hb"] = adata_aux.var_names.str.contains(
-        "(?i)^HB(?!EGF|S1L|P1).+"
-    )
+    adata_aux.var["hb"] = adata_aux.var_names.str.contains("(?i)^HB(?!EGF|S1L|P1).+")
 
     sc.pp.calculate_qc_metrics(
         adata_aux, qc_vars=["mt", "rb", "hb"], percent_top=None, inplace=True
@@ -111,18 +112,16 @@ def remove_cells_by_pct_counts(
     hb_auto_threshold = adata_aux[hb_pass].obs["pct_counts_hb"].max()
 
     match threshold:
-        case threshold if isinstance(
-            threshold, (int, float)
-        ) and not isinstance(threshold, bool):
+        case threshold if isinstance(threshold, (int, float)) and not isinstance(
+            threshold, bool
+        ):
+            log.debug(f"Filtering cells for {genes} with threshold {threshold}.")
             if genes == "rb":
-                adata._inplace_subset_obs(
-                    adata.obs[f"pct_counts_{genes}"] > threshold
-                )
+                adata._inplace_subset_obs(adata.obs[f"pct_counts_{genes}"] > threshold)
             else:
-                adata._inplace_subset_obs(
-                    adata.obs[f"pct_counts_{genes}"] < threshold
-                )
+                adata._inplace_subset_obs(adata.obs[f"pct_counts_{genes}"] < threshold)
         case "auto":
+            log.debug(f"Filtering cells for {genes} with auto mode.")
             if genes == "mt":
                 ddqc(adata)
             elif genes == "rb":
@@ -138,7 +137,7 @@ def remove_cells_by_pct_counts(
                     f"Auto selection for {genes}_threshold not implemented."
                 )
         case False | None:
-            print(f"No {genes} filter applied.")
+            log.debug(f"No {genes} filter applied.")
         case _:
             raise ValueError("Error.")
 
@@ -165,6 +164,7 @@ def remove_genes(gene_lst: list, rmv_lst: list, gene_key) -> None:
 
     match gene_key:
         case True:
+            log.debug("Removing genes from list.")
             rmv_lst.append(gene_lst)
         case False | None:
             pass
@@ -227,9 +227,7 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
 
     for cluster in adata_copy.obs["leiden"].unique():
         indices = adata_copy.obs["leiden"] == cluster
-        pct_counts_mt_cluster = adata_copy.obs.loc[
-            indices, "pct_counts_mt"
-        ].values
+        pct_counts_mt_cluster = adata_copy.obs.loc[indices, "pct_counts_mt"].values
 
         passing_mask_mt = is_passing_upper(pct_counts_mt_cluster, nmads=3)
         """
@@ -261,9 +259,7 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
         )
         """
 
-        mt_thresh_ = adata_copy.obs["pct_counts_mt"][indices][
-            passing_mask_mt
-        ].max()
+        mt_thresh_ = adata_copy.obs["pct_counts_mt"][indices][passing_mask_mt].max()
 
         cellwise_mt_threshold[indices][passing_mask_mt] = mt_thresh_
 
@@ -316,8 +312,7 @@ def store_config_params(
     # Store config parameters, depending on whether the step is applied or not
     if not apply:
         params = {
-            key: (False if key == "apply" else None)
-            for key, val in params.items()
+            key: (False if key == "apply" else None) for key, val in params.items()
         }
     adata.uns[uns_key][analysis_step] = {
         key: (list(val) if isinstance(val, tuple) else val)
@@ -326,10 +321,7 @@ def store_config_params(
 
 
 def choose_representation(
-    adata: AnnData,
-    use_rep: Optional[str] = None,
-    n_pcs: Optional[int] = None,
-    **kwargs,
+    adata: AnnData, use_rep: Optional[str] = None, n_pcs: Optional[int] = None, **kwargs
 ) -> Union[np.ndarray, csr_matrix]:
     # Adapted from https://github.com/scverse/scanpy/blob/29e454429bcb41f3150c2516d82a5c4938f124e1/src/scanpy/tools/_utils.py#L17
 
