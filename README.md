@@ -179,7 +179,7 @@ The following values of the parameters are currently possible
 | tables | *str*, *Path*, *None* | The path to the output directory for the differential expression tables. |
 | **umap** | | |
 | apply | *bool* | Whether to run UMAP or not. |
-| ** plotting ** | | |
+| **plotting** | | |
 | apply | *bool* | Whether to create plots or not. |
 | umap | *bool* | Whether to plot the UMAP or not. |
 | path | *str*, *Path* | The path to the output directory for the plots. |
