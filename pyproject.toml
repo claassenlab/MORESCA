@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "moresca"
-version = "0.1.1"
+dynamic = ["version"]
 readme = "README.md"
 description = "Reproducible boilerplate-free workflow management for Scanpy-based scRNA-seq analysis."
 license = { text = "AGPL-3.0 license" }
@@ -47,6 +47,8 @@ repository = "https://github.com/claassenlab/MORESCA"
 
 [project.optional-dependencies]
 dev = ["ruff", "pytest"]
+
+[tool.setuptools_scm]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
