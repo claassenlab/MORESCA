@@ -77,7 +77,7 @@ exclude = [
 # Same as Black.
 line-length = 88
 
-# Assume Python 3.10.
+# Assume Python 3.12.
 target-version = "py312"
 
 [tool.ruff.lint]
@@ -116,4 +116,4 @@ exclude = [] # exclude packages matching these glob patterns (empty by default)
 namespaces = false # to disable scanning PEP 420 namespaces (true by default)
 
 [project.scripts]
-moresca = "MORESCA.template:main"
+moresca = "MORESCA.main:main"
