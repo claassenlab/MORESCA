@@ -40,6 +40,8 @@ dependencies = [
     "igraph",
     "scikit-misc",
     "pynndescent",
+    "triku",
+    "hotspotsc",
 ]
 
 [project.urls]
