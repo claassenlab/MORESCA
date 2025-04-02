@@ -126,7 +126,7 @@ def main():
     # Setup logging
     log_dir = Path("log")
     log_dir.mkdir(parents=True, exist_ok=True)
-    logging_level = logging.DEBUG if args.verbose else logging.INFO
+    logging_level = "DEBUG" if args.verbose else "INFO"
     logging.config.dictConfig(
         {
             "version": 1,
@@ -137,9 +137,9 @@ def main():
                 }
             },
             "handlers": {
-                "console": {"class": logging.StreamHandler, "formatter": "simple"},
+                "console": {"class": "logging.StreamHandler", "formatter": "simple"},
                 "file": {
-                    "class": logging.FileHandler,
+                    "class": "logging.FileHandler",
                     "formatter": "simple",
                     "filename": log_dir / "moresca.log",
                     "mode": "w",
