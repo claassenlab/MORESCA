@@ -35,6 +35,7 @@ Then, simply install MORESCA with pip:
 | -d, --data | Path | Path to the h5ad file. | *data/adata_raw.h5ad* |
 | -o, --output | Path | Path to the output folder for the processed data. | *results* |
 | -p, --parameters | Path | Path to the config file. | *config.gin* |
+| -v, --verbose | Flag | Generate verbose logs. | |
 
 By default, ```moresca``` expects the data in ```H5AD``` format to be in ```data```. The ```output``` directory as well as figure folders specified in the config are generated on the fly if they don't exist yet.
 

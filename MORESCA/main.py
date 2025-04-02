@@ -118,7 +118,7 @@ def main():
         help="Path to the config.gin.",
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Set verbosity level."
+        "-v", "--verbose", action="store_true", help="Generate verbose logs."
     )
 
     args = parser.parse_args()
