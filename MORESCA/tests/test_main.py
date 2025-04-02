@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import scanpy as sc
 
-from MORESCA.template import run_analysis
+from MORESCA.main import run_analysis
 
 ADATA = sc.datasets.pbmc3k()
 ADATA.obs["batch"] = 1350 * ["a"] + 1350 * ["b"]
@@ -16,7 +16,7 @@ CONFIG_PATH = Path("test-config.gin")
 
 
 def test_run_analysis():
-    run_analysis(DATA_PATH, config_path=CONFIG_PATH, verbose=False)
+    run_analysis(DATA_PATH, config_path=CONFIG_PATH)
 
 
 @pytest.mark.parametrize(
@@ -43,9 +43,9 @@ def test_run_analysis_exception(data_path: list, output_path: list):
         ([DATA_PATH, DATA_PATH], ["res/1", "res/2"]),
     ],
 )
-def test_template(data_path: list, output_path: list):
+def test_main(data_path: list, output_path: list):
     cmd = (
-        ["python3", "../template.py", "-d"]
+        ["python3", "../main.py", "-d"]
         + data_path
         + ["-o"]
         + output_path
@@ -63,5 +63,5 @@ def test_template(data_path: list, output_path: list):
 
 
 def test_moresca():
-    cmd = ["moresca", "-d", DATA_PATH, "-p", CONFIG_PATH]
+    cmd = ["moresca", "-d", DATA_PATH, "-p", CONFIG_PATH, "-v"]
     subprocess.run(cmd, check=True)

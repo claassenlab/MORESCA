@@ -6,7 +6,7 @@ quality_control:
     min_counts = 10
     max_counts = 6000
     min_cells = 10
-    n_genes_by_counts = 8000
+    max_genes = 8000
     mt_threshold = "auto"
     rb_threshold = 10
     hb_threshold = 2
