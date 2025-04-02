@@ -6,7 +6,7 @@ quality_control:
     min_counts = None
     max_counts = None
     min_cells = 10
-    max_genes = None
+    n_genes_by_counts = None
     mt_threshold = 15
     rb_threshold = 10
     hb_threshold = 1
@@ -24,6 +24,7 @@ normalization:
 feature_selection:
     apply = True
     method = "seurat_v3"
+    species = "hsapiens"
     number_features = 2000
 
 scaling:
