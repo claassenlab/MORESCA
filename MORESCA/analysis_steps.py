@@ -469,6 +469,7 @@ def feature_selection(
                 "Anti-correlation feature selection is currently only implemented for human data!"
             )
 
+            # TODO: Is this needed? Installation guarantees the installation.
             if anti_cor_import_error:
                 raise ImportError(
                     "Anti_cor is not available.\
@@ -480,6 +481,12 @@ def feature_selection(
             )
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
+        case "triku":
+            log.debug("Using TRIKU for feature selection.")
+            pass
+        case "hotspot":
+            log.debug("Using Hotspot for feature selection.")
+            pass
         case False | None:
             # TODO: Should this be a warning?
             log.debug("No feature selection applied.")
