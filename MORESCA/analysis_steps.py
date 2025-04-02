@@ -464,15 +464,14 @@ def feature_selection(
             )
         case "anti_correlation":
             log.debug("Using anti-correlation method for feature selection.")
-            warnings.warn(
-                "This feature selection is currently only implemented for human data!",
-                category=RuntimeWarning,
+            log.warning(
+                "Anti-correlation feature selection is currently only implemented for human data!"
             )
             # This is experimental and has to be tested and discussed!
-            # Todo: Implement mapping for species according to provided YAML.
+            # TODO: Implement mapping for species according to provided YAML.
 
             if anti_cor_import_error:
-                warnings.warn(
+                raise ImportError(
                     "Anti_cor is not available.\
                     Install it using 'pip install anticor-features."
                 )
@@ -483,7 +482,7 @@ def feature_selection(
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
         case False | None:
-            # Todo: Should this be a warning?
+            # TODO: Should this be a warning?
             log.debug("No feature selection applied.")
             return None
         case _:
@@ -495,7 +494,7 @@ def feature_selection(
         return adata
 
 
-# Todo: This is just a wrapper, to make the usage of config.gin consistent.
+# TODO: This is just a wrapper, to make the usage of config.gin consistent.
 # Does this make sense?
 @gin.configurable
 def scaling(
