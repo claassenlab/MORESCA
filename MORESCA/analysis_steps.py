@@ -12,6 +12,7 @@ import pandas as pd
 import scanpy as sc
 import scanpy.external as sce
 import scipy.stats as ss
+import triku as tk
 from anndata import AnnData
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
@@ -415,6 +416,7 @@ def feature_selection(
             - "seurat_v3": Use Seurat v3's highly variable genes method.
             - "analytical_pearson": Use analytical Pearson residuals for feature selection.
             - "anti_correlation": Use anti-correlation method for feature selection (currently only implemented for human data).
+        species: The species for which to perform the anti-correlation feature selection..
         number_features: The number of top features to select (only applicable for certain methods).
         inplace: Whether to perform the feature selection steps in-place or return a modified copy of the AnnData object.
 
@@ -482,8 +484,17 @@ def feature_selection(
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
         case "triku":
-            log.debug("Using TRIKU for feature selection.")
-            pass
+            log.debug("Using Triku for feature selection.")
+            adata_copy = adata.copy()
+            # TODO: Ensure that data is not logged twice.
+            sc.pp.log1p(adata_copy)
+            sc.pp.pca(adata_copy)
+            sc.pp.neighbors(adata_copy)
+            tk.tl.triku(adata_copy)
+
+            adata.var["highly_variable"] = adata_copy.var["highly_variable"]
+            del adata_copy
+
         case "hotspot":
             log.debug("Using Hotspot for feature selection.")
             pass
