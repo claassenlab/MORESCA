@@ -76,6 +76,7 @@ normalization:
 
 feature_selection:
     apply = True
+    species = "hsapiens"
     method = "seurat_v3"
     number_features = 2000
 
