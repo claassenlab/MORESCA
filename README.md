@@ -123,6 +123,9 @@ plotting:
 
 The following values of the parameters are currently possible
 
+> [!NOTE]
+> The parameter ```species``` is only used for the feature selection based on anti-correlation. For available values [here](https://biit.cs.ut.ee/gprofiler/page/organism-list). It defaults to ```hsapiens```.
+
 | Parameter | Values | Description |
 | - | - | - |
 | **quality_control** | | |

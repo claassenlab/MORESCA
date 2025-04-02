@@ -400,6 +400,7 @@ def feature_selection(
     adata: AnnData,
     apply: bool,
     method: Optional[str] = "seurat",
+    species: Optional[str] = "hsapiens",
     number_features: Optional[int] = None,
     inplace: bool = True,
 ) -> Optional[AnnData]:
@@ -467,8 +468,6 @@ def feature_selection(
             log.warning(
                 "Anti-correlation feature selection is currently only implemented for human data!"
             )
-            # This is experimental and has to be tested and discussed!
-            # TODO: Implement mapping for species according to provided YAML.
 
             if anti_cor_import_error:
                 raise ImportError(
@@ -477,7 +476,7 @@ def feature_selection(
                 )
 
             anti_cor_table = get_anti_cor_genes(
-                adata.X.T, adata.var.index.tolist(), species="hsapiens"
+                adata.X.T, adata.var.index.tolist(), species=species
             )
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
