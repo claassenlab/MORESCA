@@ -18,11 +18,7 @@ print(hb_genes.sum())
 rmv_lst = []
 
 sc.pp.calculate_qc_metrics(
-    example_data,
-    qc_vars=["mt", "rb", "hb"],
-    percent_top=[20],
-    log1p=True,
-    inplace=True,
+    example_data, qc_vars=["mt", "rb", "hb"], percent_top=[20], log1p=True, inplace=True
 )
 
 
