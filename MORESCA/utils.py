@@ -216,7 +216,7 @@ def ddqc(adata: AnnData, inplace: bool = True) -> Optional[AnnData]:
     sc.pp.scale(adata_copy)
     sc.tl.pca(adata_copy)
     sc.pp.neighbors(adata_copy, n_neighbors=20, n_pcs=50, metric="euclidean")
-    sc.tl.leiden(adata_copy, resolution=1.4)
+    sc.tl.leiden(adata_copy, resolution=1.4, flavor="igraph", n_iterations=2)
 
     # Directly apply the quality control checks and create the 'passed' mask
     passed = np.ones(adata_copy.n_obs, dtype=bool)

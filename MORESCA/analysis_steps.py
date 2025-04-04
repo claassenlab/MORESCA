@@ -463,7 +463,10 @@ def feature_selection(
         case "analytical_pearson":
             log.debug("Using analytical Pearson residuals for feature selection.")
             sc.experimental.pp.highly_variable_genes(
-                adata, flavor="pearson_residuals", n_top_genes=number_features
+                adata,
+                flavor="pearson_residuals",
+                n_top_genes=number_features,
+                layer="counts",
             )
         case "anti_correlation":
             log.debug("Using anti-correlation method for feature selection.")
@@ -479,7 +482,10 @@ def feature_selection(
                 )
 
             anti_cor_table = get_anti_cor_genes(
-                adata.X.T, adata.var.index.tolist(), species=species
+                adata.X.T,
+                adata.var.index.tolist(),
+                species=species,
+                pre_remove_pathways=False,
             )
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
@@ -846,6 +852,8 @@ def clustering(
                 sc.tl.leiden(
                     adata=adata,
                     resolution=res,
+                    flavor="igraph",
+                    n_iterations=2,
                     key_added=f"leiden_r{res}",
                     random_state=0,
                 )
