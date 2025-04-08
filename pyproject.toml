@@ -40,7 +40,7 @@ dependencies = [
     "igraph",
     "scikit-misc",
     "pynndescent",
-    "triku",
+    "triku@git+https://github.com/mbruhns/triku",
     "hotspotsc",
 ]
 
