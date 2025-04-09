@@ -22,7 +22,6 @@ def test_normalization(method, remove_mt, remove_rb, remove_hb):
     adata = ADATA.copy()
     sc.pp.filter_cells(adata, min_genes=50)
     sc.pp.filter_genes(adata, min_cells=10)
-    sc.pp.log1p(adata)
     normalization(
         adata=adata,
         apply=True,
