@@ -40,6 +40,8 @@ dependencies = [
     "igraph",
     "scikit-misc",
     "pynndescent",
+    "triku@git+https://github.com/mbruhns/triku",
+    "hotspotsc@git+https://github.com/YosefLab/Hotspot.git@workflow",
 ]
 
 [project.urls]
