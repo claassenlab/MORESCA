@@ -1,3 +1,30 @@
+import logging
+import warnings
+from typing import Optional
+
+import gin
+import hotspot
+import scanpy as sc
+import triku as tk
+from anndata import AnnData
+from scipy.sparse import csc_matrix
+
+from MORESCA.utils import store_config_params
+
+try:
+    from anticor_features.anticor_features import get_anti_cor_genes
+
+    anti_cor_import_error = False
+except ImportError:
+    anti_cor_import_error = True
+    warnings.warn(
+        "Could not import anticor_features,\
+        install it using 'pip install anticor-features'"
+    )
+
+log = logging.getLogger(__name__)
+
+
 @gin.configurable
 def feature_selection(
     adata: AnnData,

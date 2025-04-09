@@ -1,3 +1,15 @@
+import logging
+from typing import Optional
+
+import gin
+import scanpy as sc
+from anndata import AnnData
+
+from MORESCA.utils import store_config_params
+
+log = logging.getLogger(__name__)
+
+
 @gin.configurable
 def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]:
     """
@@ -16,7 +28,7 @@ def umap(adata: AnnData, apply: bool, inplace: bool = True) -> Optional[AnnData]
 
     store_config_params(
         adata=adata,
-        analysis_step=plotting.__name__,
+        analysis_step=umap.__name__,
         apply=apply,
         params={
             key: val for key, val in locals().items() if key not in ["adata", "inplace"]
