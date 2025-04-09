@@ -6,10 +6,10 @@
 
 - Add logging.
 - Additional feature selection methods:
-    - Analytical Pearson residuals
-    - Anticorrelated features
-    - triku
-    - hotspot
+    - Analytical Pearson residuals (<a href=https://doi.org/10.1186/s13059-021-02451-7 target="_blank">Lause et al. 2021</a>)
+    - Anticorrelated features (<a href="https://doi.org/10.1038/s41467-023-43406-9" target="_blank">Tyler et al. 2024</a>)
+    - Triku (<a href="https://doi.org/10.1093/gigascience/giac017" target="_blank">Ascensión et al. 2022</a>)
+    - Hotspot (<a href="https://doi.org/10.1016/j.cels.2021.04.005" target="_blank">DeTomaso et al. 2021</a>)
 - Documentation.
 
 
