@@ -1,34 +1,6 @@
-[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3119/)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3128/)
-[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/release/python-3130/)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-red)](https://github.com/astral-sh/ruff)
-[![codecov](https://codecov.io/gh/claassenlab/MORESCA/branch/main/graph/badge.svg?token=WHUCNFSPJF)](https://codecov.io/gh/claassenlab/MORESCA)
-[![Python package](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml/badge.svg)](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml)
-[![PyPI - Version](https://img.shields.io/pypi/v/moresca)](https://pypi.org/project/moresca/)
+# Usage
 
-
-# MORESCA (MOdular and REproducible Single-Cell Analysis)
-
-This repository provides a template  on standardized scRNA-seq analysis using Python and the Scanpy library. All parameters of the workflow are controlled with a single config file.
-
-## Usage
-
-### Installation
-
-We strongly recommend to install MORESCA into a virtual environment. Here, we use Conda:
-
-    conda create -n <env_name> python=3.12
-    conda activate <env_name>
-
-Then, simply install MORESCA with pip:
-
-    pip install moresca
-
-> [!IMPORTANT]
-> If you want to use Python 3.13 on MacOS, make sure to use GCC>=16. This is required for compiling scikit-misc. See [this discussion](https://stackoverflow.com/questions/48174684/fortran-codes-wont-compile-on-mac-with-gfortran) for advice.
-
-### Calling the template
+## General command line usage
 
 | Flag | Type | Description | Default |
 | - | -  | - | - |
@@ -45,11 +17,11 @@ The following example executes the pipeline with the h5ad file ```example_data.h
 
     moresca -d example_data.h5ad -o results -p config.gin
 
-### Using the config.gin
+## Using the config.gin
 
 By default, the used parameter file looks like this:
 
-``` yml
+``` yaml
 # config.gin
 quality_control:
     apply = True
@@ -124,8 +96,9 @@ plotting:
 
 The following values of the parameters are currently possible
 
-> [!NOTE]
-> The parameter ```species``` is only used for the feature selection based on anti-correlation. For available values check [here](https://biit.cs.ut.ee/gprofiler/page/organism-list). It defaults to ```hsapiens```.
+```{note}
+The parameter ```species``` is only used for the feature selection based on anti-correlation. For available values check [here](https://biit.cs.ut.ee/gprofiler/page/organism-list). It defaults to ```hsapiens```.
+```
 
 | Parameter | Values | Description |
 | - | - | - |
@@ -189,14 +162,3 @@ The following values of the parameters are currently possible
 | apply | *bool* | Whether to create plots or not. |
 | umap | *bool* | Whether to plot the UMAP or not. |
 | path | *str*, *Path* | The path to the output directory for the plots. |
-
-## Contributing
-
-For contribution purposes, you should clone MORESCA from GitHub and install it in dev mode:
-
-    git clone git@github.com:claassenlab/MORESCA.git
-    cd MORESCA
-    pip install -e ".[dev]"
-
-This additionally installs `ruff` and `pytest`, which we use for formatting and code style control. Please run these before you commit new code.
-Note: This will be made mandatory by using pre-commit hooks.

@@ -49,6 +49,12 @@ repository = "https://github.com/claassenlab/MORESCA"
 
 [project.optional-dependencies]
 dev = ["ruff", "pytest"]
+doc = [
+    "sphinx",
+    "sphinx-book-theme",
+    "sphinx-copybutton",
+    "myst-parser",
+]
 
 [tool.setuptools_scm]
 
