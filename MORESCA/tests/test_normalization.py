@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import scanpy as sc
 
-from MORESCA.analysis_steps import normalization
+from MORESCA.pipeline import normalization
 
 ADATA = sc.datasets.pbmc3k()
 ADATA.layers["counts"] = ADATA.X.copy()

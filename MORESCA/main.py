@@ -150,12 +150,12 @@ def main():
                 MORESCA.pipeline.__name__: {
                     "handlers": ["console", "file"],
                     "level": logging_level,
-                    "propagate": False # Avoid duplicate logs if root is configured
+                    "propagate": False,  # Avoid duplicate logs if root is configured
                 },
                 MORESCA.utils.__name__: {
                     "handlers": ["console", "file"],
                     "level": logging_level,
-                    "propagate": False # Avoid duplicate logs if root is configured
+                    "propagate": False,  # Avoid duplicate logs if root is configured
                 },
             },
         }

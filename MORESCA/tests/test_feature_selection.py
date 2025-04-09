@@ -3,7 +3,7 @@ import sys
 import pytest
 import scanpy as sc
 
-from MORESCA.analysis_steps import feature_selection
+from MORESCA.pipeline import feature_selection
 
 ADATA = sc.datasets.pbmc3k()
 ADATA.layers["counts"] = ADATA.X.copy()
