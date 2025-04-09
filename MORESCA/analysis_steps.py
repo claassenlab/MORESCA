@@ -485,7 +485,7 @@ def feature_selection(
                 adata.X.T,
                 adata.var.index.tolist(),
                 species=species,
-                pre_remove_pathways=False,
+                pre_remove_pathways=[],
             )
             anti_cor_table.fillna(value=False, axis=None, inplace=True)
             adata.var["highly_variable"] = anti_cor_table.selected.copy()
