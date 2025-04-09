@@ -7,8 +7,7 @@ from typing import List, Union
 import gin
 
 import MORESCA
-import MORESCA.analysis_steps
-from MORESCA.analysis_steps import (
+from MORESCA.pipeline import (
     batch_effect_correction,
     clustering,
     diff_gene_exp,
@@ -130,9 +129,10 @@ def main():
     logging.config.dictConfig(
         {
             "version": 1,
+            "disable_existing_loggers": False,
             "formatters": {
                 "simple": {
-                    "format": "[%(asctime)s][%(module)s][%(levelname)s] - %(message)s",
+                    "format": "[%(asctime)s][%(name)s][%(levelname)s] - %(message)s",
                     "datefmt": "%Y-%m-%d %H:%M:%S",
                 }
             },
@@ -147,13 +147,15 @@ def main():
             },
             "loggers": {
                 __name__: {"handlers": ["console", "file"], "level": logging_level},
-                MORESCA.analysis_steps.__name__: {
+                MORESCA.pipeline.__name__: {
                     "handlers": ["console", "file"],
                     "level": logging_level,
+                    "propagate": False # Avoid duplicate logs if root is configured
                 },
                 MORESCA.utils.__name__: {
                     "handlers": ["console", "file"],
                     "level": logging_level,
+                    "propagate": False # Avoid duplicate logs if root is configured
                 },
             },
         }
