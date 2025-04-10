@@ -1,6 +1,7 @@
 import argparse
 import logging
 import logging.config
+from datetime import datetime
 from pathlib import Path
 from typing import List, Union
 
@@ -141,7 +142,8 @@ def main():
                 "file": {
                     "class": "logging.FileHandler",
                     "formatter": "simple",
-                    "filename": log_dir / "moresca.log",
+                    "filename": log_dir
+                    / f"moresca_{datetime.now().strftime('%Y%m%d-%H%M%S')}.log",
                     "mode": "w",
                 },
             },
@@ -150,12 +152,12 @@ def main():
                 MORESCA.pipeline.__name__: {
                     "handlers": ["console", "file"],
                     "level": logging_level,
-                    "propagate": False,  # Avoid duplicate logs if root is configured
+                    "propagate": True,  # Avoid duplicate logs if root is configured
                 },
                 MORESCA.utils.__name__: {
                     "handlers": ["console", "file"],
                     "level": logging_level,
-                    "propagate": False,  # Avoid duplicate logs if root is configured
+                    "propagate": True,  # Avoid duplicate logs if root is configured
                 },
             },
         }
