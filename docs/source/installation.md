@@ -20,6 +20,7 @@ For contribution purposes, you should clone MORESCA from GitHub and install it i
     git clone git@github.com:claassenlab/MORESCA.git
     cd MORESCA
     pip install -e ".[dev]"
+    pre-commit install
 
 This additionally installs `ruff` and `pytest`, which we use for formatting and code style control. Please run these before you commit new code.
-Note: This will be made mandatory by using pre-commit hooks.
+Additionally, it will set up a pre-commit hook to run `ruff`.
