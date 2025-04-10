@@ -1,7 +1,7 @@
 import gin
 import scanpy as sc
 
-from MORESCA.analysis_steps import (
+from MORESCA.pipeline import (
     batch_effect_correction,
     clustering,
     diff_gene_exp,

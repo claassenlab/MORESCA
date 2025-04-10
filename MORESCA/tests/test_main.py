@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -45,7 +46,7 @@ def test_run_analysis_exception(data_path: list, output_path: list):
 )
 def test_main(data_path: list, output_path: list):
     cmd = (
-        ["python3", "../main.py", "-d"]
+        [sys.executable, "../main.py", "-d"]
         + data_path
         + ["-o"]
         + output_path

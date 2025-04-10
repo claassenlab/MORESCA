@@ -48,7 +48,7 @@ dependencies = [
 repository = "https://github.com/claassenlab/MORESCA"
 
 [project.optional-dependencies]
-dev = ["ruff", "pytest"]
+dev = ["ruff", "pytest", "pre-commit"]
 
 [tool.setuptools_scm]
 
