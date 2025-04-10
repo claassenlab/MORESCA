@@ -60,7 +60,7 @@ def quality_control(
         If `inplace` is True, returns None. Otherwise, returns a modified copy of the AnnData object.
 
     Raises:
-        ValueError: If an invalid value is provided for `max_genes`.
+        ValueError: If an invalid value is provided for `max_genes`, `min_genes`, `min_counts`, `max_counts`, or `min_cells`.
 
     Todo:
         - Implement doublet removal for different batches.
