@@ -56,13 +56,6 @@ def feature_selection(
 
     Raises:
         ValueError: If an invalid feature selection method is provided.
-
-    Warnings:
-        - The "anti_correlation" method is currently only implemented for human data.
-        - If the "anti_correlation" method is selected and the `anticor-features` package is not installed, a warning will be raised.
-
-    Todo:
-        - Implement mapping for species according to provided YAML for the "anti_correlation" method.
     """
 
     if not inplace:
