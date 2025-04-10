@@ -104,7 +104,7 @@ def clustering(
 
                 if method == "phenograph":
                     adata.obs.rename(
-                        columns={"pheno_leiden": f"pheno_r{res}"}, inplace=True
+                        columns={"pheno_leiden": f"phenograph_r{res}"}, inplace=True
                     )
 
         case False | None:

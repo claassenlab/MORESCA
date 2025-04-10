@@ -19,4 +19,4 @@ sc.pp.neighbors(ADATA)
 @pytest.mark.parametrize("resolution", [0.5, 1, 2, [0.1, 0.2, 0.3], "auto"])
 def test_clustering(method, resolution):
     adata = ADATA.copy()
-    clustering(adata=adata, apply=True, method=method, inplace=True)
+    clustering(adata=adata, resolution=resolution, apply=True, method=method, inplace=True)
