@@ -8,9 +8,8 @@ import numpy as np
 import scanpy as sc
 from anndata import AnnData
 
-from MORESCA.pipeline.is_outlier import is_outlier
 from MORESCA.plotting import plot_qc_vars
-from MORESCA.utils import remove_cells_by_pct_counts, store_config_params
+from MORESCA.utils import is_outlier, remove_cells_by_pct_counts, store_config_params
 
 log = logging.getLogger(__name__)
 

@@ -1,8 +1,3 @@
-import os
-from pathlib import Path
-from typing import List, Literal, Tuple, Union
-
-import numpy as np
 import pytest
 import scanpy as sc
 
