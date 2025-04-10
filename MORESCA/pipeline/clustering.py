@@ -4,6 +4,7 @@ from typing import List, Literal, Optional, Tuple, Union
 import gin
 import numpy as np
 import scanpy as sc
+import scanpy.external as sce
 from anndata import AnnData
 from sklearn.metrics import silhouette_score
 
@@ -60,9 +61,22 @@ def clustering(
 
     log.info("Performing clustering.")
 
+    method_config = {
+        "leiden": (
+            sc.tl.leiden,
+            {"n_iterations": -1, "flavor": "igraph", "random_state": 0},
+        ),
+        "phenograph": (
+            sce.tl.phenograph,
+            {"clustering_algo": "leiden", "n_iterations": -1, "seed": 0},
+        ),
+    }
+
+    func_to_call, params_to_use = method_config[method]
+
     match method:
-        case "leiden":
-            log.debug("Using Leiden algorithm for clustering.")
+        case "leiden" | "phenograph":
+            log.debug(f"Using {method} algorithm for clustering.")
             if (
                 not isinstance(resolution, (float, int, list, tuple))
                 and resolution != "auto"
@@ -81,14 +95,18 @@ def clustering(
                 resolutions = resolution
 
             for res in resolutions:
-                sc.tl.leiden(
-                    adata=adata,
-                    resolution=res,
-                    flavor="igraph",
-                    n_iterations=2,
-                    key_added=f"leiden_r{res}",
-                    random_state=0,
-                )
+                if method == "leiden":
+                    params_to_use["resolution"] = res
+                    params_to_use["key_added"] = f"{method}_r{res}"
+                elif method == "phenograph":
+                    params_to_use["resolution_parameter"] = res
+                func_to_call(adata, **params_to_use)
+
+                if method == "phenograph":
+                    adata.obs.rename(
+                        columns={"pheno_leiden": f"pheno_r{res}"}, inplace=True
+                    )
+
         case False | None:
             log.debug("No clustering applied.")
             return None
@@ -111,12 +129,12 @@ def clustering(
 
         for i, res in enumerate(resolutions):
             scores[i] = silhouette_score(
-                X, labels=adata.obs[f"leiden_r{res}"], metric=metric
+                X, labels=adata.obs[f"{method}_r{res}"], metric=metric
             )
 
         best_res = resolutions[np.argmax(scores)]
         log.debug(f"Best resolution: {best_res}.")
-        adata.obs["leiden"] = adata.obs[f"leiden_r{best_res}"]
+        adata.obs[method] = adata.obs[f"{method}_r{best_res}"]
 
         adata.uns["MORESCA"]["clustering"]["best_resolution"] = best_res
         adata.uns["MORESCA"]["clustering"]["resolutions"] = resolutions
