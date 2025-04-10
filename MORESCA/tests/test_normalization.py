@@ -1,12 +1,7 @@
-import os
-from pathlib import Path
-from typing import List, Literal, Tuple, Union
-
-import numpy as np
 import pytest
 import scanpy as sc
 
-from MORESCA.analysis_steps import normalization
+from MORESCA.pipeline import normalization
 
 ADATA = sc.datasets.pbmc3k()
 ADATA.layers["counts"] = ADATA.X.copy()
@@ -22,7 +17,6 @@ def test_normalization(method, remove_mt, remove_rb, remove_hb):
     adata = ADATA.copy()
     sc.pp.filter_cells(adata, min_genes=50)
     sc.pp.filter_genes(adata, min_cells=10)
-    sc.pp.log1p(adata)
     normalization(
         adata=adata,
         apply=True,

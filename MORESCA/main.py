@@ -1,14 +1,14 @@
 import argparse
 import logging
 import logging.config
+from datetime import datetime
 from pathlib import Path
 from typing import List, Union
 
 import gin
 
 import MORESCA
-import MORESCA.analysis_steps
-from MORESCA.analysis_steps import (
+from MORESCA.pipeline import (
     batch_effect_correction,
     clustering,
     diff_gene_exp,
@@ -130,9 +130,10 @@ def main():
     logging.config.dictConfig(
         {
             "version": 1,
+            "disable_existing_loggers": False,
             "formatters": {
                 "simple": {
-                    "format": "[%(asctime)s][%(module)s][%(levelname)s] - %(message)s",
+                    "format": "[%(asctime)s][%(name)s][%(levelname)s] - %(message)s",
                     "datefmt": "%Y-%m-%d %H:%M:%S",
                 }
             },
@@ -141,19 +142,22 @@ def main():
                 "file": {
                     "class": "logging.FileHandler",
                     "formatter": "simple",
-                    "filename": log_dir / "moresca.log",
+                    "filename": log_dir
+                    / f"moresca_{datetime.now().strftime('%Y%m%d-%H%M%S')}.log",
                     "mode": "w",
                 },
             },
             "loggers": {
                 __name__: {"handlers": ["console", "file"], "level": logging_level},
-                MORESCA.analysis_steps.__name__: {
+                MORESCA.pipeline.__name__: {
                     "handlers": ["console", "file"],
                     "level": logging_level,
+                    "propagate": True,  # Avoid duplicate logs if root is configured
                 },
                 MORESCA.utils.__name__: {
                     "handlers": ["console", "file"],
                     "level": logging_level,
+                    "propagate": True,  # Avoid duplicate logs if root is configured
                 },
             },
         }

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import scanpy as sc
 
-from MORESCA.analysis_steps import (
+from MORESCA.pipeline import (
     clustering,
     feature_selection,
     load_data,
