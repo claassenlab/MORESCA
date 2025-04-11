@@ -6,6 +6,7 @@
 [![codecov](https://codecov.io/gh/claassenlab/MORESCA/branch/main/graph/badge.svg?token=WHUCNFSPJF)](https://codecov.io/gh/claassenlab/MORESCA)
 [![Python package](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml/badge.svg)](https://github.com/claassenlab/MORESCA/actions/workflows/python-package.yml)
 [![PyPI - Version](https://img.shields.io/pypi/v/moresca)](https://pypi.org/project/moresca/)
+[![readthedocs](https://readthedocs.org/projects/MORESCA/badge/?version=latest)](https://moresca.readthedocs.io)
 
 
 # MORESCA (MOdular and REproducible Single-Cell Analysis)
