@@ -1,6 +1,6 @@
 # Release notes
 
-## Version 0.2.0 ({small}`2025-04-10`)
+## Version 0.2.0 ({small}`2025-04-11`)
 
 ### Changes
 
