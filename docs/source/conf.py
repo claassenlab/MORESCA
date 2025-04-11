@@ -38,7 +38,6 @@ html_theme_options = dict(
     repository_url="https://github.com/claassenlab/MORESCA/",
     repository_branch="main",
 )
-html_static_path = ["_static"]
 html_title = "MORESCA"
 
 
