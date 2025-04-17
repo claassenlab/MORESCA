@@ -41,8 +41,7 @@ dependencies = [
     "scikit-misc",
     "pynndescent",
     "phenograph",
-    "triku@git+https://github.com/mbruhns/triku",
-    "hotspotsc@git+https://github.com/YosefLab/Hotspot.git@workflow",
+    "triku>=2.2",
 ]
 
 [project.urls]
@@ -50,12 +49,7 @@ repository = "https://github.com/claassenlab/MORESCA"
 
 [project.optional-dependencies]
 dev = ["ruff", "pytest", "pre-commit"]
-doc = [
-    "sphinx",
-    "sphinx-book-theme",
-    "sphinx-copybutton",
-    "myst-parser",
-]
+doc = ["sphinx", "sphinx-book-theme", "sphinx-copybutton", "myst-parser"]
 
 [tool.setuptools_scm]
 
