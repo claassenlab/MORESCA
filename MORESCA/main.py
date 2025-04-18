@@ -8,6 +8,7 @@ from typing import List, Union
 import gin
 
 import MORESCA
+import MORESCA.validation
 from MORESCA.pipeline import (
     batch_effect_correction,
     clustering,
@@ -22,6 +23,7 @@ from MORESCA.pipeline import (
     scaling,
     umap,
 )
+from MORESCA.validation import validate_config
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +45,7 @@ def run_analysis(
         )
 
     gin.parse_config_file(config_path)
+    validate_config(gin.config_str())
     sample_id = None
 
     # Run analysis for each data set
@@ -155,6 +158,11 @@ def main():
                     "propagate": True,  # Avoid duplicate logs if root is configured
                 },
                 MORESCA.utils.__name__: {
+                    "handlers": ["console", "file"],
+                    "level": logging_level,
+                    "propagate": True,  # Avoid duplicate logs if root is configured
+                },
+                MORESCA.validation.__name__: {
                     "handlers": ["console", "file"],
                     "level": logging_level,
                     "propagate": True,  # Avoid duplicate logs if root is configured
