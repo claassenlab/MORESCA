@@ -14,7 +14,7 @@ from sphinx.application import Sphinx
 project = "MORESCA"
 copyright = "2025, Matthias Bruhns, Jan T. Schleicher"
 author = "Matthias Bruhns, Jan T. Schleicher"
-release = "0.2.0"
+release = "0.3.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

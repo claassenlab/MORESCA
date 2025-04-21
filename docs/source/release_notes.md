@@ -1,8 +1,12 @@
 # Release notes
 
-## Version 0.2.0 ({small}`2025-04-17`)
+## Version 0.2.0 ({small}`2025-04-21`)
+
+- Add hotspot for feature selection (<a href=https://doi.org/10.1038/s41592-025-02624-3 target="_blank">Zappia et al. 2025</a>)
 
 ### Changes
+
+## Version 0.2.0 ({small}`2025-04-17`)
 
 - Add logging.
 - Additional feature selection methods:

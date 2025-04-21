@@ -10,7 +10,15 @@ ADATA.layers["counts"] = ADATA.X.copy()
 
 
 @pytest.mark.parametrize(
-    "method", ["seurat", "seurat_v3", "analytical_pearson", "anti_correlation", "triku"]
+    "method",
+    [
+        "seurat",
+        "seurat_v3",
+        "analytical_pearson",
+        "anti_correlation",
+        "triku",
+        "hotspot",
+    ],
 )
 @pytest.mark.parametrize("number_features", [2000, None])
 def test_feature_selection(method, number_features):
