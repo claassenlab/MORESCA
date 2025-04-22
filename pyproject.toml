@@ -35,6 +35,7 @@ dependencies = [
     "anticor-features",
     "numpy",
     "gin-config",
+    "cerberus",
     "loompy",
     "leidenalg",
     "igraph",
