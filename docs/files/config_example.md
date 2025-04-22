@@ -1,0 +1,72 @@
+``` yaml
+# config.gin
+quality_control:
+    apply = True
+    doublet_removal = True
+    outlier_removal = True
+    min_genes = 200
+    min_counts = None
+    max_counts = None
+    min_cells = 10
+    max_genes = None
+    mt_threshold = 15
+    rb_threshold = 10
+    hb_threshold = 1
+    figures = "figures/"
+    pre_qc_plots = True
+    post_qc_plots = True
+
+normalization:
+    apply = True
+    method = "log1pPF"
+    remove_mt = False
+    remove_rb = False
+    remove_hb = False
+
+feature_selection:
+    apply = True
+    species = "hsapiens"
+    method = "seurat_v3"
+    number_features = 2000
+
+scaling:
+    apply = True
+    max_value = None
+
+pca:
+    apply = True
+    n_comps = 100
+    use_highly_variable = True
+
+batch_effect_correction:
+    apply = False
+    method = "harmony"
+    batch_key = None
+
+neighborhood_graph:
+    apply = True
+    n_neighbors = 30
+    n_pcs = None
+    metric = "cosine"
+
+clustering:
+    apply = True
+    method = "leiden"
+    resolution = 1.0
+
+diff_gene_exp:
+    apply = True
+    method = "wilcoxon"
+    groupby = "leiden_r1.0"
+    use_raw = False
+    layer = "unscaled"
+    tables = None
+
+umap:
+    apply = True
+
+plotting:
+    apply = True
+    umap = True
+    path = "figures/"
+  ```
