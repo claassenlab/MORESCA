@@ -19,6 +19,7 @@
 
 
 ## Version 0.1.1 ({small}`2025-03-31`)
+### Changes
 
 Fixed a problem in the ```pyproject.toml``` to include README and GitHub link.
 
