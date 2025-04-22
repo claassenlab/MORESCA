@@ -3,9 +3,11 @@ import warnings
 from typing import Optional
 
 import gin
+import hotspot
 import scanpy as sc
 import triku as tk
 from anndata import AnnData
+from scipy.sparse import csc_matrix
 
 from MORESCA.utils import store_config_params
 
@@ -133,9 +135,7 @@ def feature_selection(
         case "hotspot":
             # Implementation as shown in
             # https://github.com/theislab/atlas-feature-selection-benchmark/blob/b89fc0f66747062e6e1b4b35bd392b27ad035295/bin/method-hotspot.py#L16
-            raise NotImplementedError("Hotspot is not implemented yet.")
 
-            """
             log.debug("Using Hotspot for feature selection.")
             adata_copy = adata.copy()
             adata_copy.X = adata_copy.layers["counts"].copy().astype(int)
@@ -173,7 +173,6 @@ def feature_selection(
 
             adata.var["highly_variable"] = adata_copy.var.index.isin(selected_features)
             del adata_copy
-            """
 
         case False | None:
             # TODO: Should this be a warning?

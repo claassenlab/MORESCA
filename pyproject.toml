@@ -42,6 +42,7 @@ dependencies = [
     "pynndescent",
     "phenograph",
     "triku>=2.2",
+    "hotspotsc>=1.1.3",
 ]
 
 [project.urls]

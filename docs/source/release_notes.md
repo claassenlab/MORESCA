@@ -1,7 +1,11 @@
 # Release notes
 
-## Version 0.2.0 ({small}`2025-04-17`)
+## Version 0.3.0 ({small}`2025-04-21`)
+### Changes
 
+- Add hotspot for feature selection (<a href=https://doi.org/10.1038/s41592-025-02624-3 target="_blank">Zappia et al. 2025</a>)
+
+## Version 0.2.0 ({small}`2025-04-17`)
 ### Changes
 
 - Add logging.
@@ -15,6 +19,7 @@
 
 
 ## Version 0.1.1 ({small}`2025-03-31`)
+### Changes
 
 Fixed a problem in the ```pyproject.toml``` to include README and GitHub link.
 

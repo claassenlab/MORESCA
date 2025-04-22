@@ -125,7 +125,7 @@ The parameter ```species``` is only used for the feature selection based on anti
 | remove_hb | *bool*, *None* | Whether to remove hemoglobin genes or not. |
 | **feature_selection** | | |
 | apply | *bool* | Whether to apply the feature selection steps or not. |
-| method | *seurat*, *seurat_v3*, *analytical_pearson*, *anti_correlation*, *triku*, *None*, *False* | The feature selection method to use. |
+| method | *seurat*, *seurat_v3*, *analytical_pearson*, *anti_correlation*, *triku*, *hotspot*, *None*, *False* | The feature selection method to use. |
 | species | *str* | Species of the data. Only used if feature_selection=anti_correlation |
 | number_features | *int*, *None* | The number of top features to select (only applicable for certain methods). |
 | **scaling** | | |
