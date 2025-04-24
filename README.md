@@ -11,7 +11,7 @@
 
 # MORESCA (MOdular and REproducible Single-Cell Analysis)
 
-This repository provides a template  on standardized scRNA-seq analysis using Python and the Scanpy library. All parameters of the workflow are controlled with a single config file.
+This repository provides a template  on standardized scRNA-seq analysis using [Python](https://www.python.org/) and the [Scanpy](https://scanpy.readthedocs.io/) library. All parameters of the workflow are controlled with a single config file.
 
 ## Usage
 
@@ -31,14 +31,26 @@ Then, simply install MORESCA with pip:
 
 ### Calling the template
 
-```{include} docs/file/cli_usage.md
-```
+| Flag | Type | Description | Default |
+| - | -  | - | - |
+| -d, --data | Path | Path to the h5ad file. | *data/adata_raw.h5ad* |
+| -o, --output | Path | Path to the output folder for the processed data. | *results* |
+| -p, --parameters | Path | Path to the config file. | *config.gin* |
+| -v, --verbose | Flag | Generate verbose logs. | |
+
+By default, ```moresca``` expects the data in ```H5AD``` format to be in ```data```. The ```output``` directory as well as figure folders specified in the config are generated on the fly if they don't exist yet.
+
+Currently, the script will perform the most common operations from doublet removal to DEG analysis of found clusters. If you want to apply ambient RNA correction beforehand, you need to run this separately.
+
+The following example executes the pipeline with the h5ad file ```example_data.h5ad``` and the parameter file ```config.gin```, saving the output in the folder ```results```.
+
+    moresca -d example_data.h5ad -o results -p config.gin
 
 ### Using the config.gin
 
 By default, the used parameter file looks like this:
 
-``` yml
+```yaml
 # config.gin
 quality_control:
     apply = True
@@ -109,7 +121,7 @@ plotting:
     apply = True
     umap = True
     path = "figures/"
-  ```
+```
 
 The following values of the parameters are currently possible
 
@@ -162,7 +174,7 @@ The following values of the parameters are currently possible
 | metric | *str* | The distance metric to use for computing the neighborhood graph. |
 | **clustering** | | |
 | apply | *bool* | Whether to perform clustering or not. |
-| method | *leiden*, *None*, *False* | The clustering method to use. |
+| method | *leiden*, *phenograph*, *None*, *False* | The clustering method to use. |
 | resolution | *float*, *int*, *list*, *tuple*, *auto* | The resolution parameter for the clustering method. Can be a single value or a list of values. |
 | **diff_gene_exp** | | |
 | apply | *bool* | Whether to perform differential gene expression analysis or not. |
