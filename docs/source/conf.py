@@ -93,7 +93,6 @@ def replace_directives(app, docname, source):
 
     # Replace GitHub-style admonitions with MyST-compatible directives
     # Ensure this only applies to actual admonitions, not included content
-    print(f"Before replacement: {content}\n")
     content = re.sub(
         r"^> \[!(NOTE|IMPORTANT|WARNING|TIP)\]\n> (.+)",
         r"```{\1}\n\2\n```",
