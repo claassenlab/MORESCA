@@ -11,7 +11,7 @@
 
 # MORESCA (MOdular and REproducible Single-Cell Analysis)
 
-This repository provides a template  on standardized scRNA-seq analysis using Python and the Scanpy library. All parameters of the workflow are controlled with a single config file.
+This repository provides a template  on standardized scRNA-seq analysis using [Python](https://www.python.org/) and the [Scanpy](https://scanpy.readthedocs.io/) library. All parameters of the workflow are controlled with a single config file.
 
 ## Usage
 
@@ -50,7 +50,7 @@ The following example executes the pipeline with the h5ad file ```example_data.h
 
 By default, the used parameter file looks like this:
 
-``` yml
+```yaml
 # config.gin
 quality_control:
     apply = True
@@ -121,7 +121,7 @@ plotting:
     apply = True
     umap = True
     path = "figures/"
-  ```
+```
 
 The following values of the parameters are currently possible
 
@@ -174,7 +174,7 @@ The following values of the parameters are currently possible
 | metric | *str* | The distance metric to use for computing the neighborhood graph. |
 | **clustering** | | |
 | apply | *bool* | Whether to perform clustering or not. |
-| method | *leiden*, *None*, *False* | The clustering method to use. |
+| method | *leiden*, *phenograph*, *None*, *False* | The clustering method to use. |
 | resolution | *float*, *int*, *list*, *tuple*, *auto* | The resolution parameter for the clustering method. Can be a single value or a list of values. |
 | **diff_gene_exp** | | |
 | apply | *bool* | Whether to perform differential gene expression analysis or not. |
