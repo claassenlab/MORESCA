@@ -53,7 +53,7 @@ def preprocess_includes(content, base_path) -> str:
         end_before = match.group(3)
 
         # Resolve the full path of the included file
-        full_path = os.path.join(base_path, include_path)
+        full_path = os.path.abspath(os.path.join(base_path, include_path))
         if not os.path.isfile(full_path):
             raise FileNotFoundError(f"Included file not found: {full_path}")
 
