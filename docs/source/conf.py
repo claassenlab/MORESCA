@@ -43,7 +43,7 @@ html_theme_options = dict(
 html_title = "MORESCA"
 
 
-def preprocess_includes(content, base_path):
+def preprocess_includes(content, base_path) -> str:
     """Preprocess MyST {include} directives by replacing their content."""
 
     def replace_include(match):
@@ -55,7 +55,7 @@ def preprocess_includes(content, base_path):
         # Resolve the full path of the included file
         full_path = os.path.join(base_path, include_path)
         if not os.path.isfile(full_path):
-            return f"<!-- Could not find file: {include_path} -->"
+            raise FileNotFoundError(f"Included file not found: {full_path}")
 
         # Read the included file
         with open(full_path, "r") as f:
