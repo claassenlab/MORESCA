@@ -79,6 +79,49 @@ def _parse_gin_config_str(config_str: str) -> dict:
     return config_dict
 
 
+def _pretty_print_message_list(message_list: list, indent: int = 0) -> str:
+    """
+    Pretty print a list of messages.
+
+    Args:
+        message_list: List of messages to print.
+        indent: Indentation level for pretty printing.
+
+    Returns:
+        Formatted string of the messages.
+    """
+    if len(message_list) == 0:
+        return ""
+    else:
+        message_str = ""
+        i = 0
+        while i < len(message_list):
+            if message_list[i] == "none or more than one rule validate":
+                message_str += (
+                    f"{' ' * indent}- None or more than one "
+                    "of the following rules validate:\n"
+                )
+                i += 1
+                assert isinstance(message_list[i], dict)
+                for lst in message_list[i].values():
+                    for value in lst:
+                        if isinstance(value, dict):
+                            message_str += (
+                                f"{' ' * (indent + 2)}- must be a list  "
+                                "with items validating following rules\n"
+                            )
+                            for sub_list in value.values():
+                                message_str += _pretty_print_message_list(
+                                    sub_list, indent=indent + 4
+                                )
+                        else:
+                            message_str += f"{' ' * (indent + 2)}- {value}\n"
+            else:
+                message_str += f"{' ' * indent}- {message_list[i]}\n"
+            i += 1
+    return message_str
+
+
 def _pretty_print_errors(validator) -> str:
     """
     Pretty print the errors from the validator.
@@ -92,7 +135,7 @@ def _pretty_print_errors(validator) -> str:
         for error in error_list:
             for param, message in error.items():
                 # TODO: Make message prettier
-                errors_str += f"  - Parameter {param}: {message}\n"
+                errors_str += f"  - Parameter {param}:\n{_pretty_print_message_list(message, indent=4)}\n"
     return errors_str
 
 

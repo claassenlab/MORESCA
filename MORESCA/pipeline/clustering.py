@@ -31,6 +31,7 @@ def clustering(
         apply: Whether to perform clustering or not.
         method: The clustering method to use. Available options are:
             - "leiden": Use the Leiden algorithm for clustering.
+            - "phenograph": Use the Phenograph algorithm for clustering.
         resolution: The resolution parameter for the clustering method. Can be a single value or a list of values.
         inplace: Whether to perform the clustering in-place or return a modified copy of the AnnData object.
 
