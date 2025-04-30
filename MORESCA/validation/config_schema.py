@@ -64,6 +64,7 @@ _FEATURE_SELECTION_SCHEMA = {
             "analytical_pearson",
             "anti_correlation",
             "triku",
+            "hotspot",
             False,
         ],
     },
