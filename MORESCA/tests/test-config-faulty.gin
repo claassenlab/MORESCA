@@ -1,0 +1,69 @@
+quality_control:
+    apply = True
+    doublet_removal = False
+    outlier_removal = True
+    min_genes = 200
+    min_counts = -10
+    max_counts = 6000
+    min_cells = 10
+    max_genes = 8000
+    mt_threshold = "auto"
+    rb_threshold = 10
+    hb_threshold = 200
+    figures = "figures/"
+    pre_qc_plots = True
+    post_qc_plots = True
+
+normalization:
+    apply = True
+    method = "log1pCP10k"
+    remove_mt = True
+    remove_rb = True
+    remove_hb = True
+
+feature_selection:
+    apply = True
+    method = "seurat_v3"
+    species = "hsapiens"
+    number_features = 2500
+
+scaling:
+    apply = True
+    max_value = 5
+
+pca:
+    apply = True
+    n_comps = 1.5
+    use_highly_variable = True
+
+batch_effect_correction:
+    apply = True
+    method = "harmony"
+    batch_key = "batch"
+
+neighborhood_graph:
+    apply = True
+    n_neighbors = 15
+    n_pcs = None
+
+clustering:
+    apply = True
+    method = "leiden"
+    resolution = ["auto", 0.5, 1.0, -2]
+
+diff_gene_exp:
+    apply = True
+    method = "Bombardiro Crocodilo"
+    groupby = "leiden_r1.0"
+    use_raw = False
+    layer = "counts"
+    corr_method = "benjamini-hochberg"
+    tables = "results/"
+
+umap:
+    apply = True
+
+plotting:
+    apply = True
+    umap = True
+    path = "figures/"
