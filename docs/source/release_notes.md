@@ -1,6 +1,6 @@
 # Release notes
 
-## Version 0.3.0 ({small}`2025-04-21`)
+## Version 0.3.0 ({small}`2025-04-30`)
 ### Changes
 - Add hotspot for feature selection (<a href=https://doi.org/10.1038/s41592-025-02624-3 target="_blank">Zappia et al. 2025</a>)
 - Add validation functionality for config file.
